@@ -7,10 +7,42 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".LockScreenActivity$PlaceholderFragment">
-
-    <TextView
-        android:text="@string/hello_world"
+    <LinearLayout
+        android:id="@+id/clockLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="10sp">
+        <TextView android:text="@string/hello_world"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"/>
+        <DigitalClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20sp"
+            android:textSize="65sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/userPictureLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/clockLayout"
+        android:layout_marginBottom="10sp">
+        <ImageView
+            android:id="@+id/userPicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
+    <ViewAnimator
+        android:id="@+id/passphraseInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/userPictureLayout">
+        <!-- Views added at runtime -->
+    </ViewAnimator>
+
 
 </RelativeLayout>
