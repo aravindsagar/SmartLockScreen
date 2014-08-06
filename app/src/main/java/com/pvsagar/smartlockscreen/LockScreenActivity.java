@@ -1,12 +1,8 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 
@@ -18,7 +14,7 @@ public class LockScreenActivity extends Activity {
         setContentView(R.layout.activity_lock_screen);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new LockScreenFragment())
                     .commit();
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -34,19 +30,4 @@ public class LockScreenActivity extends Activity {
         return true;
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_lock_screen, container, false);
-            return rootView;
-        }
-    }
 }
