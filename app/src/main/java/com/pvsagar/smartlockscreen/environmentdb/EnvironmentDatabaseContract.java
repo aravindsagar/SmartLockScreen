@@ -18,7 +18,7 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_RADIUS = "radius";
 
         //Given name of the geofence
-        public static final String COLUMN_LOCAION_NAME = "location_name";
+        public static final String COLUMN_LOCATION_NAME = "location_name";
     }
 
     public static final class BluetoothDevicesEntry implements BaseColumns {
@@ -71,5 +71,37 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_ENVIRONMENT_ID = "environment_id";
 
         public static final String COLUMN_BLUETOOTH_ID = "bluetooth_device_id";
+    }
+
+    public static final class UsersEntry implements BaseColumns {
+        public static final String TABLE_NAME = "users";
+
+        public static final String COLUMN_USER_NAME = "user_name";
+    }
+
+    public static final class PasswordEntry implements BaseColumns {
+        public static final String TABLE_NAME = "passwords";
+
+        public static final String PASSWORD_TYPE = "password_type";
+        //Should see how to store passwords. Might change this to something else
+        public static final String PASSWORD_STRING = "password_string";
+    }
+
+    public static final class UserPasswordsEntry implements BaseColumns {
+        public static final String TABLE_NAME = "user_passwords";
+
+        public static final String ENVIRONMENT_ID = "environment_id";
+
+        public static final String USER_ID = "user_id";
+
+        public static final String PASSWORD_ID = "password_id";
+    }
+
+    public static final class AppWhitelistEntry implements BaseColumns {
+        public static final String TABLE_NAME = "app_whitelist";
+
+        public static final String USER_ID = "user_id";
+
+        public static final String PACKAGE_NAME = "package_name";
     }
 }
