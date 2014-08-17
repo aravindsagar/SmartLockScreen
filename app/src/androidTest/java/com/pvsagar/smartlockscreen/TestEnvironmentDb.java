@@ -4,11 +4,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 
@@ -82,10 +84,22 @@ public class TestEnvironmentDb extends AndroidTestCase {
         Cursor environmentBluetoothDeviceCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(environmentBluetoothDeviceValues, environmentBluetoothDeviceCursor);
+
+        //Testing users table
+        ContentValues userValues =
+                getUserContentValues();
+        long userId = db.insert(UsersEntry.TABLE_NAME, null,
+                userValues);
+        assertTrue(userId != -1);
+
+        Cursor userCursor = db.query(UsersEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(userValues, userCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
         if(!valueCursor.moveToFirst()){
+            Log.d(LOG_TAG, "cursor position:" + String.valueOf(valueCursor.getPosition()));
             fail("No data returned in cursor");
         }
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
@@ -155,6 +169,13 @@ public class TestEnvironmentDb extends AndroidTestCase {
         ContentValues values = new ContentValues();
         values.put(EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID, environmentId);
         values.put(EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID, bluetoothDeviceId);
+        return values;
+    }
+
+    private ContentValues getUserContentValues(){
+        ContentValues values = new ContentValues();
+        final String testUsername = "sagar";
+        values.put(UsersEntry.COLUMN_USER_NAME, testUsername);
         return values;
     }
 }
