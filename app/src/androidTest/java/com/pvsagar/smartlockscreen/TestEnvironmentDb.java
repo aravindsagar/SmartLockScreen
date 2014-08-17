@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 
@@ -27,16 +28,33 @@ public class TestEnvironmentDb extends AndroidTestCase {
         EnvironmentDbHelper dbHelper = new EnvironmentDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        //Testing geofences table
         ContentValues geofenceValues = getGeofenceContentValues();
         long geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, geofenceValues);
         assertTrue(geofenceId != -1);
 
-        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME, null, null, null, null, null, null);
+        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
+                null, null, null, null, null, null);
         if(geofenceCursor.moveToFirst()){
             validateCursor(geofenceValues, geofenceCursor);
         }
         else{
             fail("No geofence data returned.");
+        }
+
+        //Testing bluetooth devices table
+        ContentValues bluetoothDeviceValues = getBluetoothDeviceValues();
+        long bluetoothDeviceId = db.insert(BluetoothDevicesEntry.TABLE_NAME, null,
+                bluetoothDeviceValues);
+        assertTrue(bluetoothDeviceId != -1);
+
+        Cursor bluetoothDeviceCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        if(bluetoothDeviceCursor.moveToFirst()){
+            validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
+        }
+        else{
+            fail("No bluetooth device data returned.");
         }
     }
 
@@ -53,15 +71,24 @@ public class TestEnvironmentDb extends AndroidTestCase {
 
     private ContentValues getGeofenceContentValues() {
         ContentValues values = new ContentValues();
-        double testLatitude = 22.5;
-        double testLongitude = 68.9;
-        int testRadius = 15;
-        String testLocationName = "home";
+        final double testLatitude = 22.5;
+        final double testLongitude = 68.9;
+        final int testRadius = 15;
+        final String testLocationName = "home";
 
         values.put(GeoFenceEntry.COLUMN_COORD_LAT, testLatitude);
         values.put(GeoFenceEntry.COLUMN_COORD_LONG, testLongitude);
         values.put(GeoFenceEntry.COLUMN_RADIUS, testRadius);
         values.put(GeoFenceEntry.COLUMN_LOCATION_NAME, testLocationName);
+        return values;
+    }
+
+    private ContentValues getBluetoothDeviceValues(){
+        ContentValues values = new ContentValues();
+        final String deviceName = "Nexus 4";
+        final String deviceAddress = "C4:66:9B:0F:00:DB";
+        values.put(BluetoothDevicesEntry.COLUMN_DEVICE_NAME, deviceName);
+        values.put(BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS, deviceAddress);
         return values;
     }
 }

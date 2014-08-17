@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 
 /**
  * Created by aravind on 10/8/14.
@@ -42,10 +43,17 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 GeoFenceEntry.COLUMN_COORD_LONG + ", " + GeoFenceEntry.COLUMN_RADIUS +
                 ") ON CONFLICT IGNORE, UNIQUE (" + GeoFenceEntry.COLUMN_LOCATION_NAME + ")" +
                 " ON CONFLICT IGNORE);";
+
+        final String SQL_CREATE_BLUETOOTH_DEVICES = "CREATE TABLE " +
+                BluetoothDevicesEntry.TABLE_NAME + " ( " +
+                BluetoothDevicesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS + " TEXT NOT NULL, " +
+                BluetoothDevicesEntry.COLUMN_DEVICE_NAME + " TEXT NOT NULL);";
+
         //TODO: remaining tables
 
         db.execSQL(SQL_CREATE_GEOFENCES);
-
+        db.execSQL(SQL_CREATE_BLUETOOTH_DEVICES);
     }
 
     @Override
