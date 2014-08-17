@@ -10,6 +10,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Blu
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
@@ -86,8 +87,7 @@ public class TestEnvironmentDb extends AndroidTestCase {
         validateCursor(environmentBluetoothDeviceValues, environmentBluetoothDeviceCursor);
 
         //Testing users table
-        ContentValues userValues =
-                getUserContentValues();
+        ContentValues userValues = getUserContentValues();
         long userId = db.insert(UsersEntry.TABLE_NAME, null,
                 userValues);
         assertTrue(userId != -1);
@@ -95,6 +95,16 @@ public class TestEnvironmentDb extends AndroidTestCase {
         Cursor userCursor = db.query(UsersEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(userValues, userCursor);
+
+        //Testing passwords table
+        ContentValues passwordValues = getPasswordContentValues();
+        long passwordId = db.insert(PasswordEntry.TABLE_NAME, null,
+                passwordValues);
+        assertTrue(passwordId != -1);
+
+        Cursor passwordCursor = db.query(PasswordEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(passwordValues, passwordCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
@@ -176,6 +186,15 @@ public class TestEnvironmentDb extends AndroidTestCase {
         ContentValues values = new ContentValues();
         final String testUsername = "sagar";
         values.put(UsersEntry.COLUMN_USER_NAME, testUsername);
+        return values;
+    }
+
+    private ContentValues getPasswordContentValues(){
+        ContentValues values = new ContentValues();
+        final String passwordType = "alphabetical";
+        final String passwordString = "will be encrypted";
+        values.put(PasswordEntry.COLUMN_PASSWORD_TYPE, passwordType);
+        values.put(PasswordEntry.COLUMN_PASSWORD_STRING, passwordString);
         return values;
     }
 }

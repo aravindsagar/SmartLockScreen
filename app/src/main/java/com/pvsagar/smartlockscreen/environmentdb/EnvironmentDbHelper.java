@@ -8,6 +8,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Blu
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 
@@ -100,6 +101,11 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 UsersEntry.COLUMN_USER_NAME + " TEXT NOT NULL, " +
                 "UNIQUE (" + UsersEntry.COLUMN_USER_NAME + ") ON CONFLICT IGNORE);";
 
+        final String SQL_CREATE_PASSWORDS = "CREATE TABLE " + PasswordEntry.TABLE_NAME + " ( " +
+                PasswordEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                PasswordEntry.COLUMN_PASSWORD_TYPE + " INTEGER NOT NULL, " +
+                PasswordEntry.COLUMN_PASSWORD_STRING + " TEXT NOT NULL);";
+
         //TODO: remaining tables
 
         db.execSQL(SQL_CREATE_GEOFENCES);
@@ -108,6 +114,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_ENVIRONMENTS);
         db.execSQL(SQL_CREATE_ENVIRONMENT_BLUETOOTH_DEVICES);
         db.execSQL(SQL_CREATE_USERS);
+        db.execSQL(SQL_CREATE_PASSWORDS);
     }
 
     @Override
