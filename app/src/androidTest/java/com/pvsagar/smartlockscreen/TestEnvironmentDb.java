@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.AppWhitelistEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
@@ -117,6 +118,16 @@ public class TestEnvironmentDb extends AndroidTestCase {
         Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(userPasswordValues, userPasswordCursor);
+
+        //Testing app whitelist table
+        ContentValues appWhitelistValues = getAppWhitelistContentValues(userId);
+        long appWhitelistId = db.insert(AppWhitelistEntry.TABLE_NAME, null,
+                appWhitelistValues);
+        assertTrue(appWhitelistId != -1);
+
+        Cursor appWhitelistCursor = db.query(AppWhitelistEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(appWhitelistValues, appWhitelistCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
@@ -216,6 +227,14 @@ public class TestEnvironmentDb extends AndroidTestCase {
         values.put(UserPasswordsEntry.COLUMN_ENVIRONMENT_ID, environmentId);
         values.put(UserPasswordsEntry.COLUMN_USER_ID, userId);
         values.put(UserPasswordsEntry.COLUMN_PASSWORD_ID, passwordId);
+        return values;
+    }
+
+    private ContentValues getAppWhitelistContentValues(long userId){
+        ContentValues values = new ContentValues();
+        final String testPackageName = "com.pvsagar.smartlockscreen";
+        values.put(AppWhitelistEntry.COLUMN_USER_ID, userId);
+        values.put(AppWhitelistEntry.COLUMN_PACKAGE_NAME, testPackageName);
         return values;
     }
 }

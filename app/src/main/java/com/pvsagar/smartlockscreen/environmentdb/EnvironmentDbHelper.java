@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.AppWhitelistEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
@@ -122,7 +123,15 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 "UNIQUE (" + UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + ", " +
                 UserPasswordsEntry.COLUMN_USER_ID + ") ON CONFLICT REPLACE);";
 
-        //TODO: remaining tables
+        final String SQL_CREATE_APP_WHITELIST = "CREATE TABLE " +
+                AppWhitelistEntry.TABLE_NAME + " ( " +
+                AppWhitelistEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                AppWhitelistEntry.COLUMN_USER_ID + " INTEGER NOT NULL, " +
+                AppWhitelistEntry.COLUMN_PACKAGE_NAME + " TEXT NOT NULL, " +
+                " FOREIGN KEY (" + AppWhitelistEntry.COLUMN_USER_ID + ") REFERENCES " +
+                UsersEntry.TABLE_NAME + "(" + UsersEntry._ID + "), " +
+                "UNIQUE (" + AppWhitelistEntry.COLUMN_USER_ID + ", " +
+                AppWhitelistEntry.COLUMN_PACKAGE_NAME + ") ON CONFLICT IGNORE);";
 
         db.execSQL(SQL_CREATE_GEOFENCES);
         db.execSQL(SQL_CREATE_BLUETOOTH_DEVICES);
@@ -132,6 +141,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_USERS);
         db.execSQL(SQL_CREATE_PASSWORDS);
         db.execSQL(SQL_CREATE_USER_PASSWORDS);
+        db.execSQL(SQL_CREATE_APP_WHITELIST);
     }
 
     @Override
