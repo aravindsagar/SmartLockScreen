@@ -4,6 +4,10 @@ import android.provider.BaseColumns;
 
 /**
  * Created by aravind on 9/8/14.
+ * A contract class for our database.
+ * Makes it convenient to make dbHelper class and content provider.
+ * All the tables and the columns in each table are defined here.
+ * Make use of this whenever you want to specify table name, column name etc., to avoid errors.
  */
 public class EnvironmentDatabaseContract {
 
@@ -48,7 +52,7 @@ public class EnvironmentDatabaseContract {
 
         public static final String COLUMN_IS_BLUETOOTH_ENABLED = "is_bluetooth_enabled";
 
-        //Boolean to see whether allthe bluetooth devices specified should be present or
+        //Boolean to see whether all the bluetooth devices specified should be present or
         // any of the bluetooth devices in the list will do
         public static final String COLUMN_BLUETOOTH_ALL_OR_ANY = "bluetooth_all_or_any";
 
@@ -73,6 +77,7 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_BLUETOOTH_ID = "bluetooth_device_id";
     }
 
+    //Making a separate table for users because planning to put user picture etc later.
     public static final class UsersEntry implements BaseColumns {
         public static final String TABLE_NAME = "users";
 
@@ -82,26 +87,26 @@ public class EnvironmentDatabaseContract {
     public static final class PasswordEntry implements BaseColumns {
         public static final String TABLE_NAME = "passwords";
 
-        public static final String PASSWORD_TYPE = "password_type";
+        public static final String COLUMN_PASSWORD_TYPE = "password_type";
         //Should see how to store passwords. Might change this to something else
-        public static final String PASSWORD_STRING = "password_string";
+        public static final String COLUMN_PASSWORD_STRING = "password_string";
     }
 
     public static final class UserPasswordsEntry implements BaseColumns {
         public static final String TABLE_NAME = "user_passwords";
 
-        public static final String ENVIRONMENT_ID = "environment_id";
+        public static final String COLUMN_ENVIRONMENT_ID = "environment_id";
 
-        public static final String USER_ID = "user_id";
+        public static final String COLUMN_USER_ID = "user_id";
 
-        public static final String PASSWORD_ID = "password_id";
+        public static final String COLUMN_PASSWORD_ID = "password_id";
     }
 
     public static final class AppWhitelistEntry implements BaseColumns {
         public static final String TABLE_NAME = "app_whitelist";
 
-        public static final String USER_ID = "user_id";
+        public static final String COLUMN_USER_ID = "user_id";
 
-        public static final String PACKAGE_NAME = "package_name";
+        public static final String COLUMN_PACKAGE_NAME = "package_name";
     }
 }
