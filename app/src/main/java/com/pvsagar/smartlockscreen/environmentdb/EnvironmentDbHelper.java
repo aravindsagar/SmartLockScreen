@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
@@ -81,12 +82,25 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 WiFiNetworksEntry.TABLE_NAME + "(" + WiFiNetworksEntry._ID + "), " +
                 "UNIQUE (" + EnvironmentEntry.COLUMN_NAME + ") ON CONFLICT IGNORE);";
 
+        final String SQL_CREATE_ENVIRONMENT_BLUETOOTH_DEVICES = "CREATE TABLE " +
+                EnvironmentBluetoothEntry.TABLE_NAME + " ( " +
+                EnvironmentBluetoothEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + " INTEGER NOT NULL, " +
+                EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID + " INTEGET NOT NULL, " +
+                " FOREIGN KEY (" + EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + ") REFERENCES " +
+                BluetoothDevicesEntry.TABLE_NAME + "(" + BluetoothDevicesEntry._ID + "), " +
+                " FOREIGN KEY (" + EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID +
+                ") REFERENCES " + EnvironmentEntry.TABLE_NAME + "(" + EnvironmentEntry._ID + "), " +
+                "UNIQUE (" + EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID + ", " +
+                EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + ") ON CONFLICT IGNORE);";
+
         //TODO: remaining tables
 
         db.execSQL(SQL_CREATE_GEOFENCES);
         db.execSQL(SQL_CREATE_BLUETOOTH_DEVICES);
         db.execSQL(SQL_CREATE_WIFI_NETWORKS);
         db.execSQL(SQL_CREATE_ENVIRONMENTS);
+        db.execSQL(SQL_CREATE_ENVIRONMENT_BLUETOOTH_DEVICES);
     }
 
     @Override

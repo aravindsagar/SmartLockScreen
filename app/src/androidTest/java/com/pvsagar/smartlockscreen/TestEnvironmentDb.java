@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
@@ -70,6 +71,17 @@ public class TestEnvironmentDb extends AndroidTestCase {
         Cursor environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(environmentValues, environmentCursor);
+
+        //Testing environment bluetooth devices table
+        ContentValues environmentBluetoothDeviceValues =
+                getEnvironmentBluetoothDeviceContentValues(environmentId, bluetoothDeviceId);
+        long environmentBluetoothDeviceId = db.insert(EnvironmentBluetoothEntry.TABLE_NAME, null,
+                environmentBluetoothDeviceValues);
+        assertTrue(environmentBluetoothDeviceId != -1);
+
+        Cursor environmentBluetoothDeviceCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(environmentBluetoothDeviceValues, environmentBluetoothDeviceCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
@@ -135,6 +147,14 @@ public class TestEnvironmentDb extends AndroidTestCase {
         values.put(EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL, testMaxNoiseLevel);
         values.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED, testEnbled);
         values.put(EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,testMinNoiseLevel);
+        return values;
+    }
+
+    private ContentValues getEnvironmentBluetoothDeviceContentValues
+            (long environmentId, long bluetoothDeviceId){
+        ContentValues values = new ContentValues();
+        values.put(EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID, environmentId);
+        values.put(EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID, bluetoothDeviceId);
         return values;
     }
 }
