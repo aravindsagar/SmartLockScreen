@@ -7,6 +7,7 @@ import android.test.AndroidTestCase;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 
 import java.util.Map;
@@ -35,12 +36,7 @@ public class TestEnvironmentDb extends AndroidTestCase {
 
         Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
                 null, null, null, null, null, null);
-        if(geofenceCursor.moveToFirst()){
-            validateCursor(geofenceValues, geofenceCursor);
-        }
-        else{
-            fail("No geofence data returned.");
-        }
+        validateCursor(geofenceValues, geofenceCursor);
 
         //Testing bluetooth devices table
         ContentValues bluetoothDeviceValues = getBluetoothDeviceValues();
@@ -50,15 +46,23 @@ public class TestEnvironmentDb extends AndroidTestCase {
 
         Cursor bluetoothDeviceCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
                 null, null, null, null, null, null);
-        if(bluetoothDeviceCursor.moveToFirst()){
-            validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
-        }
-        else{
-            fail("No bluetooth device data returned.");
-        }
+        validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
+
+        //Testing wifi networks table
+        ContentValues wifiNetworkContentValues = getWifiNetworkContentValues();
+        long wifiNetworkId = db.insert(WiFiNetworksEntry.TABLE_NAME, null,
+                wifiNetworkContentValues);
+        assertTrue(wifiNetworkId != -1);
+
+        Cursor wifiNetworkCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(wifiNetworkContentValues, wifiNetworkCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
+        if(!valueCursor.moveToFirst()){
+            fail("No data returned in cursor");
+        }
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
         for(Map.Entry<String, Object> entry : valueSet){
             String columnName = entry.getKey();
@@ -85,10 +89,19 @@ public class TestEnvironmentDb extends AndroidTestCase {
 
     private ContentValues getBluetoothDeviceValues(){
         ContentValues values = new ContentValues();
-        final String deviceName = "Nexus 4";
-        final String deviceAddress = "C4:66:9B:0F:00:DB";
-        values.put(BluetoothDevicesEntry.COLUMN_DEVICE_NAME, deviceName);
-        values.put(BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS, deviceAddress);
+        final String testDeviceName = "Nexus 4";
+        final String testDeviceAddress = "C4:66:9B:0F:00:DB";
+        values.put(BluetoothDevicesEntry.COLUMN_DEVICE_NAME, testDeviceName);
+        values.put(BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS, testDeviceAddress);
+        return values;
+    }
+
+    private ContentValues getWifiNetworkContentValues(){
+        ContentValues values = new ContentValues();
+        final String testSSID = "homeWifi";
+        final String testEncryptionType = "WEP";
+        values.put(WiFiNetworksEntry.COLUMN_SSID, testSSID);
+        values.put(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, testEncryptionType);
         return values;
     }
 }

@@ -4,8 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 
 /**
  * Created by aravind on 10/8/14.
@@ -50,10 +51,19 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS + " TEXT NOT NULL, " +
                 BluetoothDevicesEntry.COLUMN_DEVICE_NAME + " TEXT NOT NULL);";
 
+        final String SQL_CREATE_WIFI_NETWORKS = "CREATE TABLE " +
+                WiFiNetworksEntry.TABLE_NAME + " ( " +
+                WiFiNetworksEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                WiFiNetworksEntry.COLUMN_SSID + " TEXT NOT NULL, " +
+                WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE + " TEXT NOT NULL, " +
+                "UNIQUE (" + WiFiNetworksEntry.COLUMN_SSID + ", " +
+                WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE + ") ON CONFLICT IGNORE);";
+
         //TODO: remaining tables
 
         db.execSQL(SQL_CREATE_GEOFENCES);
         db.execSQL(SQL_CREATE_BLUETOOTH_DEVICES);
+        db.execSQL(SQL_CREATE_WIFI_NETWORKS);
     }
 
     @Override
