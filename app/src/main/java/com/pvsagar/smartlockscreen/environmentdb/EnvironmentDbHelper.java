@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 
@@ -33,6 +34,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
          * 1. sqlite3 does not have a separate boolean type. Integer is used
          * 2. Validating whether the environment is unique is not included here.
          *    It will be built separately
+         * 3. Bluetooth all or any: value of 0 for any, 1 for all
          */
         final String SQL_CREATE_GEOFENCES = "CREATE TABLE " + GeoFenceEntry.TABLE_NAME + " ( " +
                 GeoFenceEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -59,11 +61,32 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 "UNIQUE (" + WiFiNetworksEntry.COLUMN_SSID + ", " +
                 WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE + ") ON CONFLICT IGNORE);";
 
+        final String SQL_CREATE_ENVIRONMENTS = "CREATE TABLE " +
+                EnvironmentEntry.TABLE_NAME + " ( " +
+                EnvironmentEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                EnvironmentEntry.COLUMN_NAME + " TEXT NOT NULL, " +
+                EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED + " INTEGER NOT NULL, " +
+                EnvironmentEntry.COLUMN_GEOFENCE_ID + " INTEGER, " +
+                EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED + " INTEGER NOT NULL, " +
+                EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY + " INTEGER, " +
+                EnvironmentEntry.COLUMN_IS_WIFI_ENABLED + " INTEGER NOT NULL, " +
+                EnvironmentEntry.COLUMN_WIFI_ID + " INTEGER, " +
+                EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED + " INTEGER NOT NULL, " +
+                EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL + " REAL, " +
+                EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED + " INTEGER NOT NULL, " +
+                EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL + " REAL, " +
+                " FOREIGN KEY (" + EnvironmentEntry.COLUMN_GEOFENCE_ID + ") REFERENCES " +
+                GeoFenceEntry.TABLE_NAME + "(" + GeoFenceEntry._ID + "), " +
+                " FOREIGN KEY (" + EnvironmentEntry.COLUMN_WIFI_ID + ") REFERENCES " +
+                WiFiNetworksEntry.TABLE_NAME + "(" + WiFiNetworksEntry._ID + "), " +
+                "UNIQUE (" + EnvironmentEntry.COLUMN_NAME + ") ON CONFLICT IGNORE);";
+
         //TODO: remaining tables
 
         db.execSQL(SQL_CREATE_GEOFENCES);
         db.execSQL(SQL_CREATE_BLUETOOTH_DEVICES);
         db.execSQL(SQL_CREATE_WIFI_NETWORKS);
+        db.execSQL(SQL_CREATE_ENVIRONMENTS);
     }
 
     @Override

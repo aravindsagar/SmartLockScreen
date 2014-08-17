@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
@@ -15,6 +16,8 @@ import java.util.Set;
 
 /**
  * Created by aravind on 17/8/14.
+ * Contains the tests for testing creation, insertion and querying of all the tables in
+ * environment.db
  */
 public class TestEnvironmentDb extends AndroidTestCase {
     private static final String LOG_TAG = TestEnvironmentDb.class.getSimpleName();
@@ -49,14 +52,24 @@ public class TestEnvironmentDb extends AndroidTestCase {
         validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
 
         //Testing wifi networks table
-        ContentValues wifiNetworkContentValues = getWifiNetworkContentValues();
+        ContentValues wifiNetworkValues = getWifiNetworkContentValues();
         long wifiNetworkId = db.insert(WiFiNetworksEntry.TABLE_NAME, null,
-                wifiNetworkContentValues);
+                wifiNetworkValues);
         assertTrue(wifiNetworkId != -1);
 
         Cursor wifiNetworkCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
                 null, null, null, null, null, null);
-        validateCursor(wifiNetworkContentValues, wifiNetworkCursor);
+        validateCursor(wifiNetworkValues, wifiNetworkCursor);
+
+        //Testing environments table
+        ContentValues environmentValues = getEnvironmentContentValues(geofenceId, wifiNetworkId);
+        long environmentId = db.insert(EnvironmentEntry.TABLE_NAME, null,
+                environmentValues);
+        assertTrue(environmentId != -1);
+
+        Cursor environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(environmentValues, environmentCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
@@ -102,6 +115,26 @@ public class TestEnvironmentDb extends AndroidTestCase {
         final String testEncryptionType = "WEP";
         values.put(WiFiNetworksEntry.COLUMN_SSID, testSSID);
         values.put(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, testEncryptionType);
+        return values;
+    }
+
+    private ContentValues getEnvironmentContentValues(long geofenceId, long wifiNetwokId){
+        ContentValues values = new ContentValues();
+        final int testEnbled = 1;
+        final String testEnvironmentName = "home";
+        final double testMaxNoiseLevel = 30.2;
+        final double testMinNoiseLevel = 11.1;
+        values.put(EnvironmentEntry.COLUMN_NAME, testEnvironmentName);
+        values.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
+        values.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_WIFI_ID, wifiNetwokId);
+        values.put(EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL, testMaxNoiseLevel);
+        values.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,testMinNoiseLevel);
         return values;
     }
 }
