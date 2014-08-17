@@ -11,6 +11,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Env
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UserPasswordsEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
@@ -105,6 +106,17 @@ public class TestEnvironmentDb extends AndroidTestCase {
         Cursor passwordCursor = db.query(PasswordEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(passwordValues, passwordCursor);
+
+        //Testing user passwords table
+        ContentValues userPasswordValues = getUserPasswordContentValues
+                (userId, environmentId, passwordId);
+        long userPasswordId = db.insert(UserPasswordsEntry.TABLE_NAME, null,
+                userPasswordValues);
+        assertTrue(userPasswordId != -1);
+
+        Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(userPasswordValues, userPasswordCursor);
     }
 
     static private void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
@@ -195,6 +207,15 @@ public class TestEnvironmentDb extends AndroidTestCase {
         final String passwordString = "will be encrypted";
         values.put(PasswordEntry.COLUMN_PASSWORD_TYPE, passwordType);
         values.put(PasswordEntry.COLUMN_PASSWORD_STRING, passwordString);
+        return values;
+    }
+
+    private ContentValues getUserPasswordContentValues
+            (long userId, long environmentId, long passwordId){
+        ContentValues values = new ContentValues();
+        values.put(UserPasswordsEntry.COLUMN_ENVIRONMENT_ID, environmentId);
+        values.put(UserPasswordsEntry.COLUMN_USER_ID, userId);
+        values.put(UserPasswordsEntry.COLUMN_PASSWORD_ID, passwordId);
         return values;
     }
 }

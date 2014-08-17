@@ -9,6 +9,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Env
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UserPasswordsEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 
@@ -106,6 +107,21 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 PasswordEntry.COLUMN_PASSWORD_TYPE + " INTEGER NOT NULL, " +
                 PasswordEntry.COLUMN_PASSWORD_STRING + " TEXT NOT NULL);";
 
+        final String SQL_CREATE_USER_PASSWORDS = "CREATE TABLE " +
+                UserPasswordsEntry.TABLE_NAME + " ( " +
+                UserPasswordsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + " INTEGER NOT NULL, " +
+                UserPasswordsEntry.COLUMN_USER_ID + " INTEGER NOT NULL, " +
+                UserPasswordsEntry.COLUMN_PASSWORD_ID + " INTEGER NOT NULL, " +
+                " FOREIGN KEY (" + UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + ") REFERENCES " +
+                EnvironmentEntry.TABLE_NAME + "(" + EnvironmentEntry._ID + "), " +
+                " FOREIGN KEY (" + UserPasswordsEntry.COLUMN_USER_ID + ") REFERENCES " +
+                UsersEntry.TABLE_NAME + "(" + UsersEntry._ID + "), " +
+                " FOREIGN KEY (" + UserPasswordsEntry.COLUMN_PASSWORD_ID + ") REFERENCES " +
+                PasswordEntry.TABLE_NAME + "(" + PasswordEntry._ID + "), " +
+                "UNIQUE (" + UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + ", " +
+                UserPasswordsEntry.COLUMN_USER_ID + ") ON CONFLICT REPLACE);";
+
         //TODO: remaining tables
 
         db.execSQL(SQL_CREATE_GEOFENCES);
@@ -115,6 +131,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_ENVIRONMENT_BLUETOOTH_DEVICES);
         db.execSQL(SQL_CREATE_USERS);
         db.execSQL(SQL_CREATE_PASSWORDS);
+        db.execSQL(SQL_CREATE_USER_PASSWORDS);
     }
 
     @Override
