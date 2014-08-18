@@ -31,14 +31,28 @@ public abstract class EnvironmentVariable {
 
     /**
      * Constructor for EnvironmentVariable
-     * @param variableType Each base class should pass in a String to the constructor which
-     *                     specifies what type of EnvironmentVariable it is. The String should be
-     *                     one of th TYPE_* Strings defined above.
+     * @param variableType Type of environment variable. Should be one of the TYPE_* strings
+     *                     defined above
+     * @param numberOfFloatValues
+     * @param numberOfStringValues
      */
-    public EnvironmentVariable(String variableType){
+    public EnvironmentVariable(String variableType,
+                               int numberOfFloatValues, int numberOfStringValues){
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(isValid){
             this.variableType = variableType;
+            setFloatValues(new float[numberOfFloatValues]);
+            setStringValues(stringValues = new String[numberOfStringValues]);
+            isInitialized = true;
+        }
+    }
+
+    public EnvironmentVariable(String variableType, float[] floatValues, String[] stringValues){
+        boolean isValid = checkTypeValidity(variableType) && !isInitialized;
+        if(isValid){
+            this.variableType = variableType;
+            setFloatValues(floatValues);
+            setStringValues(stringValues);
             isInitialized = true;
         }
     }

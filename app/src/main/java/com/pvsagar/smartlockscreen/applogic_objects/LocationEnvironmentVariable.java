@@ -11,29 +11,23 @@ import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 public class LocationEnvironmentVariable extends EnvironmentVariable {
     private static String LOG_TAG = LocationEnvironmentVariable.class.getSimpleName();
 
+    private static final int NUMBER_OF_FLOAT_VALUES = 3;
+    private static final int NUMBER_OF_STRING_VALUES = 1;
     //float value indices
-    private static int INDEX_LATITUDE = 0;
-    private static int INDEX_LONGITUDE = 1;
-    private static int INDEX_RADIUS = 2;
+    private static final int INDEX_LATITUDE = 0;
+    private static final int INDEX_LONGITUDE = 1;
+    private static final int INDEX_RADIUS = 2;
 
     //String value indices
-    private static int INDEX_LOCATION_NAME = 0;
+    private static final int INDEX_LOCATION_NAME = 0;
 
     public LocationEnvironmentVariable(){
-        super(TYPE_LOCATION);
+        super(TYPE_LOCATION, NUMBER_OF_FLOAT_VALUES, NUMBER_OF_STRING_VALUES);
     }
 
     public LocationEnvironmentVariable
             (float latitude, float longitude, int radius, String locationName){
-        super(TYPE_LOCATION);
-        setFloatValues(new float[]{
-                latitude,
-                longitude,
-                radius
-        });
-        setStringValues(new String[]{
-                locationName
-        });
+        super(TYPE_LOCATION, new float[]{latitude,longitude,radius}, new String[]{locationName});
     }
 
     @Override
