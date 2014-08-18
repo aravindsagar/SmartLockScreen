@@ -40,6 +40,10 @@ public class EnvironmentDatabaseContract {
 
         //Given name of the geofence
         public static final String COLUMN_LOCATION_NAME = "location_name";
+
+        public static Uri buildGeofenceUriWithId(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+        }
     }
 
     public static final class BluetoothDevicesEntry implements BaseColumns {
@@ -56,6 +60,10 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_DEVICE_ADDRESS = "device_address";
 
         public static final String COLUMN_DEVICE_NAME = "device_name";
+
+        public static Uri buildBluetoothUriWithId(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+        }
     }
 
     public static final class WiFiNetworksEntry implements BaseColumns {
@@ -72,6 +80,10 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_SSID = "ssid";
 
         public static final String COLUMN_ENCRYPTION_TYPE = "encryption_type";
+
+        public static Uri buildWiFiUriWithId(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+        }
     }
 
     public static final class EnvironmentEntry implements BaseColumns {
@@ -108,6 +120,10 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_MIN_NOISE_LEVEL = "min_noise_level";
 
         public static final String COLUMN_MAX_NOISE_LEVEL = "max_noise_level";
+
+        public static Uri buildEnvironmentUriWithId(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+        }
     }
 
     public static final class EnvironmentBluetoothEntry implements BaseColumns {
@@ -131,6 +147,16 @@ public class EnvironmentDatabaseContract {
         public static final String TABLE_NAME = "users";
 
         public static final String COLUMN_USER_NAME = "user_name";
+
+        public static Uri buildUserUriWithId(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+        }
+
+        public static Uri buildUserUriWithIdEnvironmentAndPassword
+                (long userId, long environmentId, String password){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(userId)).
+                    appendPath(String.valueOf(environmentId)).appendPath(password).build();
+        }
     }
 
     public static final class PasswordEntry implements BaseColumns {
