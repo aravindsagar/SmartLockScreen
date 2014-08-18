@@ -43,6 +43,14 @@ public class EnvironmentDatabaseContract {
     }
 
     public static final class BluetoothDevicesEntry implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_BLUETOOTH_DEVICES).build();
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" +
+                CONTENT_AUTHORITY + "/" + PATH_BLUETOOTH_DEVICES;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_BLUETOOTH_DEVICES;
+
         public static final String TABLE_NAME = "bluetooth_devices";
 
         public static final String COLUMN_DEVICE_ADDRESS = "device_address";
@@ -51,6 +59,14 @@ public class EnvironmentDatabaseContract {
     }
 
     public static final class WiFiNetworksEntry implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_WIFI_NETWORKS).build();
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" +
+                CONTENT_AUTHORITY + "/" + PATH_WIFI_NETWORKS;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_WIFI_NETWORKS;
+
         public static final String TABLE_NAME = "wifi_networks";
 
         public static final String COLUMN_SSID = "ssid";
@@ -59,6 +75,14 @@ public class EnvironmentDatabaseContract {
     }
 
     public static final class EnvironmentEntry implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_ENVIRONMENTS).build();
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" +
+                CONTENT_AUTHORITY + "/" + PATH_ENVIRONMENTS;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_ENVIRONMENTS;
+
         public static final String TABLE_NAME = "environments";
 
         public static final String COLUMN_NAME = "name";
@@ -96,6 +120,14 @@ public class EnvironmentDatabaseContract {
 
     //Making a separate table for users because planning to put user picture etc later.
     public static final class UsersEntry implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_USERS).build();
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" +
+                CONTENT_AUTHORITY + "/" + PATH_USERS;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_USERS;
+
         public static final String TABLE_NAME = "users";
 
         public static final String COLUMN_USER_NAME = "user_name";
