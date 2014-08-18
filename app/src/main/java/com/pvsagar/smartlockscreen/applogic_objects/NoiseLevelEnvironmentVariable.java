@@ -1,11 +1,14 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
+import android.util.Log;
+
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 
 /**
  * Created by aravind on 8/8/14.
  */
 public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
+    private static final String LOG_TAG = NoiseLevelEnvironmentVariable.class.getSimpleName();
 
     private boolean hasLowerLimit = true, hasUpperLimit = true;
 
@@ -27,5 +30,33 @@ public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
     @Override
     public boolean isFloatValuesSupported() {
         return true;
+    }
+
+    public float getUpperLimit(){
+        try {
+            return getFloatValue(INDEX_UPPER_LIMIT);
+        } catch (Exception e){
+            Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
+                    + e.getMessage());
+            return (float) 0.0; //Should think of a better way, though it should never come to this.
+        }
+    }
+
+    public float getLowerLimit(){
+        try {
+            return getFloatValue(INDEX_LOWER_LIMIT);
+        } catch (Exception e){
+            Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
+                    + e.getMessage());
+            return (float) 0.0; //Should think of a better way, though it should never come to this.
+        }
+    }
+
+    public void setUpperLimit(float upperLimit){
+        setFloatValue(upperLimit, INDEX_UPPER_LIMIT);
+    }
+
+    public void setLowerLimit(float lowerLimit){
+        setFloatValue(lowerLimit, INDEX_LOWER_LIMIT);
     }
 }
