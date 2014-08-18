@@ -7,6 +7,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UserPasswordsEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
+
 /**
  * Created by aravind on 17/8/14.
  * base_uri is defined in EnvironmentDatabaseContract.BASE_CONTENT_URI
@@ -23,9 +30,13 @@ public class EnvironmentProvider extends ContentProvider {
     //Declaring some integer constants for identification throughout the class
     //100 to 199 reserved for possible further uris extending GEOFENCES. Similarly for others.
     private static final int GEOFENCE = 100;
+    private static final int GEOFENCE_WITH_ID = 101;
     private static final int ENVIRONMENT = 200;
+    private static final int ENVIRONMENT_WITH_ID = 201;
     private static final int BLUETOOTH_DEVICE = 300;
+    private static final int BLUETOOTH_DEVICE_WITH_ID = 301;
     private static final int WIFI_NETWORK = 400;
+    private static final int WIFI_NETWORK_WITH_ID = 401;
     private static final int USER = 500;
     private static final int USER_WITH_ID = 501;
     private static final int USER_WITH_ID_AND_ENVIRONMENT_PASSWORD = 502;
@@ -37,12 +48,9 @@ public class EnvironmentProvider extends ContentProvider {
     static {
         sPasswordMatcherForUserWithEnvironment = new SQLiteQueryBuilder();
         sPasswordMatcherForUserWithEnvironment.setTables(
-                EnvironmentDatabaseContract.UsersEntry.TABLE_NAME + " INNER JOIN " +
-                        EnvironmentDatabaseContract.UserPasswordsEntry.TABLE_NAME + " ON " +
-                        EnvironmentDatabaseContract.UsersEntry.TABLE_NAME + "." +
-                        EnvironmentDatabaseContract.UsersEntry._ID + " = " +
-                        EnvironmentDatabaseContract.UserPasswordsEntry.TABLE_NAME + "." +
-                        EnvironmentDatabaseContract.UserPasswordsEntry.COLUMN_USER_ID
+                UsersEntry.TABLE_NAME + " INNER JOIN " + UserPasswordsEntry.TABLE_NAME + " ON " +
+                        UsersEntry.TABLE_NAME + "." + UsersEntry._ID + " = " +
+                        UserPasswordsEntry.TABLE_NAME + "." + UserPasswordsEntry.COLUMN_USER_ID
         );
     }
 
@@ -59,7 +67,32 @@ public class EnvironmentProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case GEOFENCE:
+                return GeoFenceEntry.CONTENT_TYPE;
+            case GEOFENCE_WITH_ID:
+                return GeoFenceEntry.CONTENT_ITEM_TYPE;
+            case BLUETOOTH_DEVICE:
+                return BluetoothDevicesEntry.CONTENT_TYPE;
+            case BLUETOOTH_DEVICE_WITH_ID:
+                return BluetoothDevicesEntry.CONTENT_ITEM_TYPE;
+            case WIFI_NETWORK:
+                return WiFiNetworksEntry.CONTENT_TYPE;
+            case WIFI_NETWORK_WITH_ID:
+                return WiFiNetworksEntry.CONTENT_ITEM_TYPE;
+            case ENVIRONMENT:
+                return EnvironmentEntry.CONTENT_TYPE;
+            case ENVIRONMENT_WITH_ID:
+                return EnvironmentEntry.CONTENT_ITEM_TYPE;
+            case USER:
+                return UsersEntry.CONTENT_TYPE;
+            case USER_WITH_ID:
+            case USER_WITH_ID_AND_ENVIRONMENT_PASSWORD:
+                return UsersEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unknown uri : " + uri);
+        }
     }
 
     @Override
@@ -81,10 +114,18 @@ public class EnvironmentProvider extends ContentProvider {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         String authority = EnvironmentDatabaseContract.CONTENT_AUTHORITY;
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_GEOFENCES, GEOFENCE);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_GEOFENCES + "/#",
+                GEOFENCE_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS, ENVIRONMENT);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS + "/#",
+                ENVIRONMENT_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_BLUETOOTH_DEVICES,
                 BLUETOOTH_DEVICE);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_BLUETOOTH_DEVICES + "/#",
+                BLUETOOTH_DEVICE_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_WIFI_NETWORKS, WIFI_NETWORK);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_WIFI_NETWORKS + "/#",
+                WIFI_NETWORK_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS, USER);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#", USER_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/#/*",
