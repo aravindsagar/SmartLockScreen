@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.environmentdb;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -10,8 +11,24 @@ import android.provider.BaseColumns;
  * Make use of this whenever you want to specify table name, column name etc., to avoid errors.
  */
 public class EnvironmentDatabaseContract {
+    public static final String CONTENT_AUTHORITY = "com.pvsagar.smartlockscreen.app";
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    public static final String PATH_GEOFENCES = "geofences";
+    public static final String PATH_ENVIRONMENTS = "environments";
+    public static final String PATH_BLUETOOTH_DEVICES = "bluetoothdevices";
+    public static final String PATH_WIFI_NETWORKS = "wifinetworks";
+    public static final String PATH_USERS = "users";
 
     public static final class GeoFenceEntry implements BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_GEOFENCES).build();
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" +
+                CONTENT_AUTHORITY + "/" + PATH_GEOFENCES;
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_GEOFENCES;
+
         public static final String TABLE_NAME = "geofences";
 
         //Latitude and longitude of the center

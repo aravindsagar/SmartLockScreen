@@ -1,0 +1,7 @@
+package com.pvsagar.smartlockscreen.applogic_objects;
+
+/**
+ * Created by aravind on 8/8/14.
+ */
+public class LoudnessEnvironmentVariable {
+}
