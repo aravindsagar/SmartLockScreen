@@ -4,10 +4,15 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.AppWhitelistEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UserPasswordsEntry;
@@ -97,12 +102,96 @@ public class EnvironmentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        SQLiteDatabase db = mEnvironmentDbHelper.getWritableDatabase();
+        long _id;
+        Uri returnUri;
+        switch (sUriMatcher.match(uri)){
+            case GEOFENCE:
+                _id = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
+                if(_id > 0){
+                    returnUri = GeoFenceEntry.buildGeofenceUriWithId(_id);
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            case ENVIRONMENT:
+                _id = db.insert(EnvironmentEntry.TABLE_NAME, null, values);
+                if(_id > 0){
+                    returnUri = EnvironmentEntry.buildEnvironmentUriWithId(_id);
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            case WIFI_NETWORK:
+                _id = db.insert(WiFiNetworksEntry.TABLE_NAME, null, values);
+                if(_id > 0){
+                    returnUri = WiFiNetworksEntry.buildWiFiUriWithId(_id);
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            case BLUETOOTH_DEVICE:
+                _id = db.insert(BluetoothDevicesEntry.TABLE_NAME, null, values);
+                if(_id > 0){
+                    returnUri = BluetoothDevicesEntry.buildBluetoothUriWithId(_id);
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            case USER:
+                _id = db.insert(UsersEntry.TABLE_NAME, null, values);
+                if(_id > 0){
+                    returnUri = UsersEntry.buildUserUriWithId(_id);
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown Uri: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return returnUri;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        int returnValue;
+        SQLiteDatabase db = mEnvironmentDbHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)){
+            case ENVIRONMENT:
+                returnValue = deleteEnvironment(db, selection, selectionArgs);
+                break;
+            case USER:
+                returnValue = deleteUser(db, selection, selectionArgs);
+                break;
+            case GEOFENCE:
+                returnValue = db.delete(GeoFenceEntry.TABLE_NAME,
+                        selection, selectionArgs);
+                break;
+            case WIFI_NETWORK:
+                returnValue = db.delete(WiFiNetworksEntry.TABLE_NAME,
+                        selection, selectionArgs);
+                break;
+            case BLUETOOTH_DEVICE:
+                returnValue = db.delete(BluetoothDevicesEntry.TABLE_NAME,
+                        selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown Uri " + uri);
+        }
+        if(selection == null || returnValue != 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+        return returnValue;
     }
 
     @Override
@@ -131,5 +220,49 @@ public class EnvironmentProvider extends ContentProvider {
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/#/*",
                 USER_WITH_ID_AND_ENVIRONMENT_PASSWORD);
         return matcher;
+    }
+
+    private int deleteEnvironment(SQLiteDatabase db, String selection, String[] selectionArgs){
+        //Finding the environment ids of the environments to be deleted, so that they can be
+        // deleted in environment_bluetooth_devices table also
+        Cursor envCursor = db.query(
+                EnvironmentEntry.TABLE_NAME,
+                new String[]{EnvironmentEntry._ID},
+                selection,
+                selectionArgs,
+                null, null, null
+        );
+
+        for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
+            long envId = envCursor.getLong(envCursor.getColumnIndex(EnvironmentEntry._ID));
+            String envSelection = EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID + " = ? ";
+            String[] envSelectionArgs = new String[]{String.valueOf(envId)};
+            db.delete(EnvironmentBluetoothEntry.TABLE_NAME, envSelection, envSelectionArgs);
+        }
+
+        return db.delete(EnvironmentEntry.TABLE_NAME,
+                selection, selectionArgs);
+    }
+
+    private int deleteUser(SQLiteDatabase db, String selection, String[] selectionArgs){
+        Cursor userCursor = db.query(
+                UsersEntry.TABLE_NAME,
+                new String[]{UsersEntry._ID},
+                selection,
+                selectionArgs,
+                null, null, null
+        );
+
+        for(userCursor.moveToFirst(); !userCursor.isAfterLast(); userCursor.moveToNext()){
+            long userId = userCursor.getLong(userCursor.getColumnIndex(UsersEntry._ID));
+            String userSelection = UserPasswordsEntry.COLUMN_USER_ID + " = ? ";
+            String[] userSelectionArgs = new String[]{String.valueOf(userId)};
+            db.delete(UserPasswordsEntry.TABLE_NAME, userSelection, userSelectionArgs);
+
+            userSelection = AppWhitelistEntry.COLUMN_USER_ID + " = ? ";
+            db.delete(AppWhitelistEntry.TABLE_NAME, userSelection, userSelectionArgs);
+        }
+
+        return db.delete(UsersEntry.TABLE_NAME, selection, selectionArgs);
     }
 }
