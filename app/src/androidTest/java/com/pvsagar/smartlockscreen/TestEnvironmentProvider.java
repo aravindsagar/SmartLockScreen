@@ -49,6 +49,42 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         deleteAllRecords(GeoFenceEntry.CONTENT_URI, WiFiNetworksEntry.CONTENT_URI,
                 BluetoothDevicesEntry.CONTENT_URI, EnvironmentEntry.CONTENT_URI,
                 UsersEntry.CONTENT_URI);
+        SQLiteDatabase db = new EnvironmentDbHelper(mContext).getReadableDatabase();
+        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, geofenceCursor.getCount());
+
+        Cursor bluetoothDeviceCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, bluetoothDeviceCursor.getCount());
+
+        Cursor wifiNetworkCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, wifiNetworkCursor.getCount());
+
+        Cursor environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, environmentCursor.getCount());
+
+        Cursor environmentBluetoothDeviceCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, environmentBluetoothDeviceCursor.getCount());
+
+        Cursor userCursor = db.query(UsersEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, userCursor.getCount());
+
+        Cursor passwordCursor = db.query(PasswordEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, passwordCursor.getCount());
+
+        Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, userPasswordCursor.getCount());
+
+        Cursor appWhitelistCursor = db.query(AppWhitelistEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        assertEquals(0, appWhitelistCursor.getCount());
     }
 
     public void testGetType(){
@@ -156,32 +192,28 @@ public class TestEnvironmentProvider extends AndroidTestCase {
                 null, null, null, null, null, null);
         validateCursor(userValues, userCursor);
 
-        //Testing passwords table
+        //Testing passwords table and userPasswords table
         ContentValues passwordValues = getPasswordContentValues();
-        long passwordId = db.insert(PasswordEntry.TABLE_NAME, null,
-                passwordValues);
-        assertTrue(passwordId != -1);
-
+        Uri passwordUri = UsersEntry.buildUserUriWithIdEnvironmentAndPassword(
+                userId, environmentId);
+        mContext.getContentResolver().insert(passwordUri, passwordValues);
         Cursor passwordCursor = db.query(PasswordEntry.TABLE_NAME,
                 null, null, null, null, null, null);
+        passwordCursor.moveToFirst();
+        long passwordId = passwordCursor.getLong(passwordCursor.getColumnIndex(PasswordEntry._ID));
+        assertTrue(passwordId != -1);
         validateCursor(passwordValues, passwordCursor);
 
-        //Testing user passwords table
         ContentValues userPasswordValues = getUserPasswordContentValues
                 (userId, environmentId, passwordId);
-        long userPasswordId = db.insert(UserPasswordsEntry.TABLE_NAME, null,
-                userPasswordValues);
-        assertTrue(userPasswordId != -1);
-
         Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(userPasswordValues, userPasswordCursor);
 
         //Testing app whitelist table
         ContentValues appWhitelistValues = getAppWhitelistContentValues(userId);
-        long appWhitelistId = db.insert(AppWhitelistEntry.TABLE_NAME, null,
+        mContext.getContentResolver().insert(UsersEntry.buildUserUriWithAppWhitelist(userId),
                 appWhitelistValues);
-        assertTrue(appWhitelistId != -1);
 
         Cursor appWhitelistCursor = db.query(AppWhitelistEntry.TABLE_NAME,
                 null, null, null, null, null, null);
@@ -292,6 +324,13 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         ContentValues values = new ContentValues();
         final String testPackageName = "com.pvsagar.smartlockscreen";
         values.put(AppWhitelistEntry.COLUMN_USER_ID, userId);
+        values.put(AppWhitelistEntry.COLUMN_PACKAGE_NAME, testPackageName);
+        return values;
+    }
+
+    private ContentValues getAppWhitelistContentValues(){
+        ContentValues values = new ContentValues();
+        final String testPackageName = "com.pvsagar.smartlockscreen";
         values.put(AppWhitelistEntry.COLUMN_PACKAGE_NAME, testPackageName);
         return values;
     }

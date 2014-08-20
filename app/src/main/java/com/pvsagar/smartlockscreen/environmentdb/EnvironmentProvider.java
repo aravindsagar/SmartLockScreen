@@ -15,6 +15,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Blu
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UserPasswordsEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
@@ -23,10 +24,17 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiF
  * Created by aravind on 17/8/14.
  * base_uri is defined in EnvironmentDatabaseContract.BASE_CONTENT_URI
  * Content provider for Environment database. Uris for accessing content is listed below:
+ * (Replace items beginning and ending with '-', with actual values.
  *   - CONTENT_URL is provided in the respective EnvironmentDatabaseContract.*Entry classes for
  *   geofences,environments, bluetooth devices, wifi networks and users
- *   - Users CONTENT_URL/environment_id/encrypted_password can be used for inserting passwords and
- *   checking whether password is right
+ *   (The Uris below can be built using helper methods in EnvironmentDatabaseContract inner classes)
+ *   - Users CONTENT_URL/-user_id-/-environment_id-/passwords can be used for inserting and
+ *   retrieving encrypted password
+ *   - Users CONTENT_URL/-user_id-/app_whitelist will insert/bulk insert/get whitelisted apps
+ *   - Environments CONTENT_URL/-environment_id-/bluetooth_devices will insert/bulk insert/get the
+ *   bluetooth devices associated with the environment
+ *   - Similarly, Environments CONTENT_URL/-environment_id-/wifi_networks and
+ *   CONTENT_URL/-environment_id-/geofences can be used.
  *   - More coming
  */
 public class EnvironmentProvider extends ContentProvider {
@@ -38,13 +46,17 @@ public class EnvironmentProvider extends ContentProvider {
     private static final int GEOFENCE_WITH_ID = 101;
     private static final int ENVIRONMENT = 200;
     private static final int ENVIRONMENT_WITH_ID = 201;
+    private static final int ENVIRONMENT_WITH_ID_AND_BLUETOOTH_DEVICES = 202;
+    private static final int ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS = 203;
+    private static final int ENVIRONMENT_WITH_ID_AND_GEOFENCES = 204;
     private static final int BLUETOOTH_DEVICE = 300;
     private static final int BLUETOOTH_DEVICE_WITH_ID = 301;
     private static final int WIFI_NETWORK = 400;
     private static final int WIFI_NETWORK_WITH_ID = 401;
     private static final int USER = 500;
     private static final int USER_WITH_ID = 501;
-    private static final int USER_WITH_ID_AND_ENVIRONMENT_PASSWORD = 502;
+    private static final int USER_WITH_ID_AND_APP_WHITELIST = 502;
+    private static final int USER_WITH_ID_ENVIRONMENT_AND_PASSWORD = 503;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private EnvironmentDbHelper mEnvironmentDbHelper;
@@ -66,7 +78,8 @@ public class EnvironmentProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection,
+                        String selection, String[] selectionArgs, String sortOrder) {
         return null;
     }
 
@@ -89,11 +102,15 @@ public class EnvironmentProvider extends ContentProvider {
             case ENVIRONMENT:
                 return EnvironmentEntry.CONTENT_TYPE;
             case ENVIRONMENT_WITH_ID:
+            case ENVIRONMENT_WITH_ID_AND_BLUETOOTH_DEVICES:
+            case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
+            case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
                 return EnvironmentEntry.CONTENT_ITEM_TYPE;
             case USER:
                 return UsersEntry.CONTENT_TYPE;
             case USER_WITH_ID:
-            case USER_WITH_ID_AND_ENVIRONMENT_PASSWORD:
+            case USER_WITH_ID_AND_APP_WHITELIST:
+            case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
                 return UsersEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri : " + uri);
@@ -150,8 +167,30 @@ public class EnvironmentProvider extends ContentProvider {
                 _id = db.insert(UsersEntry.TABLE_NAME, null, values);
                 if(_id > 0){
                     returnUri = UsersEntry.buildUserUriWithId(_id);
+                } else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
                 }
-                else{
+                break;
+            case USER_WITH_ID_AND_APP_WHITELIST:
+                String userIdString = uri.getPathSegments().get(1);
+                if(values.get(AppWhitelistEntry.COLUMN_USER_ID) == null){
+                    values.put(AppWhitelistEntry.COLUMN_USER_ID, userIdString);
+                }
+                _id = db.insert(AppWhitelistEntry.TABLE_NAME, null, values);
+                if(_id > 0) {
+                    returnUri = UsersEntry.buildUserUriWithId(Long.valueOf(userIdString));
+                } else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
+                _id = insertPassword(uri, db, values);
+                if(_id > 0){
+                    returnUri = UsersEntry.buildUserUriWithId(Long.parseLong
+                            (uri.getPathSegments().get(1)));
+                } else{
                     Log.e(LOG_TAG, "Failed to insert row into " + uri);
                     throw new SQLiteException("Failed to insert row into " + uri);
                 }
@@ -208,6 +247,12 @@ public class EnvironmentProvider extends ContentProvider {
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS, ENVIRONMENT);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS + "/#",
                 ENVIRONMENT_WITH_ID);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS + "/#/" +
+                BluetoothDevicesEntry.TABLE_NAME, ENVIRONMENT_WITH_ID_AND_BLUETOOTH_DEVICES);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS + "/#/" +
+                WiFiNetworksEntry.TABLE_NAME, ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_ENVIRONMENTS + "/#/" +
+                GeoFenceEntry.TABLE_NAME, ENVIRONMENT_WITH_ID_AND_GEOFENCES);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_BLUETOOTH_DEVICES,
                 BLUETOOTH_DEVICE);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_BLUETOOTH_DEVICES + "/#",
@@ -217,14 +262,16 @@ public class EnvironmentProvider extends ContentProvider {
                 WIFI_NETWORK_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS, USER);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#", USER_WITH_ID);
-        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/#/*",
-                USER_WITH_ID_AND_ENVIRONMENT_PASSWORD);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/" +
+                AppWhitelistEntry.TABLE_NAME, USER_WITH_ID_AND_APP_WHITELIST);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/#/" +
+                PasswordEntry.TABLE_NAME, USER_WITH_ID_ENVIRONMENT_AND_PASSWORD);
         return matcher;
     }
 
     private int deleteEnvironment(SQLiteDatabase db, String selection, String[] selectionArgs){
         //Finding the environment ids of the environments to be deleted, so that they can be
-        // deleted in environment_bluetooth_devices table also
+        // deleted in other tables which stores the environment id.
         Cursor envCursor = db.query(
                 EnvironmentEntry.TABLE_NAME,
                 new String[]{EnvironmentEntry._ID},
@@ -238,6 +285,8 @@ public class EnvironmentProvider extends ContentProvider {
             String envSelection = EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID + " = ? ";
             String[] envSelectionArgs = new String[]{String.valueOf(envId)};
             db.delete(EnvironmentBluetoothEntry.TABLE_NAME, envSelection, envSelectionArgs);
+
+            deletePasswordWithEnvironmentId(envId, db);
         }
 
         return db.delete(EnvironmentEntry.TABLE_NAME,
@@ -255,14 +304,60 @@ public class EnvironmentProvider extends ContentProvider {
 
         for(userCursor.moveToFirst(); !userCursor.isAfterLast(); userCursor.moveToNext()){
             long userId = userCursor.getLong(userCursor.getColumnIndex(UsersEntry._ID));
-            String userSelection = UserPasswordsEntry.COLUMN_USER_ID + " = ? ";
-            String[] userSelectionArgs = new String[]{String.valueOf(userId)};
-            db.delete(UserPasswordsEntry.TABLE_NAME, userSelection, userSelectionArgs);
+            deletePasswordWithUserId(userId, db);
 
-            userSelection = AppWhitelistEntry.COLUMN_USER_ID + " = ? ";
+            String userSelection = AppWhitelistEntry.COLUMN_USER_ID + " = ? ";
+            String[] userSelectionArgs = new String[]{String.valueOf(userId)};
             db.delete(AppWhitelistEntry.TABLE_NAME, userSelection, userSelectionArgs);
         }
-
         return db.delete(UsersEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
+    private void deletePasswordWithUserId(long userId, SQLiteDatabase db){
+        String passwordIdsSelection = UserPasswordsEntry.COLUMN_USER_ID + " = ? ";
+        String[] passwordIdsSelectionArgs = new String[]{String.valueOf(userId)};
+        Cursor passwordIds = db.query(UserPasswordsEntry.TABLE_NAME,
+                new String[]{UserPasswordsEntry.COLUMN_PASSWORD_ID},
+                passwordIdsSelection,
+                passwordIdsSelectionArgs,
+                null, null, null, null);
+        for(passwordIds.moveToFirst(); !passwordIds.isAfterLast(); passwordIds.moveToNext()){
+            String passwordSelection = PasswordEntry._ID + " = ? ";
+            String[] passwordSelectionArgs = new String[]{String.valueOf(passwordIds.getDouble(
+                    passwordIds.getColumnIndex(UserPasswordsEntry.COLUMN_PASSWORD_ID)))};
+            db.delete(PasswordEntry.TABLE_NAME, passwordSelection, passwordSelectionArgs);
+        }
+        db.delete(UserPasswordsEntry.TABLE_NAME, passwordIdsSelection, passwordIdsSelectionArgs);
+    }
+
+    private void deletePasswordWithEnvironmentId(long environmentId, SQLiteDatabase db){
+        String passwordIdsSelection = UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + " = ? ";
+        String[] passwordIdsSelectionArgs = new String[]{String.valueOf(environmentId)};
+        Cursor passwordIds = db.query(UserPasswordsEntry.TABLE_NAME,
+                new String[]{UserPasswordsEntry.COLUMN_PASSWORD_ID},
+                passwordIdsSelection,
+                passwordIdsSelectionArgs,
+                null, null, null, null);
+        for(passwordIds.moveToFirst(); !passwordIds.isAfterLast(); passwordIds.moveToNext()){
+            String passwordSelection = PasswordEntry._ID + " = ? ";
+            String[] passwordSelectionArgs = new String[]{String.valueOf(passwordIds.getDouble(
+                    passwordIds.getColumnIndex(UserPasswordsEntry.COLUMN_PASSWORD_ID)))};
+            db.delete(PasswordEntry.TABLE_NAME, passwordSelection, passwordSelectionArgs);
+        }
+        db.delete(UserPasswordsEntry.TABLE_NAME, passwordIdsSelection, passwordIdsSelectionArgs);
+    }
+
+    private long insertPassword(Uri uri, SQLiteDatabase db, ContentValues values){
+        //Inserting into Passwords table
+        long passwordId = db.insert(PasswordEntry.TABLE_NAME, null, values);
+
+        //Inserting into user_passwords table
+        long userId = Long.parseLong(uri.getPathSegments().get(1));
+        long environmentId = Long.parseLong(uri.getPathSegments().get(2));
+        ContentValues userPasswordValues = new ContentValues();
+        userPasswordValues.put(UserPasswordsEntry.COLUMN_ENVIRONMENT_ID, environmentId);
+        userPasswordValues.put(UserPasswordsEntry.COLUMN_USER_ID, userId);
+        userPasswordValues.put(UserPasswordsEntry.COLUMN_PASSWORD_ID, passwordId);
+        return db.insert(UserPasswordsEntry.TABLE_NAME, null, userPasswordValues);
     }
 }

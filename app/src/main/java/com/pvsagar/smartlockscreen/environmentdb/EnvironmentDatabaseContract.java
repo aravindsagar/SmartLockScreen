@@ -153,9 +153,15 @@ public class EnvironmentDatabaseContract {
         }
 
         public static Uri buildUserUriWithIdEnvironmentAndPassword
-                (long userId, long environmentId, String password){
+                (long userId, long environmentId){
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(userId)).
-                    appendPath(String.valueOf(environmentId)).appendPath(password).build();
+                    appendPath(String.valueOf(environmentId)).appendPath(PasswordEntry.TABLE_NAME).
+                    build();
+        }
+
+        public static Uri buildUserUriWithAppWhitelist(long userId){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(userId)).
+                    appendPath(AppWhitelistEntry.TABLE_NAME).build();
         }
     }
 
