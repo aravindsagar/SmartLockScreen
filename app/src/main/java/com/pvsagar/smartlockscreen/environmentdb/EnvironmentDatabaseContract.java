@@ -124,6 +124,11 @@ public class EnvironmentDatabaseContract {
         public static Uri buildEnvironmentUriWithId(long id){
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
         }
+
+        public static Uri buildEnvironmentUriWithIdAndBluetooth(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).
+                    appendPath(BluetoothDevicesEntry.TABLE_NAME).build();
+        }
     }
 
     public static final class EnvironmentBluetoothEntry implements BaseColumns {

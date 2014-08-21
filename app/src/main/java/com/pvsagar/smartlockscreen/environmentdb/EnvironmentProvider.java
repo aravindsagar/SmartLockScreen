@@ -163,6 +163,17 @@ public class EnvironmentProvider extends ContentProvider {
                     throw new SQLiteException("Failed to insert row into " + uri);
                 }
                 break;
+            case ENVIRONMENT_WITH_ID_AND_BLUETOOTH_DEVICES:
+                _id = insertEnvironmentBluetoothDevice(uri, db, values);
+                if(_id > 0){
+                    returnUri = EnvironmentEntry.buildEnvironmentUriWithId
+                            (Long.parseLong(uri.getPathSegments().get(1)));
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
             case USER:
                 _id = db.insert(UsersEntry.TABLE_NAME, null, values);
                 if(_id > 0){
@@ -359,5 +370,38 @@ public class EnvironmentProvider extends ContentProvider {
         userPasswordValues.put(UserPasswordsEntry.COLUMN_USER_ID, userId);
         userPasswordValues.put(UserPasswordsEntry.COLUMN_PASSWORD_ID, passwordId);
         return db.insert(UserPasswordsEntry.TABLE_NAME, null, userPasswordValues);
+    }
+
+    private long insertEnvironmentBluetoothDevice(Uri uri, SQLiteDatabase db, ContentValues values){
+        long environmentId = Long.parseLong(uri.getPathSegments().get(1));
+        String bluetoothSelection = BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS + " = ? AND " +
+                BluetoothDevicesEntry.COLUMN_DEVICE_NAME + " = ? ";
+        String[] bluetoothSelectionArgs = new String[]{
+                values.getAsString(BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS),
+                values.getAsString(BluetoothDevicesEntry.COLUMN_DEVICE_NAME)
+        };
+        Cursor bluetoothCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
+                new String[]{BluetoothDevicesEntry._ID}, bluetoothSelection,
+                bluetoothSelectionArgs, null, null, null);
+        long bluetoothDeviceId;
+        if(bluetoothCursor.getCount() == 0){
+            bluetoothDeviceId = db.insert(BluetoothDevicesEntry.TABLE_NAME, null, values);
+        } else {
+            bluetoothCursor.moveToFirst();
+            bluetoothDeviceId = bluetoothCursor.getLong(
+                    bluetoothCursor.getColumnIndex(BluetoothDevicesEntry._ID));
+        }
+        ContentValues environmentContentValues = new ContentValues();
+        environmentContentValues.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, 1);
+        db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
+                EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
+
+        ContentValues environmentBluetoothContentValues = new ContentValues();
+        environmentBluetoothContentValues.put(EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID,
+                bluetoothDeviceId);
+        environmentBluetoothContentValues.put(EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID,
+                environmentId);
+        return db.insert(EnvironmentBluetoothEntry.TABLE_NAME, null,
+                environmentBluetoothContentValues);
     }
 }

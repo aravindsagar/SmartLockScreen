@@ -173,9 +173,10 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         //Testing environment bluetooth devices table
         ContentValues environmentBluetoothDeviceValues =
                 getEnvironmentBluetoothDeviceContentValues(environmentId, bluetoothDeviceId);
-        long environmentBluetoothDeviceId = db.insert(EnvironmentBluetoothEntry.TABLE_NAME, null,
-                environmentBluetoothDeviceValues);
-        assertTrue(environmentBluetoothDeviceId != -1);
+        mContext.getContentResolver().insert(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId),
+                bluetoothDeviceValues
+        );
 
         Cursor environmentBluetoothDeviceCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
                 null, null, null, null, null, null);
