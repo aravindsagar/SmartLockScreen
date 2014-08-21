@@ -139,6 +139,10 @@ public class EnvironmentDatabaseContract {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).
                     appendPath(GeoFenceEntry.TABLE_NAME).build();
         }
+
+        public static long getEnvironmentIdFromUri(Uri uri){
+            return Long.parseLong(uri.getPathSegments().get(1));
+        }
     }
 
     public static final class EnvironmentBluetoothEntry implements BaseColumns {

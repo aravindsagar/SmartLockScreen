@@ -10,11 +10,14 @@ import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
     private static final String LOG_TAG = NoiseLevelEnvironmentVariable.class.getSimpleName();
 
-    private boolean hasLowerLimit = true, hasUpperLimit = true;
+    public boolean hasLowerLimit = true, hasUpperLimit = true;
 
     private static final int NUMBER_OF_FLOAT_VALUES = 2;
     private static final int INDEX_LOWER_LIMIT = 0;
     private static final int INDEX_UPPER_LIMIT = 1;
+
+    public static final float MAX_NOISE_LEVEL = (float) 100.0;
+    public static final float MIN_NOISE_LEVEL = (float) 0.0;
 
     public NoiseLevelEnvironmentVariable(boolean hasLowerLimit, boolean hasUpperLimit){
         super(TYPE_NOISE_LEVEL, NUMBER_OF_FLOAT_VALUES, 0);

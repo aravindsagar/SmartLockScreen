@@ -10,17 +10,34 @@ import java.util.Vector;
 public class Environment {
     private LocationEnvironmentVariable locationEnvironmentVariable;
     private Vector<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables;
+    //true for all, false for any
+    private boolean bluetoothAllOrAny;
     private WiFiEnvironmentVariable wiFiEnvironmentVariable;
     private NoiseLevelEnvironmentVariable noiseLevelEnvironmentVariable;
+    private String name;
 
     public boolean hasLocation, hasBluetoothDevices, hasWiFiNetwork, hasNoiseLevel;
     public Environment(){
         hasLocation = hasNoiseLevel = hasWiFiNetwork = hasBluetoothDevices = false;
+        bluetoothAllOrAny = false;
     }
 
-    public Environment(EnvironmentVariable... variables){
+    public Environment(String name, EnvironmentVariable... variables){
         this();
+        setName(name);
         addEnvironmentVariables(variables);
+    }
+
+    public void setName(String name){
+        if(name != null) {
+            this.name = name;
+        } else {
+            throw new IllegalArgumentException("Name cannot be null.");
+        }
+    }
+
+    public void setBluetoothAllOrAny(boolean b){
+        bluetoothAllOrAny = b;
     }
 
     public void addEnvironmentVariables(EnvironmentVariable... variables){
@@ -42,24 +59,53 @@ public class Environment {
 
     public void addLocationVariable(LocationEnvironmentVariable variable){
         locationEnvironmentVariable = variable;
-        hasLocation = true;
+        hasLocation = variable != null;
     }
 
     public void addBluetoothDevicesEnvironmentVariable(BluetoothEnvironmentVariable variable){
-        if(bluetoothEnvironmentVariables == null){
-            bluetoothEnvironmentVariables = new Vector<BluetoothEnvironmentVariable>();
+        if(variable != null) {
+            if (bluetoothEnvironmentVariables == null) {
+                bluetoothEnvironmentVariables = new Vector<BluetoothEnvironmentVariable>();
+            }
+            bluetoothEnvironmentVariables.add(variable);
+            hasBluetoothDevices = true;
+        } else {
+            bluetoothEnvironmentVariables = null;
+            hasBluetoothDevices = false;
         }
-        bluetoothEnvironmentVariables.add(variable);
-        hasBluetoothDevices = true;
     }
 
     public void addWiFiEnvironmentVariable(WiFiEnvironmentVariable variable){
         wiFiEnvironmentVariable = variable;
-        hasWiFiNetwork = true;
+        hasWiFiNetwork = variable != null;
     }
 
     public void addNoiseLevelEnvironmentVariable(NoiseLevelEnvironmentVariable variable){
         noiseLevelEnvironmentVariable = variable;
-        hasNoiseLevel = true;
+        hasNoiseLevel = variable != null;
+    }
+
+    public LocationEnvironmentVariable getLocationEnvironmentVariable(){
+        return locationEnvironmentVariable;
+    }
+
+    public Vector<BluetoothEnvironmentVariable> getBluetoothEnvironmentVariables(){
+        return bluetoothEnvironmentVariables;
+    }
+
+    public WiFiEnvironmentVariable getWiFiEnvironmentVariable(){
+        return wiFiEnvironmentVariable;
+    }
+
+    public NoiseLevelEnvironmentVariable getNoiseLevelEnvironmentVariable(){
+        return noiseLevelEnvironmentVariable;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public boolean isBluetoothAllOrAny(){
+        return bluetoothAllOrAny;
     }
 }
