@@ -153,6 +153,17 @@ public class EnvironmentProvider extends ContentProvider {
                     throw new SQLiteException("Failed to insert row into " + uri);
                 }
                 break;
+            case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
+                _id = insertEnvironmentWifiNetwork(uri, db, values);
+                if(_id > 0){
+                    returnUri = EnvironmentEntry.buildEnvironmentUriWithId(
+                            Long.parseLong(uri.getPathSegments().get(1)));
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
             case BLUETOOTH_DEVICE:
                 _id = db.insert(BluetoothDevicesEntry.TABLE_NAME, null, values);
                 if(_id > 0){
@@ -383,6 +394,7 @@ public class EnvironmentProvider extends ContentProvider {
         Cursor bluetoothCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
                 new String[]{BluetoothDevicesEntry._ID}, bluetoothSelection,
                 bluetoothSelectionArgs, null, null, null);
+
         long bluetoothDeviceId;
         if(bluetoothCursor.getCount() == 0){
             bluetoothDeviceId = db.insert(BluetoothDevicesEntry.TABLE_NAME, null, values);
@@ -391,6 +403,10 @@ public class EnvironmentProvider extends ContentProvider {
             bluetoothDeviceId = bluetoothCursor.getLong(
                     bluetoothCursor.getColumnIndex(BluetoothDevicesEntry._ID));
         }
+        if(bluetoothDeviceId == -1){
+            return -1;
+        }
+
         ContentValues environmentContentValues = new ContentValues();
         environmentContentValues.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, 1);
         db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
@@ -403,5 +419,35 @@ public class EnvironmentProvider extends ContentProvider {
                 environmentId);
         return db.insert(EnvironmentBluetoothEntry.TABLE_NAME, null,
                 environmentBluetoothContentValues);
+    }
+
+    private long insertEnvironmentWifiNetwork(Uri uri, SQLiteDatabase db, ContentValues values){
+        long environmentId = Long.parseLong(uri.getPathSegments().get(1));
+        String wifiSelection = WiFiNetworksEntry.COLUMN_SSID+ " = ? AND " +
+                WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE + " = ? ";
+        String[] wifiSelectionArgs = new String[]{
+                values.getAsString(WiFiNetworksEntry.COLUMN_SSID),
+                values.getAsString(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE)
+        };
+        Cursor wifiCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
+                new String[]{WiFiNetworksEntry._ID}, wifiSelection, wifiSelectionArgs,
+                null, null, null);
+
+        long wifiId;
+        if(wifiCursor.getCount() == 0){
+            wifiId = db.insert(WiFiNetworksEntry.TABLE_NAME, null, values);
+        } else {
+            wifiCursor.moveToFirst();
+            wifiId = wifiCursor.getLong(wifiCursor.getColumnIndex(WiFiNetworksEntry._ID));
+        }
+        if(wifiId == -1){
+            return -1;
+        }
+
+        ContentValues environmentContentValues = new ContentValues();
+        environmentContentValues.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1);
+        environmentContentValues.put(EnvironmentEntry.COLUMN_WIFI_ID, wifiId);
+        return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
+                EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
     }
 }
