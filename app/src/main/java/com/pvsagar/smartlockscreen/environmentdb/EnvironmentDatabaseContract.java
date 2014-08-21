@@ -134,6 +134,11 @@ public class EnvironmentDatabaseContract {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).
                     appendPath(WiFiNetworksEntry.TABLE_NAME).build();
         }
+
+        public static Uri buildEnvironmentUriWithIdAndLocation(long id){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).
+                    appendPath(GeoFenceEntry.TABLE_NAME).build();
+        }
     }
 
     public static final class EnvironmentBluetoothEntry implements BaseColumns {

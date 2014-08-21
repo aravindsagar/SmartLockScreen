@@ -32,9 +32,13 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiF
  *   retrieving encrypted password
  *   - Users CONTENT_URL/-user_id-/app_whitelist will insert/bulk insert/get whitelisted apps
  *   - Environments CONTENT_URL/-environment_id-/bluetooth_devices will insert/bulk insert/get the
- *   bluetooth devices associated with the environment
+ *   bluetooth devices associated with the environment. Values required are BluetoothDevicesEntry
+ *   values. If the device is not already there in the database, it'll be inserted. Then the
+ *   environment entry is modified to refer to the device (new or existing).
  *   - Similarly, Environments CONTENT_URL/-environment_id-/wifi_networks and
- *   CONTENT_URL/-environment_id-/geofences can be used.
+ *   CONTENT_URL/-environment_id-/geofences can be used. Note that while multiple bluetooth
+ *   devices are possible in an environment, only a single wifi network/location is allowed per
+ *   environment.
  *   - More coming
  */
 public class EnvironmentProvider extends ContentProvider {
@@ -137,6 +141,17 @@ public class EnvironmentProvider extends ContentProvider {
                 _id = db.insert(EnvironmentEntry.TABLE_NAME, null, values);
                 if(_id > 0){
                     returnUri = EnvironmentEntry.buildEnvironmentUriWithId(_id);
+                }
+                else{
+                    Log.e(LOG_TAG, "Failed to insert row into " + uri);
+                    throw new SQLiteException("Failed to insert row into " + uri);
+                }
+                break;
+            case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
+                _id = insertEnvironmentLocation(uri, db, values);
+                if(_id > 0){
+                    returnUri = EnvironmentEntry.buildEnvironmentUriWithId(
+                            Long.parseLong(uri.getPathSegments().get(1)));
                 }
                 else{
                     Log.e(LOG_TAG, "Failed to insert row into " + uri);
@@ -447,6 +462,37 @@ public class EnvironmentProvider extends ContentProvider {
         ContentValues environmentContentValues = new ContentValues();
         environmentContentValues.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1);
         environmentContentValues.put(EnvironmentEntry.COLUMN_WIFI_ID, wifiId);
+        return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
+                EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
+    }
+
+    private long insertEnvironmentLocation(Uri uri, SQLiteDatabase db, ContentValues values){
+        long environmentId = Long.parseLong(uri.getPathSegments().get(1));
+        String geofenceSelection = GeoFenceEntry.COLUMN_COORD_LAT + " = ? AND " +
+                GeoFenceEntry.COLUMN_COORD_LONG + " = ? AND " +
+                GeoFenceEntry.COLUMN_RADIUS + " = ? ";
+        String[] geofenceSelectionArgs = new String[]{
+                values.getAsString(GeoFenceEntry.COLUMN_COORD_LAT),
+                values.getAsString(GeoFenceEntry.COLUMN_COORD_LONG),
+                values.getAsString(GeoFenceEntry.COLUMN_RADIUS)
+        };
+        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME, new String[]{GeoFenceEntry._ID},
+                geofenceSelection, geofenceSelectionArgs, null, null, null);
+
+        long geofenceId;
+        if(geofenceCursor.getCount() == 0){
+            geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
+        } else {
+            geofenceCursor.moveToFirst();
+            geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
+        }
+        if(geofenceId == -1){
+            return -1;
+        }
+
+        ContentValues environmentContentValues = new ContentValues();
+        environmentContentValues.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 1);
+        environmentContentValues.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
         return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
                 EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
     }

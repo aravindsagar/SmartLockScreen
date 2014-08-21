@@ -33,7 +33,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
     private void deleteAllRecords(Uri... uris){
         Cursor cursor;
         for(Uri uri: uris){
-            int numberDeleted = mContext.getContentResolver().delete(uri, null, null);
+            mContext.getContentResolver().delete(uri, null, null);
             cursor = mContext.getContentResolver().query(uri, null, null, null, null);
             if(cursor != null) {
                 assertEquals(0, cursor.getCount());
@@ -226,18 +226,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         EnvironmentDbHelper dbHelper = new EnvironmentDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        //Testing geofences table
-        ContentValues geofenceValues = getGeofenceContentValues();
-        Uri geoFenceUri = mContext.getContentResolver().insert(GeoFenceEntry.CONTENT_URI, geofenceValues);
-        long geofenceId = ContentUris.parseId(geoFenceUri);
-        assertTrue(geofenceId != -1);
-
-        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
-                null, null, null, null, null, null);
-        validateCursor(geofenceValues, geofenceCursor);
-
         //Testing environments table
-        ContentValues environmentValues = getEnvironmentAlternateContentValues(geofenceId);
+        ContentValues environmentValues = getEnvironmentAlternateContentValues();
         Uri environmentUri = mContext.getContentResolver().insert(EnvironmentEntry.CONTENT_URI,
                 environmentValues);
         long environmentId = ContentUris.parseId(environmentUri);
@@ -246,6 +236,18 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         Cursor environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(environmentValues, environmentCursor);
+
+        //Testing geofences table
+        ContentValues geofenceValues = getGeofenceContentValues();
+        mContext.getContentResolver().insert(EnvironmentEntry.
+                buildEnvironmentUriWithIdAndLocation(environmentId), geofenceValues);
+
+        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(geofenceValues, geofenceCursor);
+        geofenceCursor.moveToFirst();
+        long geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
+        assertTrue(geofenceId != -1);
 
         //Testing wifi networks table
         ContentValues wifiNetworkValues = getWifiNetworkContentValues();
@@ -256,6 +258,10 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         Cursor wifiNetworkCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(wifiNetworkValues, wifiNetworkCursor);
+        wifiNetworkCursor.moveToFirst();
+        long wifiNetworkId = wifiNetworkCursor.getLong(wifiNetworkCursor.getColumnIndex(
+                WiFiNetworksEntry._ID));
+        assertTrue(wifiNetworkId != -1);
 
         //Testing environment bluetooth devices table
         //Testing bluetooth devices table
@@ -308,13 +314,19 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         validateCursor(userPasswordValues, userPasswordCursor);
 
         //Testing app whitelist table
-        ContentValues appWhitelistValues = getAppWhitelistContentValues(userId);
+        ContentValues appWhitelistValues = getAppWhitelistContentValues();
         mContext.getContentResolver().insert(UsersEntry.buildUserUriWithAppWhitelist(userId),
                 appWhitelistValues);
 
         Cursor appWhitelistCursor = db.query(AppWhitelistEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         validateCursor(appWhitelistValues, appWhitelistCursor);
+
+        //Final environment check
+        environmentValues = getEnvironmentContentValues(geofenceId, wifiNetworkId);
+        environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
+                null, null, null, null, null, null);
+        validateCursor(environmentValues, environmentCursor);
     }
 
     public void testDeleteAllRecordsAfter(){
@@ -388,7 +400,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         return values;
     }
 
-    private ContentValues getEnvironmentAlternateContentValues(long geofenceId){
+    private ContentValues getEnvironmentAlternateContentValues(){
         ContentValues values = new ContentValues();
         final int testEnbled = 1;
         final int testNotEnabled = 0;
@@ -396,8 +408,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         final double testMaxNoiseLevel = 30.2;
         final double testMinNoiseLevel = 11.1;
         values.put(EnvironmentEntry.COLUMN_NAME, testEnvironmentName);
-        values.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, testEnbled);
-        values.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
+        values.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, testNotEnabled);
         values.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, testNotEnabled);
         values.put(EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY, testEnbled);
         values.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, testNotEnabled);
