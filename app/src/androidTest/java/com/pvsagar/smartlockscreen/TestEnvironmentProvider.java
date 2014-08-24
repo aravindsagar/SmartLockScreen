@@ -24,8 +24,7 @@ import java.util.Set;
 
 /**
  * Created by aravind on 17/8/14.
- * Contains the tests for testing creation, insertion and querying of all the tables in
- * environment.db
+ * Contains the tests for testing the content provider for environment database
  */
 public class TestEnvironmentProvider extends AndroidTestCase {
     private static final String LOG_TAG = TestEnvironmentProvider.class.getSimpleName();
@@ -122,18 +121,21 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         assertEquals(UsersEntry.CONTENT_ITEM_TYPE, type);
     }
 
-    public void testInsertReadDb() {
-        EnvironmentDbHelper dbHelper = new EnvironmentDbHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+    public void testInsertReadProvider() {
 
         //Testing geofences table
         ContentValues geofenceValues = getGeofenceContentValues();
-        Uri geoFenceUri = mContext.getContentResolver().insert(GeoFenceEntry.CONTENT_URI, geofenceValues);
+        Uri geoFenceUri = mContext.getContentResolver().insert(
+                GeoFenceEntry.CONTENT_URI, geofenceValues);
         long geofenceId = ContentUris.parseId(geoFenceUri);
         assertTrue(geofenceId != -1);
 
-        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor geofenceCursor = mContext.getContentResolver().query(GeoFenceEntry.CONTENT_URI,
+                null, null, null, null);
+        validateCursor(geofenceValues, geofenceCursor);
+
+        geofenceCursor = mContext.getContentResolver().query(
+                GeoFenceEntry.buildGeofenceUriWithId(geofenceId), null, null, null, null);
         validateCursor(geofenceValues, geofenceCursor);
 
         //Testing bluetooth devices table
@@ -143,8 +145,13 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         long bluetoothDeviceId = ContentUris.parseId(bluetoothDeviceUri);
         assertTrue(bluetoothDeviceId != -1);
 
-        Cursor bluetoothDeviceCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor bluetoothDeviceCursor = mContext.getContentResolver().query(
+                BluetoothDevicesEntry.CONTENT_URI, null, null, null, null);
+        validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
+
+        bluetoothDeviceCursor = mContext.getContentResolver().query(
+                BluetoothDevicesEntry.buildBluetoothUriWithId(bluetoothDeviceId), null, null, null,
+                null);
         validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
 
         //Testing wifi networks table
@@ -154,8 +161,12 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         long wifiNetworkId = ContentUris.parseId(wifiNetworksUri);
         assertTrue(wifiNetworkId != -1);
 
-        Cursor wifiNetworkCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor wifiNetworkCursor = mContext.getContentResolver().query(
+                WiFiNetworksEntry.CONTENT_URI, null, null, null, null);
+        validateCursor(wifiNetworkValues, wifiNetworkCursor);
+
+        wifiNetworkCursor = mContext.getContentResolver().query(
+                WiFiNetworksEntry.buildWiFiUriWithId(wifiNetworkId), null, null, null, null);
         validateCursor(wifiNetworkValues, wifiNetworkCursor);
 
         //Testing environments table
@@ -165,8 +176,12 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         long environmentId = ContentUris.parseId(environmentUri);
         assertTrue(environmentId != -1);
 
-        Cursor environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor environmentCursor = mContext.getContentResolver().query(EnvironmentEntry.CONTENT_URI,
+                null, null, null, null);
+        validateCursor(environmentValues, environmentCursor);
+
+        environmentCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.buildEnvironmentUriWithId(environmentId), null, null, null, null);
         validateCursor(environmentValues, environmentCursor);
 
         //Testing environment bluetooth devices table
@@ -177,8 +192,9 @@ public class TestEnvironmentProvider extends AndroidTestCase {
                 bluetoothDeviceValues
         );
 
-        Cursor environmentBluetoothDeviceCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor environmentBluetoothDeviceCursor = mContext.getContentResolver().query
+                (EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId),
+                null, null, null, null);
 
         validateCursor(environmentBluetoothDeviceValues, environmentBluetoothDeviceCursor);
 
@@ -188,8 +204,12 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         long userId = ContentUris.parseId(userUri);
         assertTrue(userId != -1);
 
-        Cursor userCursor = db.query(UsersEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor userCursor = mContext.getContentResolver().query(UsersEntry.CONTENT_URI,
+                null, null, null, null);
+        validateCursor(userValues, userCursor);
+
+        userCursor = mContext.getContentResolver().query(UsersEntry.buildUserUriWithId(userId),
+                null, null, null, null);
         validateCursor(userValues, userCursor);
 
         //Testing passwords table and userPasswords table
@@ -197,34 +217,27 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         Uri passwordUri = UsersEntry.buildUserUriWithIdEnvironmentAndPassword(
                 userId, environmentId);
         mContext.getContentResolver().insert(passwordUri, passwordValues);
-        Cursor passwordCursor = db.query(PasswordEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor passwordCursor = mContext.getContentResolver().query(
+                UsersEntry.buildUserUriWithIdEnvironmentAndPassword(userId, environmentId),
+                null, null, null, null);
         passwordCursor.moveToFirst();
         long passwordId = passwordCursor.getLong(passwordCursor.getColumnIndex(PasswordEntry._ID));
         assertTrue(passwordId != -1);
         validateCursor(passwordValues, passwordCursor);
-
-        ContentValues userPasswordValues = getUserPasswordContentValues
-                (userId, environmentId, passwordId);
-        Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME,
-                null, null, null, null, null, null);
-        validateCursor(userPasswordValues, userPasswordCursor);
 
         //Testing app whitelist table
         ContentValues appWhitelistValues = getAppWhitelistContentValues(userId);
         mContext.getContentResolver().insert(UsersEntry.buildUserUriWithAppWhitelist(userId),
                 appWhitelistValues);
 
-        Cursor appWhitelistCursor = db.query(AppWhitelistEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor appWhitelistCursor = mContext.getContentResolver().query(
+                UsersEntry.buildUserUriWithAppWhitelist(userId), null, null, null, null);
         validateCursor(appWhitelistValues, appWhitelistCursor);
     }
 
     //Testing alternate way of setting up the environment
-    public void testInsertReadDbAlternate() {
+    public void testInsertReadProviderAlternate() {
         testDeleteAllRecordsBefore();
-        EnvironmentDbHelper dbHelper = new EnvironmentDbHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //Testing environments table
         ContentValues environmentValues = getEnvironmentAlternateContentValues();
@@ -233,8 +246,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         long environmentId = ContentUris.parseId(environmentUri);
         assertTrue(environmentId != -1);
 
-        Cursor environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor environmentCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.CONTENT_URI, null, null, null, null);
         validateCursor(environmentValues, environmentCursor);
 
         //Testing geofences table
@@ -242,8 +255,9 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         mContext.getContentResolver().insert(EnvironmentEntry.
                 buildEnvironmentUriWithIdAndLocation(environmentId), geofenceValues);
 
-        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor geofenceCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId),
+                null, null, null, null);
         validateCursor(geofenceValues, geofenceCursor);
         geofenceCursor.moveToFirst();
         long geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
@@ -255,8 +269,9 @@ public class TestEnvironmentProvider extends AndroidTestCase {
                 EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId),
                 wifiNetworkValues);
 
-        Cursor wifiNetworkCursor = db.query(WiFiNetworksEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor wifiNetworkCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId), null, null, null,
+                null);
         validateCursor(wifiNetworkValues, wifiNetworkCursor);
         wifiNetworkCursor.moveToFirst();
         long wifiNetworkId = wifiNetworkCursor.getLong(wifiNetworkCursor.getColumnIndex(
@@ -271,8 +286,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
                 bluetoothDeviceValues
         );
 
-        Cursor bluetoothDeviceCursor = db.query(BluetoothDevicesEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor bluetoothDeviceCursor = mContext.getContentResolver().query(
+                BluetoothDevicesEntry.CONTENT_URI, null, null, null, null);
         validateCursor(bluetoothDeviceValues, bluetoothDeviceCursor);
         bluetoothDeviceCursor.moveToFirst();
         long bluetoothDeviceId = bluetoothDeviceCursor.getLong(bluetoothDeviceCursor.
@@ -280,8 +295,9 @@ public class TestEnvironmentProvider extends AndroidTestCase {
 
         ContentValues environmentBluetoothDeviceValues =
                 getEnvironmentBluetoothDeviceContentValues(environmentId, bluetoothDeviceId);
-        Cursor environmentBluetoothDeviceCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor environmentBluetoothDeviceCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId),
+                null, null, null, null);
 
         validateCursor(environmentBluetoothDeviceValues, environmentBluetoothDeviceCursor);
 
@@ -291,8 +307,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         long userId = ContentUris.parseId(userUri);
         assertTrue(userId != -1);
 
-        Cursor userCursor = db.query(UsersEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor userCursor = mContext.getContentResolver().query(UsersEntry.CONTENT_URI,
+                null, null, null, null);
         validateCursor(userValues, userCursor);
 
         //Testing passwords table and userPasswords table
@@ -300,32 +316,27 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         Uri passwordUri = UsersEntry.buildUserUriWithIdEnvironmentAndPassword(
                 userId, environmentId);
         mContext.getContentResolver().insert(passwordUri, passwordValues);
-        Cursor passwordCursor = db.query(PasswordEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor passwordCursor = mContext.getContentResolver().query(
+                UsersEntry.buildUserUriWithIdEnvironmentAndPassword(userId, environmentId),
+                null, null, null, null);
         passwordCursor.moveToFirst();
         long passwordId = passwordCursor.getLong(passwordCursor.getColumnIndex(PasswordEntry._ID));
         assertTrue(passwordId != -1);
         validateCursor(passwordValues, passwordCursor);
-
-        ContentValues userPasswordValues = getUserPasswordContentValues
-                (userId, environmentId, passwordId);
-        Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME,
-                null, null, null, null, null, null);
-        validateCursor(userPasswordValues, userPasswordCursor);
 
         //Testing app whitelist table
         ContentValues appWhitelistValues = getAppWhitelistContentValues();
         mContext.getContentResolver().insert(UsersEntry.buildUserUriWithAppWhitelist(userId),
                 appWhitelistValues);
 
-        Cursor appWhitelistCursor = db.query(AppWhitelistEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        Cursor appWhitelistCursor = mContext.getContentResolver().query(
+                UsersEntry.buildUserUriWithAppWhitelist(userId), null, null, null, null);
         validateCursor(appWhitelistValues, appWhitelistCursor);
 
         //Final environment check
         environmentValues = getEnvironmentContentValues(geofenceId, wifiNetworkId);
-        environmentCursor = db.query(EnvironmentEntry.TABLE_NAME,
-                null, null, null, null, null, null);
+        environmentCursor = mContext.getContentResolver().query(EnvironmentEntry.CONTENT_URI,
+                null, null, null, null);
         validateCursor(environmentValues, environmentCursor);
     }
 
@@ -440,15 +451,6 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         final String passwordString = "will be encrypted";
         values.put(PasswordEntry.COLUMN_PASSWORD_TYPE, passwordType);
         values.put(PasswordEntry.COLUMN_PASSWORD_STRING, passwordString);
-        return values;
-    }
-
-    private ContentValues getUserPasswordContentValues
-            (long userId, long environmentId, long passwordId){
-        ContentValues values = new ContentValues();
-        values.put(UserPasswordsEntry.COLUMN_ENVIRONMENT_ID, environmentId);
-        values.put(UserPasswordsEntry.COLUMN_USER_ID, userId);
-        values.put(UserPasswordsEntry.COLUMN_PASSWORD_ID, passwordId);
         return values;
     }
 

@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.environmentdb;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -19,6 +20,8 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Pas
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UserPasswordsEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
+
+import java.util.List;
 
 /**
  * Created by aravind on 17/8/14.
@@ -40,6 +43,8 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiF
  *   devices are possible in an environment, only a single wifi network/location is allowed per
  *   environment.
  *   - More coming
+ *
+ *   TODO Bulk insert, Additional query parameters for environment, user etc, Update function
  */
 public class EnvironmentProvider extends ContentProvider {
     private static final String LOG_TAG = EnvironmentProvider.class.getSimpleName();
@@ -64,14 +69,16 @@ public class EnvironmentProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private EnvironmentDbHelper mEnvironmentDbHelper;
-    private static final SQLiteQueryBuilder sPasswordMatcherForUserWithEnvironment;
+    private static final SQLiteQueryBuilder sBluetoothDeviceMatcherWithEnvironment;
 
     static {
-        sPasswordMatcherForUserWithEnvironment = new SQLiteQueryBuilder();
-        sPasswordMatcherForUserWithEnvironment.setTables(
-                UsersEntry.TABLE_NAME + " INNER JOIN " + UserPasswordsEntry.TABLE_NAME + " ON " +
-                        UsersEntry.TABLE_NAME + "." + UsersEntry._ID + " = " +
-                        UserPasswordsEntry.TABLE_NAME + "." + UserPasswordsEntry.COLUMN_USER_ID
+        sBluetoothDeviceMatcherWithEnvironment = new SQLiteQueryBuilder();
+        sBluetoothDeviceMatcherWithEnvironment.setTables(
+                BluetoothDevicesEntry.TABLE_NAME + " INNER JOIN " +
+                        EnvironmentBluetoothEntry.TABLE_NAME + " ON " +
+                        EnvironmentBluetoothEntry.TABLE_NAME + "." +
+                        EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + " = " +
+                        BluetoothDevicesEntry.TABLE_NAME + "." + BluetoothDevicesEntry._ID
         );
     }
 
@@ -84,6 +91,117 @@ public class EnvironmentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection,
                         String selection, String[] selectionArgs, String sortOrder) {
+        final int match = sUriMatcher.match(uri);
+        SQLiteDatabase db = mEnvironmentDbHelper.getReadableDatabase();
+        switch (match){
+            case GEOFENCE_WITH_ID:
+                selection = GeoFenceEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
+            case GEOFENCE:
+                return db.query(GeoFenceEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+
+            case WIFI_NETWORK_WITH_ID:
+                selection = WiFiNetworksEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
+            case WIFI_NETWORK:
+                return db.query(WiFiNetworksEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+
+            case BLUETOOTH_DEVICE_WITH_ID:
+                selection = BluetoothDevicesEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
+            case BLUETOOTH_DEVICE:
+                return db.query(BluetoothDevicesEntry.TABLE_NAME, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+
+            case ENVIRONMENT_WITH_ID:
+                selection = EnvironmentEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
+            case ENVIRONMENT:
+                return db.query(EnvironmentEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+
+            case USER_WITH_ID:
+                selection = UsersEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
+            case USER:
+                return db.query(UsersEntry.TABLE_NAME, projection, selection, selectionArgs, null,
+                        null, sortOrder);
+
+            case ENVIRONMENT_WITH_ID_AND_BLUETOOTH_DEVICES:
+                selection = EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1)};
+                return sBluetoothDeviceMatcherWithEnvironment.query(db, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+
+            case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
+                selection = EnvironmentEntry._ID + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1)};
+                Cursor envCursor = db.query(EnvironmentEntry.TABLE_NAME, null, selection,
+                        selectionArgs, null, null, null);
+                long wifiId;
+                if(envCursor.moveToFirst()) {
+                    wifiId = envCursor.getLong(envCursor.
+                            getColumnIndex(EnvironmentEntry.COLUMN_WIFI_ID));
+                } else {
+                    Log.i(LOG_TAG, "No wifi entry found for environment id " +
+                            uri.getPathSegments().get(1));
+                    return null;
+                }
+                selection = WiFiNetworksEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(wifiId)};
+                return db.query(WiFiNetworksEntry.TABLE_NAME, projection, selection,
+                        selectionArgs, null, null, sortOrder);
+
+            case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
+                selection = EnvironmentEntry._ID + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1)};
+                envCursor = db.query(EnvironmentEntry.TABLE_NAME, null, selection,
+                        selectionArgs, null, null, null);
+                long geofenceId;
+                if(envCursor.moveToFirst()) {
+                    geofenceId = envCursor.getLong(envCursor.
+                            getColumnIndex(EnvironmentEntry.COLUMN_GEOFENCE_ID));
+                } else {
+                    Log.i(LOG_TAG, "No location entry found for environment id " +
+                    uri.getPathSegments().get(1));
+                    return null;
+                }
+
+                selection = GeoFenceEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(geofenceId)};
+                return db.query(GeoFenceEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+
+            case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
+                selection = UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + " = ? AND " +
+                        UserPasswordsEntry.COLUMN_USER_ID + " = ? ";
+                List<String> uriPathSegments = uri.getPathSegments();
+                selectionArgs = new String[]{uriPathSegments.get(2), uriPathSegments.get(1)};
+                Cursor userPasswordsCursor = db.query(UserPasswordsEntry.TABLE_NAME, null,
+                        selection, selectionArgs, null, null, null);
+                long passwordId;
+                if(userPasswordsCursor.moveToFirst()){
+                    passwordId = userPasswordsCursor.getLong(userPasswordsCursor.getColumnIndex(
+                            UserPasswordsEntry.COLUMN_PASSWORD_ID));
+                } else {
+                    Log.w(LOG_TAG, "No passwords found for given user " + uriPathSegments.get(1) +
+                    " in Environment " + uriPathSegments.get(2));
+                    return null;
+                }
+
+                selection = PasswordEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(passwordId)};
+                return db.query(PasswordEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+
+            case USER_WITH_ID_AND_APP_WHITELIST:
+                selection = AppWhitelistEntry.COLUMN_USER_ID + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1)};
+                return db.query(AppWhitelistEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
+        }
         return null;
     }
 
@@ -495,5 +613,9 @@ public class EnvironmentProvider extends ContentProvider {
         environmentContentValues.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
         return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
                 EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
+    }
+
+    private static String getIdFromUriAsString(Uri uri){
+        return String.valueOf(ContentUris.parseId(uri));
     }
 }
