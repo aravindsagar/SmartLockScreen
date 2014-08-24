@@ -17,6 +17,7 @@ import java.util.Vector;
 
 /**
  * Created by aravind on 10/8/14.
+ * Helper class for insertion, fetching etc of environments.
  */
 public class EnvironmentHelper {
 
