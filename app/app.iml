@@ -80,11 +80,7 @@
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-v4-19.1.0" level="project" />
-<<<<<<< HEAD
     <orderEntry type="library" exported="" name="play-services-5.0.89" level="project" />
-=======
-    <orderEntry type="library" exported="" name="play-services-5.0.77" level="project" />
->>>>>>> parent of bde507c... Modified build.gradle to include latest play version
   </component>
 </module>
 
