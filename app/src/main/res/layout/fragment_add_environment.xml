@@ -22,4 +22,9 @@
         android:layout_height="wrap_content"
         android:text="@string/checkbox_enable_bluetooth"
         android:layout_marginTop="20dp"/>
+    <ListView
+        android:id="@+id/list_view_bluetooth_devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"/>
 </LinearLayout>
