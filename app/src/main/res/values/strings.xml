@@ -12,5 +12,10 @@
     <string name="checkbox_enable_bluetooth">Enable Bluetooth</string>
     <string name="text_view_bluetooth">Bluetooth</string>
     <string name="text_view_bluetooth_devices_select">Select the bluetooth devices</string>
+    <string name="checkbox_enable_wifi">Enable WiFi</string>
+    <string name="text_view_wifi">WiFi</string>
+    <string name="text_view_wifi_connection_select">Select the WiFi connection</string>
+    <string name="dialog_pick_bluetooth_devices">Pick Bluetooth Devices</string>
+    <string name="ok">OK</string>
 
 </resources>
