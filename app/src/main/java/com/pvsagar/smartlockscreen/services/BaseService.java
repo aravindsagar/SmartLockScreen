@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.services;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,20 +9,30 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.pvsagar.smartlockscreen.applogic_helpers.GeofenceHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 
+import java.util.List;
+
 public class BaseService extends Service implements
-        ConnectionCallbacks,
-        OnConnectionFailedListener,
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
         OnAddGeofencesResultListener{
     private static final String LOG_TAG = BaseService.class.getSimpleName();
+
     public static final int ONGOING_NOTIFICATION_ID = 1;
+    public static final int GEOFENCE_SERVICE_REQUEST_CODE = 2;
 
     private LocationClient mLocationClient;
+    // Defines the allowable request types.
+    public enum REQUEST_TYPE {ADD_GEOFENCES};
+    private REQUEST_TYPE mRequestType;
+    // Flag that indicates if a request is underway.
+    private boolean mInProgress;
 
     public static Intent getServiceIntent(Context context, String extraText){
         Intent serviceIntent  = new Intent();
@@ -31,12 +42,16 @@ public class BaseService extends Service implements
         }
         return serviceIntent;
     }
+
     public BaseService() {
     }
 
     @Override
     public void onCreate() {
         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
+        mInProgress = false;
+        mLocationClient = new LocationClient(this, this, this);
+        requestAddGeofences();
         super.onCreate();
     }
 
@@ -47,10 +62,13 @@ public class BaseService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Uri uri = intent.getData();
-        if(uri != null){
-            startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
-                    uri.toString()));
+        if(intent != null) {
+            Uri uri = intent.getData();
+
+            if (uri != null) {
+                startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                        uri.toString()));
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -62,12 +80,19 @@ public class BaseService extends Service implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        switch (mRequestType){
+            case ADD_GEOFENCES:
+                PendingIntent geofenceIntent = PendingIntent.getService(this, 2,
+                        GeoFenceIntentService.getIntent(this), 0);
+                List<Geofence> geofenceList = GeofenceHelper.getAndroidGeofences(this);
+                mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
+        }
 
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
+    public void onDisconnected() {
+        mInProgress = false;
     }
 
     @Override
@@ -78,5 +103,15 @@ public class BaseService extends Service implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    private void requestAddGeofences(){
+        mRequestType = REQUEST_TYPE.ADD_GEOFENCES;
+        if(!mInProgress){
+            mInProgress = true;
+            mLocationClient.connect();
+        } else {
+            return;
+        }
     }
 }

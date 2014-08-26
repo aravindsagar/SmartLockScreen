@@ -53,6 +53,11 @@ public class GeoFenceIntentService extends IntentService {
         context.startService(intent);
     }
 
+    public static Intent getIntent(Context context){
+        Intent intent = new Intent(context, GeoFenceIntentService.class);
+        return intent;
+    }
+
     public GeoFenceIntentService() {
         super("GeoFenceIntentService");
     }
