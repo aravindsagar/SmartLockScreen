@@ -20,7 +20,7 @@ public class LockScreenActivity extends Activity {
         setContentView(R.layout.activity_lock_screen);
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new LockScreenFragment())
                     .commit();
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
