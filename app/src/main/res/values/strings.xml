@@ -10,5 +10,7 @@
     <string name="title_activity_add_environment">AddEnvironment</string>
     <string name="edit_text_environment_name">Environment Name</string>
     <string name="checkbox_enable_bluetooth">Enable Bluetooth</string>
+    <string name="text_view_bluetooth">Bluetooth</string>
+    <string name="text_view_bluetooth_devices_select">Select the bluetooth devices</string>
 
 </resources>

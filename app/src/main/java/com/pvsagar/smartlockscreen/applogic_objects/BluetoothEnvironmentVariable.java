@@ -69,7 +69,29 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         setStringValue(deviceAddress, INDEX_DEVICE_ADDRESS);
     }
 
+    /**
+     * This function requests the users to enable bluetooth
+     * @param context Context of the calling activity
+     */
+    public void enableBluetooth(Context context){
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        //Checking for Bluetooth Hardware
+        if(mBluetoothAdapter == null){
+            Log.e(LOG_TAG,"Bluetooth Hardware Not Found");
+        }
+        Log.v(LOG_TAG,"enabling bluetooth");
+        Intent startBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        ((Activity)context).startActivityForResult(startBluetoothIntent,REQUEST_BLUETOOTH_ENABLE);
+    }
+
+    /**
+     * This function returns the list of paired bluetooth devices.
+     * @param context Context of the calling activity
+     * @return Returns the list of paired bluetooth devices
+     */
     public ArrayList<BluetoothDevice> getPairedBluetoothDevices(Context context){
+
         Log.v(LOG_TAG, "getBluetoothDevices Entered");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -82,7 +104,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         if(!mBluetoothAdapter.isEnabled()){
             Intent startBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             ((Activity)context).startActivityForResult(startBluetoothIntent,REQUEST_BLUETOOTH_ENABLE);
-            Log.v(LOG_TAG,"Bluetooth Not enabled");
+            Log.e(LOG_TAG,"Bluetooth Not enabled");
             return null;
         }
         ArrayList<BluetoothDevice> bluetoothDevices = new ArrayList<BluetoothDevice>();

@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
@@ -52,6 +53,7 @@ public class AddEnvironment extends ActionBarActivity {
         if(requestCode == BluetoothEnvironmentVariable.REQUEST_BLUETOOTH_ENABLE){
             CheckBox enableBluetoothCheckBox = (CheckBox)findViewById(R.id.checkbox_enable_bluetooth);
             ListView bluetoothDevicesListView = (ListView)findViewById(R.id.list_view_bluetooth_devices);
+            TextView selectBluetoothDevicesTextView = (TextView)findViewById(R.id.text_view_bluetooth_devices_select);
             ArrayAdapter<String> adapter;
 
             // Checking whether bluetooth is enabled or not
@@ -67,8 +69,8 @@ public class AddEnvironment extends ActionBarActivity {
                     for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
                         deviceNamesArrayList.add(bluetoothDevice.getName());
                     }
-                    adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice, deviceNamesArrayList);
-                    bluetoothDevicesListView.setAdapter(adapter);
+                    selectBluetoothDevicesTextView.setVisibility(View.VISIBLE);
+                    displayBluetoothDevices(deviceNamesArrayList);
                 }
 
             }
@@ -77,10 +79,17 @@ public class AddEnvironment extends ActionBarActivity {
                 //Todo: uncheck the checkbox, disable the list
                 Toast.makeText(getBaseContext(),"Unable to switch on Bluetooth",Toast.LENGTH_SHORT).show();
                 enableBluetoothCheckBox.setChecked(false);
-                adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice, new ArrayList<String>());
-                bluetoothDevicesListView.setAdapter(adapter);
+                selectBluetoothDevicesTextView.setVisibility(View.INVISIBLE);
+                displayBluetoothDevices(new ArrayList<String>());
+
             }
         }
+    }
+
+    public void displayBluetoothDevices(ArrayList<String> deviceNamesArrayList){
+        ListView bluetoothDevicesListView = (ListView)findViewById(R.id.list_view_bluetooth_devices);
+        bluetoothListAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice, deviceNamesArrayList);
+        bluetoothDevicesListView.setAdapter(bluetoothListAdapter);
     }
 
     @Override
@@ -112,6 +121,7 @@ public class AddEnvironment extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
             final CheckBox enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
+            final TextView selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
             bluetoothDevicesListView = (ListView)rootView.findViewById(R.id.list_view_bluetooth_devices);
             bluetoothDevicesListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
@@ -119,44 +129,46 @@ public class AddEnvironment extends ActionBarActivity {
             bluetoothListAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_multiple_choice, new ArrayList<String>());
             bluetoothDevicesListView.setAdapter(bluetoothListAdapter);
 
+            selectBluetoothDevicesTextView.setVisibility(View.INVISIBLE);
+
             /* CheckBox CheckedChange Listener */
             enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
-                        //Toast.makeText(getActivity(),"Checked",Toast.LENGTH_SHORT).show();
+                    if (isChecked) {
                         ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(getActivity());
                         ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
-                        if(bluetoothDevices != null){
-                            //Todo: Populate the String list and Set the adapter for the list view
+                        if (bluetoothDevices != null) {
+                            //Populate the String list and Set the adapter for the list view
                             for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
                                 deviceNamesArrayList.add(bluetoothDevice.getName());
                             }
-                            displayBluetoothDevices(deviceNamesArrayList);
+                            selectBluetoothDevicesTextView.setVisibility(View.VISIBLE);
+                            ((AddEnvironment)getActivity()).displayBluetoothDevices(deviceNamesArrayList);
 
-                        } else{
+                        } else {
                             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if(mBluetoothAdapter == null){
+                            if (mBluetoothAdapter == null) {
                                 enableBluetoothCheckBox.setChecked(false);
                                 //Disable the list
-                                displayBluetoothDevices(new ArrayList<String>());
+                                selectBluetoothDevicesTextView.setVisibility(View.INVISIBLE);
+                                ((AddEnvironment)getActivity()).displayBluetoothDevices(new ArrayList<String>());
                             }
                         }
 
-                    } else{
-                        //Toast.makeText(getActivity(),"Unchecked",Toast.LENGTH_SHORT).show();
+                    } else {
                         //Disable the list
-                        displayBluetoothDevices(new ArrayList<String>());
+                        selectBluetoothDevicesTextView.setVisibility(View.INVISIBLE);
+                        ((AddEnvironment)getActivity()).displayBluetoothDevices(new ArrayList<String>());
                     }
                 }
             });
-
             return rootView;
         }
-        public void displayBluetoothDevices(ArrayList<String> deviceNamesArrayList){
+        /*public void displayBluetoothDevices(ArrayList<String> deviceNamesArrayList){
             bluetoothListAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_multiple_choice, deviceNamesArrayList);
             bluetoothDevicesListView.setAdapter(bluetoothListAdapter);
-        }
+        }*/
 
 
 
