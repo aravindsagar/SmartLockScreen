@@ -112,6 +112,8 @@ public class AddEnvironment extends ActionBarActivity {
     public static class PlaceholderFragment extends Fragment {
 
         private ListView bluetoothDevicesListView;
+        private CheckBox enableBluetoothCheckBox;
+        private TextView selectBluetoothDevicesTextView;
 
         public PlaceholderFragment() {
         }
@@ -120,15 +122,22 @@ public class AddEnvironment extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
-            final CheckBox enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
-            final TextView selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
+            enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
+            selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
             bluetoothDevicesListView = (ListView)rootView.findViewById(R.id.list_view_bluetooth_devices);
-            bluetoothDevicesListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
             /* Initialization */
+            setUpBluetoothElements();
+
+            return rootView;
+        }
+
+        public void setUpBluetoothElements(){
+
+            /* Initialization */
+            bluetoothDevicesListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             bluetoothListAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_multiple_choice, new ArrayList<String>());
             bluetoothDevicesListView.setAdapter(bluetoothListAdapter);
-
             selectBluetoothDevicesTextView.setVisibility(View.INVISIBLE);
 
             /* CheckBox CheckedChange Listener */
@@ -163,8 +172,6 @@ public class AddEnvironment extends ActionBarActivity {
                     }
                 }
             });
-
-            return rootView;
         }
 
     }
