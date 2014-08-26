@@ -14,7 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/edit_text_environment_name"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:singleLine="true"/>
 
     <TextView
         android:id="@+id/text_view_bluetooth"
@@ -39,7 +40,8 @@
         android:id="@+id/text_view_bluetooth_devices_select"
         android:text="@string/text_view_bluetooth_devices_select"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"/>
     <ListView
         android:id="@+id/list_view_bluetooth_devices"
         android:layout_width="match_parent"

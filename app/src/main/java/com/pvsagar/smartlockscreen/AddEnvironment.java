@@ -163,14 +163,9 @@ public class AddEnvironment extends ActionBarActivity {
                     }
                 }
             });
+
             return rootView;
         }
-        /*public void displayBluetoothDevices(ArrayList<String> deviceNamesArrayList){
-            bluetoothListAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_multiple_choice, deviceNamesArrayList);
-            bluetoothDevicesListView.setAdapter(bluetoothListAdapter);
-        }*/
-
-
 
     }
 }
