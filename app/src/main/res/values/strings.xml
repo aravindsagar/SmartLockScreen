@@ -16,6 +16,7 @@
     <string name="text_view_wifi">WiFi</string>
     <string name="text_view_wifi_connection_select">Select the WiFi connection</string>
     <string name="dialog_pick_bluetooth_devices">Pick Bluetooth Devices</string>
+    <string name="dialog_pick_wifi_connection">Pick WiFi Connection</string>
     <string name="ok">OK</string>
 
 </resources>

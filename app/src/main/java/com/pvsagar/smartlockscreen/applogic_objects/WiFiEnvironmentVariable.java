@@ -1,8 +1,13 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
+import android.content.Context;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+
+import java.util.ArrayList;
 
 /**
  * Created by aravind on 10/8/14.
@@ -58,5 +63,23 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
 
     public void setEncryptionType(String encryptionType){
         setStringValue(encryptionType, INDEX_ENCRYPTION_TYPE);
+    }
+
+    public static ArrayList<WifiConfiguration> getConfiguredWiFiConnections(Context context){
+
+        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+
+        if(wifiManager == null){
+            Log.e(LOG_TAG,"WiFi Hardware not available");
+            return null;
+        }
+        if(!wifiManager.isWifiEnabled()){
+            wifiManager.setWifiEnabled(true);
+        }
+        ArrayList<WifiConfiguration> wifiConfigurations = new ArrayList<WifiConfiguration>();
+        for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
+            wifiConfigurations.add(wifiConfiguration);
+        }
+        return wifiConfigurations;
     }
 }

@@ -46,13 +46,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginTop="10dp"/>
 
-
-    <ListView
-        android:id="@+id/list_view_bluetooth_devices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
-
     <!-- Wifi -->
 
     <TextView
@@ -64,8 +57,7 @@
         android:id="@+id/line_wifi"
         android:layout_width="match_parent"
         android:layout_height="2dip"
-        android:background="#2B497B"
-        />
+        android:background="#2B497B"/>
 
     <CheckBox
         android:id="@+id/checkbox_enable_wifi"
@@ -77,12 +69,8 @@
         android:id="@+id/text_view_wifi_connection_select"
         android:text="@string/text_view_wifi_connection_select"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"/>
-    <ListView
-        android:id="@+id/list_view_wifi_connections"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"/>
+        android:layout_height="@dimen/abc_action_bar_default_height"
+        android:layout_marginTop="10dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 </LinearLayout>

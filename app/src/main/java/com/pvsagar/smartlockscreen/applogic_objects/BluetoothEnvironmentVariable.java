@@ -104,7 +104,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         if(!mBluetoothAdapter.isEnabled()){
             Intent startBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             ((Activity)context).startActivityForResult(startBluetoothIntent,REQUEST_BLUETOOTH_ENABLE);
-            Log.e(LOG_TAG,"Bluetooth Not enabled");
+            Log.v(LOG_TAG,"Bluetooth Not enabled");
             return null;
         }
         ArrayList<BluetoothDevice> bluetoothDevices = new ArrayList<BluetoothDevice>();
