@@ -3,12 +3,12 @@ package com.pvsagar.smartlockscreen;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ViewAnimator;
-
-import com.pvsagar.smartlockscreen.services.GeoFenceIntentService;
 
 /**
  * Created by aravind on 6/8/14.
@@ -27,27 +27,27 @@ public class LockScreenFragment extends Fragment {
         passphraseAnimator = (ViewAnimator)rootView.findViewById(R.id.passphraseInput);
         //Adding the different passphrase views
         addViewToPassphraseAnimator(R.layout.password_lock, R.id.passwordLayout,
-                inflater, container, 0, R.id.unlockButton);
+                inflater, container, 0);
 
         passphraseAnimator.setDisplayedChild(0);
 
+        Button button = (Button) rootView.findViewById(R.id.UnlockButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v("LockScreenActivity","Unlock Button Clicked");
+                Intent intent = new Intent(getActivity(),ManageEnvironment.class);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
 
     private void addViewToPassphraseAnimator(int layoutId, int viewId, LayoutInflater inflater,
-                                             ViewGroup container, int index, int buttonId){
+                                             ViewGroup container, int index){
         View passphraseLayout = inflater.inflate(layoutId, container, false);
         View passphraseView = passphraseLayout.findViewById(viewId);
-        View unlockButton = passphraseLayout.findViewById(buttonId);
-        unlockButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(getActivity(), GeoFenceIntentService.class);
-                getActivity().startService(intent);
-            }
-        });
         passphraseAnimator.addView(passphraseView, index);
     }
 }
