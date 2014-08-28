@@ -1,8 +1,15 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
+import com.google.android.gms.location.Geofence;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by aravind on 8/8/14.
@@ -94,5 +101,51 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
 
     public void setLocationName(String locationName){
         setStringValue(locationName, INDEX_RADIUS);
+    }
+
+    private static final int NOTIFICATION_RESPONSIVENESS = 30000;
+
+    public static List<LocationEnvironmentVariable> getLocationEnvironmentVariables
+            (Context context){
+        Cursor cursor = context.getContentResolver().query(EnvironmentDatabaseContract.
+                        GeoFenceEntry.CONTENT_URI, null, null, null, null);
+        ArrayList<LocationEnvironmentVariable> locationEnvironmentVariables =
+                new ArrayList<LocationEnvironmentVariable>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            LocationEnvironmentVariable variable = new LocationEnvironmentVariable(
+                    cursor.getFloat(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LAT)),
+                    cursor.getFloat(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LONG)),
+                    (int) cursor.getFloat(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_RADIUS)),
+                    cursor.getString(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_LOCATION_NAME))
+            );
+            locationEnvironmentVariables.add(variable);
+        }
+        return locationEnvironmentVariables;
+    }
+
+    public static List<Geofence> getAndroidGeofences(Context context) {
+        Cursor cursor = context.getContentResolver().query(EnvironmentDatabaseContract.GeoFenceEntry
+                        .CONTENT_URI, null, null, null, null);
+        ArrayList<Geofence> geofences = new ArrayList<Geofence>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            geofences.add((new Geofence.Builder()).setCircularRegion(
+                    cursor.getFloat(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LAT)),
+                    cursor.getFloat(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LONG)),
+                    cursor.getFloat(cursor.getColumnIndex(
+                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_RADIUS))).
+                    setTransitionTypes(
+                            Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT).
+                    setExpirationDuration(Geofence.NEVER_EXPIRE).
+                    setNotificationResponsiveness(NOTIFICATION_RESPONSIVENESS).
+                    setRequestId(cursor.getString(cursor.getColumnIndex(EnvironmentDatabaseContract.
+                            GeoFenceEntry._ID))).build());
+        }
+        return geofences;
     }
 }

@@ -13,7 +13,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
-import com.pvsagar.smartlockscreen.applogic_helpers.GeofenceHelper;
+import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 
 import java.util.List;
@@ -82,9 +82,9 @@ public class BaseService extends Service implements
     public void onConnected(Bundle bundle) {
         switch (mRequestType){
             case ADD_GEOFENCES:
-                PendingIntent geofenceIntent = PendingIntent.getService(this, 2,
-                        GeoFenceIntentService.getIntent(this), 0);
-                List<Geofence> geofenceList = GeofenceHelper.getAndroidGeofences(this);
+                PendingIntent geofenceIntent = PendingIntent.getService(this,
+                        GEOFENCE_SERVICE_REQUEST_CODE, GeoFenceIntentService.getIntent(this), 0);
+                List<Geofence> geofenceList = LocationEnvironmentVariable.getAndroidGeofences(this);
                 mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
         }
 
