@@ -23,5 +23,7 @@
     <string name="edit_text_location_lat">Latitude</string>
     <string name="edit_text_location_lon">Longitude</string>
     <string name="edit_text_location_rad">Radius (in meters)</string>
+    <string name="action_done_add_environment">Done</string>
+    <string name="edit_text_environment_hint">Environment Hint</string>
 
 </resources>

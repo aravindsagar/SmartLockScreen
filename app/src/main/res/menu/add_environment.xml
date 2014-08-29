@@ -1,8 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.pvsagar.smartlockscreen.AddEnvironment" >
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
+    <item android:id="@+id/action_done_add_environment"
+        android:title="@string/action_done_add_environment"
+        android:icon="@drawable/ic_action_accept"
+        app:showAsAction="always"/>
 </menu>
