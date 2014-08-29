@@ -431,7 +431,6 @@ public class AddEnvironment extends ActionBarActivity {
 
             if(bluetoothFlag){
                 if(mSelectedBluetoothDevices != null && mSelectedBluetoothDevices.size() != 0){
-                    bluetoothEnvironmentVariables = new ArrayList<BluetoothEnvironmentVariable>();
                     for (BluetoothDevice bluetoothDevice : mSelectedBluetoothDevices) {
                         environmentVariables.add(new BluetoothEnvironmentVariable(bluetoothDevice.getName(),bluetoothDevice.getAddress()));
                     }
