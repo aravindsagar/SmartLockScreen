@@ -54,40 +54,6 @@ public class AddEnvironment extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* Adding Contextual Action Bar with Done and Cancel Button */
-        final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        final View customActionBarView = inflater.inflate(R.layout.actionbar_custom_view_done_cancel, null);
-        customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // "Done"
-                        //Todo: Add code to add environment to the database
-                        Toast.makeText(getBaseContext(),"Done",Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                });
-        customActionBarView.findViewById(R.id.actionbar_cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // "Cancel"
-                //Todo: Add code to show a dialog for reassurance
-                Toast.makeText(getBaseContext(),"Cancel",Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
-
-        final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions(
-                ActionBar.DISPLAY_SHOW_CUSTOM,
-                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
-                        | ActionBar.DISPLAY_SHOW_TITLE);
-        actionBar.setCustomView(customActionBarView,
-                new ActionBar.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
-        /* End of Added Code */
-
         setContentView(R.layout.activity_add_environment);
         if (savedInstanceState == null) {
             placeholderFragment = new PlaceholderFragment();
@@ -162,6 +128,9 @@ public class AddEnvironment extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
+        /* Environment Details */
+        private EditText environmentNameEditText;
+        private EditText environmentHintEditText;
         /* Bluetooth */
         private CheckBox enableBluetoothCheckBox;
         private TextView selectBluetoothDevicesTextView;
@@ -170,6 +139,7 @@ public class AddEnvironment extends ActionBarActivity {
         private TextView selectWiFiConnectionTextView;
         /* Location */
         private CheckBox enableLocationCheckBox;
+        private EditText nameLocationEditText;
         private EditText latLocationEditText;
         private EditText lonLocationEditText;
         private EditText radLocationEditText;
@@ -183,6 +153,9 @@ public class AddEnvironment extends ActionBarActivity {
             View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
 
             /* Variable Initialization */
+            //Environment details
+            environmentNameEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_name);
+            environmentHintEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_hint);
             //Bluetooth
             enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
             selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
@@ -191,6 +164,7 @@ public class AddEnvironment extends ActionBarActivity {
             selectWiFiConnectionTextView = (TextView)rootView.findViewById(R.id.text_view_wifi_connection_select);
             //Location
             enableLocationCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_location);
+            nameLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_name);
             latLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lat);
             lonLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lon);
             radLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_rad);
@@ -199,6 +173,36 @@ public class AddEnvironment extends ActionBarActivity {
             setUpBluetoothElements();
             setUpWiFiElements();
             setUpLocationElements();
+
+            /* Adding Contextual Action Bar with Done and Cancel Button */
+            final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+            final View customActionBarView = layoutInflater.inflate(R.layout.actionbar_custom_view_done_cancel, null);
+            customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // "Done"
+                            onDoneButtonClick();
+                        }
+                    });
+            customActionBarView.findViewById(R.id.actionbar_cancel).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // "Cancel"
+                    onCancelButtonClick();
+                }
+            });
+
+            final ActionBar actionBar = getActivity().getActionBar();
+            actionBar.setDisplayOptions(
+                    ActionBar.DISPLAY_SHOW_CUSTOM,
+                    ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
+                            | ActionBar.DISPLAY_SHOW_TITLE);
+            actionBar.setCustomView(customActionBarView,
+                    new ActionBar.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+            /* End of Action Bar Code */
 
             return rootView;
         }
@@ -369,9 +373,152 @@ public class AddEnvironment extends ActionBarActivity {
         }
 
         public void setLocationItemsEnabled(boolean flag){
+            nameLocationEditText.setEnabled(flag);
             latLocationEditText.setEnabled(flag);
             lonLocationEditText.setEnabled(flag);
             radLocationEditText.setEnabled(flag);
+        }
+
+        public void onDoneButtonClick(){
+            //Environment Details
+            String environmentName = environmentNameEditText.getText().toString();
+            String environmentHint = environmentHintEditText.getText().toString();
+            //Bluetooth details
+            boolean bluetoothFlag = enableBluetoothCheckBox.isChecked();
+            ArrayList<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables;
+            //Wifi Details
+            boolean wifiFlag = enableWiFiCheckBox.isChecked();
+            WiFiEnvironmentVariable wiFiEnvironmentVariable;
+            //Location
+            boolean locationFlag = enableLocationCheckBox.isChecked();
+            String locationName;
+            double latLocation;
+            double lonLocation;
+            double radLocation;
+
+
+            /*Log.v("Done Details: ","Name: "+environmentName+"\n"+
+                            "Hint: "+environmentHint+"\n"+
+                            "bluetooth: "+bluetoothFlag+"\n"+
+                            "wifi: "+wifiFlag+"\n"+
+                            "location: "+locationFlag+"\n"+
+                            "lname: "+locationName+"\n"+
+                            "lat: "+latLocation+"\n"+
+                            "lon: "+lonLocation+"\n"+
+                            "rad: "+radLocation+"\n"
+            );*/
+
+            /* Parsing the Data */
+            if(environmentName.equals("")){
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.alert_environment_name_title).setMessage(R.string.alert_environment_name_message);
+                builder.setPositiveButton(R.string.ok,null);
+                builder.create().show();
+                return;
+            }
+
+            if(environmentHint.equals("")){
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.alert_environment_hint_title).setMessage(R.string.alert_environment_hint_message);
+                builder.setPositiveButton(R.string.ok,null);
+                builder.create().show();
+                return;
+            }
+
+            if(bluetoothFlag){
+                if(mSelectedBluetoothDevices != null && mSelectedBluetoothDevices.size() != 0){
+                    bluetoothEnvironmentVariables = new ArrayList<BluetoothEnvironmentVariable>();
+                    for (BluetoothDevice bluetoothDevice : mSelectedBluetoothDevices) {
+                        bluetoothEnvironmentVariables.add(new BluetoothEnvironmentVariable(bluetoothDevice.getName(),bluetoothDevice.getAddress()));
+                    }
+                } else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_bluetooth_devices_selection_title).setMessage(R.string.alert_bluetooth_devices_selection_message);
+                    builder.setPositiveButton(R.string.ok, null);
+                    builder.create().show();
+                    return;
+                }
+            }
+            if(wifiFlag){
+                if(mSelectedWifiConfiguration != null){
+                    String ssid = mSelectedWifiConfiguration.SSID;
+                    String encryptionType = WiFiEnvironmentVariable.getSecurity(mSelectedWifiConfiguration);
+                    wiFiEnvironmentVariable = new WiFiEnvironmentVariable(ssid,encryptionType);
+                }
+                else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_wifi_connection_selection_title).setMessage(R.string.alert_wifi_connection_selection_message);
+                    builder.setPositiveButton(R.string.ok,null);
+                    builder.create().show();
+                    return;
+                }
+            }
+            if(locationFlag){
+                locationName = nameLocationEditText.getText().toString();
+                if(locationName.equals("")){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_name_location_title).setMessage(R.string.alert_environment_name_message);
+                    builder.setPositiveButton(R.string.ok,null);
+                    builder.create().show();
+                    return;
+                }
+
+                //Lat Check
+                try{
+                    latLocation = Double.parseDouble(latLocationEditText.getText().toString());
+                } catch (NumberFormatException e){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_lat_location_title).setMessage(R.string.alert_lat_location_selection_message);
+                    builder.setPositiveButton(R.string.ok,null);
+                    builder.create().show();
+                    return;
+                }
+                try{
+                    lonLocation = Double.parseDouble(lonLocationEditText.getText().toString());
+                } catch (NumberFormatException e){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_lon_location_title).setMessage(R.string.alert_lon_location_selection_message);
+                    builder.setPositiveButton(R.string.ok,null);
+                    builder.create().show();
+                    return;
+                }
+                try{
+                    radLocation = Double.parseDouble(radLocationEditText.getText().toString());
+                } catch (NumberFormatException e){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_rad_location_title).setMessage(R.string.alert_rad_location_selection_message);
+                    builder.setPositiveButton(R.string.ok,null);
+                    builder.create().show();
+                    return;
+                }
+            }
+
+            if(!bluetoothFlag && !wifiFlag && !locationFlag){
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.alert_no_variables_title).setMessage(R.string.alert_no_variables_message);
+                builder.setPositiveButton(R.string.ok,null);
+                builder.create().show();
+                return;
+            }
+
+            /* Data Parsed */
+
+            //Todo: Add code to add environment to the database
+
+            getActivity().finish();
+
+        }
+        public void onCancelButtonClick(){
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_add_environment_message);
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    getActivity().finish();
+                }
+            });
+            builder.setNegativeButton(R.string.cancel,null);
+            builder.create().show();
         }
     }
 }

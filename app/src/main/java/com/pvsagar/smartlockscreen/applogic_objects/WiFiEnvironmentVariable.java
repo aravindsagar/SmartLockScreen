@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
@@ -14,6 +15,13 @@ import java.util.ArrayList;
  */
 public class WiFiEnvironmentVariable extends EnvironmentVariable {
     private static final String LOG_TAG = WiFiEnvironmentVariable.class.getSimpleName();
+
+    /* Encryption type */
+    public static final String SECURITY_PSK = "WPA_PSK";
+    public static final String SECURITY_EAP = "WPA_EAP";
+    public static final String SECURITY_NONE = "NONE";
+    public static final String SECURITY_WEP = "WEP";
+    /* End of Encryption type */
 
     private static final int NUMBER_OF_STRING_VALUES = 2;
     private static final int INDEX_SSID = 0;
@@ -81,5 +89,16 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
             wifiConfigurations.add(wifiConfiguration);
         }
         return wifiConfigurations;
+    }
+
+    public static String getSecurity(WifiConfiguration config) {
+        if (config.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+            return SECURITY_PSK;
+        }
+        if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
+                config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+            return SECURITY_EAP;
+        }
+        return (config.wepKeys[0] != null) ? SECURITY_WEP : SECURITY_NONE;
     }
 }

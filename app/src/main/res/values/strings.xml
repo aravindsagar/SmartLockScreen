@@ -27,5 +27,26 @@
     <string name="edit_text_environment_hint">Environment Hint</string>
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
+    <string name="edit_text_location_name">Location Name</string>
+    <string name="alert_environment_name_title">Invalid Environment Name</string>
+    <string name="alert_environment_name_message">Please check your environment name.</string>
+    <string name="alert_environment_hint_title">Invalid Environment Hint</string>
+    <string name="alert_environment_hint_message">Please check your environment hint.</string>
+    <string name="alert_bluetooth_devices_selection_title">No bluetooth devices selected</string>
+    <string name="alert_bluetooth_devices_selection_message">Please select at least one bluetooth device.</string>
+    <string name="alert_wifi_connection_selection_title">No WiFi connection selected</string>
+    <string name="alert_wifi_connection_selection_message">Please select a WiFi connection.</string>
+    <string name="alert_name_location_title">Invalid Location name</string>
+    <string name="alert_name_location_selection_message">Please Enter a valid Location name.</string>
+    <string name="alert_lat_location_title">Invalid Latitude</string>
+    <string name="alert_lat_location_selection_message">Please Enter a valid Latitude.</string>
+    <string name="alert_lon_location_title">Invalid Longitude</string>
+    <string name="alert_lon_location_selection_message">Please Enter a valid Longitude.</string>
+    <string name="alert_rad_location_title">Invalid Radius</string>
+    <string name="alert_rad_location_selection_message">Please Enter a valid Radius.</string>
+    <string name="alert_cancel_add_environment_title">Warning</string>
+    <string name="alert_cancel_add_environment_message">Do you want to cancel adding environment?</string>
+    <string name="alert_no_variables_title">No Variables Selected</string>
+    <string name="alert_no_variables_message">At least select one variable</string>
 
 </resources>
