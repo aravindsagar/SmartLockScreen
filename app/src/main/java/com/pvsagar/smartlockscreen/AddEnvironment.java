@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
@@ -52,6 +53,41 @@ public class AddEnvironment extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /* Adding Contextual Action Bar with Done and Cancel Button */
+        final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View customActionBarView = inflater.inflate(R.layout.actionbar_custom_view_done_cancel, null);
+        customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // "Done"
+                        //Todo: Add code to add environment to the database
+                        Toast.makeText(getBaseContext(),"Done",Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                });
+        customActionBarView.findViewById(R.id.actionbar_cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // "Cancel"
+                //Todo: Add code to show a dialog for reassurance
+                Toast.makeText(getBaseContext(),"Cancel",Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
+        final ActionBar actionBar = getActionBar();
+        actionBar.setDisplayOptions(
+                ActionBar.DISPLAY_SHOW_CUSTOM,
+                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
+                        | ActionBar.DISPLAY_SHOW_TITLE);
+        actionBar.setCustomView(customActionBarView,
+                new ActionBar.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+        /* End of Added Code */
+
         setContentView(R.layout.activity_add_environment);
         if (savedInstanceState == null) {
             placeholderFragment = new PlaceholderFragment();
@@ -66,7 +102,7 @@ public class AddEnvironment extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_environment, menu);
+        //getMenuInflater().inflate(R.menu.add_environment, menu);
         return true;
     }
 
