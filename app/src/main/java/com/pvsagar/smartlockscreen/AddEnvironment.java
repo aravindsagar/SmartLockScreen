@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,15 +40,26 @@ public class AddEnvironment extends ActionBarActivity {
     private static WifiConfiguration mSelectedWifiConfiguration;
     private static int mSelectedWiFiItem;
 
+    /* Location */
+    private static double latLocation;
+    private static double lonLocation;
+    private static double radLocation;
+
+
+    private PlaceholderFragment placeholderFragment;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_environment);
         if (savedInstanceState == null) {
+            placeholderFragment = new PlaceholderFragment();
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, placeholderFragment)
                     .commit();
         }
+
     }
 
 
@@ -64,7 +76,6 @@ public class AddEnvironment extends ActionBarActivity {
         if(requestCode == BluetoothEnvironmentVariable.REQUEST_BLUETOOTH_ENABLE){
             /* Bluetooth request */
             CheckBox enableBluetoothCheckBox = (CheckBox)findViewById(R.id.checkbox_enable_bluetooth);
-            TextView selectBluetoothDevicesTextView = (TextView)findViewById(R.id.text_view_bluetooth_devices_select);
 
             // Checking whether bluetooth is enabled or not
             if(resultCode == RESULT_OK){
@@ -80,7 +91,7 @@ public class AddEnvironment extends ActionBarActivity {
                         deviceNamesArrayList.add(bluetoothDevice.getName());
                     }
                     AddEnvironment.bluetoothDevices = bluetoothDevices;
-                    selectBluetoothDevicesTextView.setEnabled(true);
+                    placeholderFragment.setBluetoothItemsEnabled(true);
                 }
 
             }
@@ -90,7 +101,7 @@ public class AddEnvironment extends ActionBarActivity {
                 Toast.makeText(getBaseContext(),"Unable to switch on Bluetooth",Toast.LENGTH_SHORT).show();
                 enableBluetoothCheckBox.setChecked(false);
                 AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                selectBluetoothDevicesTextView.setEnabled(false);
+                placeholderFragment.setBluetoothItemsEnabled(false);
 
             }
         }
@@ -118,8 +129,14 @@ public class AddEnvironment extends ActionBarActivity {
         /* Bluetooth */
         private CheckBox enableBluetoothCheckBox;
         private TextView selectBluetoothDevicesTextView;
+        /* WiFi */
         private CheckBox enableWiFiCheckBox;
         private TextView selectWiFiConnectionTextView;
+        /* Location */
+        private CheckBox enableLocationCheckBox;
+        private EditText latLocationEditText;
+        private EditText lonLocationEditText;
+        private EditText radLocationEditText;
 
         public PlaceholderFragment() {
         }
@@ -136,10 +153,16 @@ public class AddEnvironment extends ActionBarActivity {
             //WiFi
             enableWiFiCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_wifi);
             selectWiFiConnectionTextView = (TextView)rootView.findViewById(R.id.text_view_wifi_connection_select);
+            //Location
+            enableLocationCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_location);
+            latLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lat);
+            lonLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lon);
+            radLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_rad);
 
             /* Initialization */
             setUpBluetoothElements();
             setUpWiFiElements();
+            setUpLocationElements();
 
             return rootView;
         }
@@ -150,7 +173,7 @@ public class AddEnvironment extends ActionBarActivity {
             bluetoothDevices = new ArrayList<BluetoothDevice>();
             mSelectedBluetoothItems = new ArrayList<Integer>();
             mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
-            selectBluetoothDevicesTextView.setEnabled(false);
+            setBluetoothItemsEnabled(false);
 
             /* CheckBox CheckedChange Listener */
             enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -165,7 +188,8 @@ public class AddEnvironment extends ActionBarActivity {
                                 deviceNamesArrayList.add(bluetoothDevice.getName());
                             }
                             AddEnvironment.bluetoothDevices = bluetoothDevices;
-                            selectBluetoothDevicesTextView.setEnabled(true);
+                            setBluetoothItemsEnabled(true);
+
 
                         } else {
                             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -173,14 +197,14 @@ public class AddEnvironment extends ActionBarActivity {
                                 enableBluetoothCheckBox.setChecked(false);
                                 //Disable the list
                                 AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                                selectBluetoothDevicesTextView.setEnabled(false);
+                                setBluetoothItemsEnabled(false);
                             }
                         }
 
                     } else {
                         //Disable the list
                         AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                        selectBluetoothDevicesTextView.setEnabled(false);
+                        setBluetoothItemsEnabled(false);
                     }
                 }
             });
@@ -231,7 +255,7 @@ public class AddEnvironment extends ActionBarActivity {
         public void setUpWiFiElements(){
             wifiConfigurations = new ArrayList<WifiConfiguration>();
             mSelectedWiFiItem = -1;
-            selectWiFiConnectionTextView.setEnabled(false);
+            setWiFiItemsEnabled(false);
 
             /* Check Box listener */
             enableWiFiCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -240,15 +264,15 @@ public class AddEnvironment extends ActionBarActivity {
                     if(isChecked){
                         //WiFi is enabled
                         wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(getActivity());
-                        selectWiFiConnectionTextView.setEnabled(true);
+                        setWiFiItemsEnabled(true);
                         if(wifiConfigurations == null){
                             //No WiFi adapter Found
                             enableWiFiCheckBox.setChecked(false);
-                            selectWiFiConnectionTextView.setEnabled(false);
+                            setWiFiItemsEnabled(false);
                         }
                     }
                     else{
-                        selectWiFiConnectionTextView.setEnabled(false);
+                        setWiFiItemsEnabled(false);
                     }
                 }
             });
@@ -280,6 +304,38 @@ public class AddEnvironment extends ActionBarActivity {
 
                 }
             });
+        }
+
+        public void setUpLocationElements(){
+
+            setLocationItemsEnabled(false);
+            enableLocationCheckBox.setChecked(false);
+
+            enableLocationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked){
+                        setLocationItemsEnabled(true);
+                    }
+                    else {
+                        setLocationItemsEnabled(false);
+                    }
+                }
+            });
+        }
+
+        public void setBluetoothItemsEnabled(boolean flag){
+            selectBluetoothDevicesTextView.setEnabled(flag);
+        }
+
+        public void setWiFiItemsEnabled(boolean flag){
+            selectWiFiConnectionTextView.setEnabled(flag);
+        }
+
+        public void setLocationItemsEnabled(boolean flag){
+            latLocationEditText.setEnabled(flag);
+            lonLocationEditText.setEnabled(flag);
+            radLocationEditText.setEnabled(flag);
         }
     }
 }

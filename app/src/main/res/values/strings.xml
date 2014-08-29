@@ -6,7 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="button_unlock">Unlock</string>
     <string name="title_activity_manage_environment">ManageEnvironment</string>
-    <string name="action_add_environment">Add</string>
+    <string name="action_add_environment">Add Environment</string>
     <string name="title_activity_add_environment">AddEnvironment</string>
     <string name="edit_text_environment_name">Environment Name</string>
     <string name="checkbox_enable_bluetooth">Enable Bluetooth</string>
@@ -18,5 +18,10 @@
     <string name="dialog_pick_bluetooth_devices">Pick Bluetooth Devices</string>
     <string name="dialog_pick_wifi_connection">Pick WiFi Connection</string>
     <string name="ok">OK</string>
+    <string name="checkbox_enable_location">Enable Location</string>
+    <string name="text_view_location">Location</string>
+    <string name="edit_text_location_lat">Latitude</string>
+    <string name="edit_text_location_lon">Longitude</string>
+    <string name="edit_text_location_rad">Radius (in meters)</string>
 
 </resources>
