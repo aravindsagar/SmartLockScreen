@@ -22,7 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 
 import java.util.ArrayList;
 
@@ -385,16 +388,17 @@ public class AddEnvironment extends ActionBarActivity {
             String environmentHint = environmentHintEditText.getText().toString();
             //Bluetooth details
             boolean bluetoothFlag = enableBluetoothCheckBox.isChecked();
-            ArrayList<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables;
             //Wifi Details
             boolean wifiFlag = enableWiFiCheckBox.isChecked();
-            WiFiEnvironmentVariable wiFiEnvironmentVariable;
             //Location
             boolean locationFlag = enableLocationCheckBox.isChecked();
             String locationName;
             double latLocation;
             double lonLocation;
             double radLocation;
+
+            //List to store all the environment variables
+            ArrayList<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
 
 
             /*Log.v("Done Details: ","Name: "+environmentName+"\n"+
@@ -429,7 +433,7 @@ public class AddEnvironment extends ActionBarActivity {
                 if(mSelectedBluetoothDevices != null && mSelectedBluetoothDevices.size() != 0){
                     bluetoothEnvironmentVariables = new ArrayList<BluetoothEnvironmentVariable>();
                     for (BluetoothDevice bluetoothDevice : mSelectedBluetoothDevices) {
-                        bluetoothEnvironmentVariables.add(new BluetoothEnvironmentVariable(bluetoothDevice.getName(),bluetoothDevice.getAddress()));
+                        environmentVariables.add(new BluetoothEnvironmentVariable(bluetoothDevice.getName(),bluetoothDevice.getAddress()));
                     }
                 } else{
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -443,7 +447,8 @@ public class AddEnvironment extends ActionBarActivity {
                 if(mSelectedWifiConfiguration != null){
                     String ssid = mSelectedWifiConfiguration.SSID;
                     String encryptionType = WiFiEnvironmentVariable.getSecurity(mSelectedWifiConfiguration);
-                    wiFiEnvironmentVariable = new WiFiEnvironmentVariable(ssid,encryptionType);
+                    environmentVariables.add(new WiFiEnvironmentVariable(ssid,encryptionType));
+
                 }
                 else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -491,6 +496,8 @@ public class AddEnvironment extends ActionBarActivity {
                     builder.create().show();
                     return;
                 }
+
+                environmentVariables.add(new LocationEnvironmentVariable((float)latLocation,(float)lonLocation,(int)radLocation,locationName));
             }
 
             if(!bluetoothFlag && !wifiFlag && !locationFlag){
@@ -500,9 +507,12 @@ public class AddEnvironment extends ActionBarActivity {
                 builder.create().show();
                 return;
             }
-
             /* Data Parsed */
 
+            /* Creating Environment */
+            EnvironmentVariable[] environmentVariablesArray = new EnvironmentVariable[environmentVariables.size()];
+            environmentVariables.toArray(environmentVariablesArray);
+            Environment environment = new Environment(environmentName,environmentVariablesArray);
             //Todo: Add code to add environment to the database
 
             getActivity().finish();
