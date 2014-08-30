@@ -38,6 +38,8 @@ public class LockScreenFragment extends Fragment {
                 Log.v("LockScreenActivity","Unlock Button Clicked");
                 Intent intent = new Intent(getActivity(),ManageEnvironment.class);
                 startActivity(intent);
+                //Intent intent = new Intent(getActivity(),SelectLocation.class);
+                //startActivity(intent);
             }
         });
 

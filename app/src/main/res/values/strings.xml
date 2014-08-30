@@ -48,5 +48,9 @@
     <string name="alert_cancel_add_environment_message">Do you want to cancel adding environment?</string>
     <string name="alert_no_variables_title">No Variables Selected</string>
     <string name="alert_no_variables_message">At least select one variable</string>
+    <string name="title_activity_select_location">Select Location</string>
+    <string name="toast_current_location_not_available">Unable to detect current location</string>
+    <string name="button_select_location">Select Location</string>
+    <string name="text_view_select_location">Select Location from Map</string>
 
 </resources>

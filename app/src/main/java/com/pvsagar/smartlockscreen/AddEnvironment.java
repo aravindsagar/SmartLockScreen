@@ -7,9 +7,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 public class AddEnvironment extends ActionBarActivity {
 
     private static final String LOG_TAG = AddEnvironment.class.getSimpleName();
+    public static final int REQUEST_LOCATION_SELECT = 31;
 
     /* Bluetooth */
     private static ArrayList<BluetoothDevice> bluetoothDevices;
@@ -110,6 +113,14 @@ public class AddEnvironment extends ActionBarActivity {
 
             }
         }
+        else if(requestCode == REQUEST_LOCATION_SELECT){
+            if(resultCode == RESULT_OK){
+                Bundle bundle = data.getExtras();
+                Location location = (Location)bundle.get("selectedLocation");
+                placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
+                placeholderFragment.lonLocationEditText.setText(""+location.getLongitude());
+            }
+        }
     }
 
     @Override
@@ -146,6 +157,7 @@ public class AddEnvironment extends ActionBarActivity {
         private EditText latLocationEditText;
         private EditText lonLocationEditText;
         private EditText radLocationEditText;
+        private TextView selectLocationTextView;
 
         public PlaceholderFragment() {
         }
@@ -171,6 +183,7 @@ public class AddEnvironment extends ActionBarActivity {
             latLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lat);
             lonLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lon);
             radLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_rad);
+            selectLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_location);
 
             /* Initialization */
             setUpBluetoothElements();
@@ -365,6 +378,15 @@ public class AddEnvironment extends ActionBarActivity {
                     }
                 }
             });
+
+            selectLocationTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.v(LOG_TAG,"Starting select location");
+                    Intent intent = new Intent(getActivity(),SelectLocation.class);
+                    getActivity().startActivityForResult(intent,REQUEST_LOCATION_SELECT);
+                }
+            });
         }
 
         public void setBluetoothItemsEnabled(boolean flag){
@@ -380,6 +402,7 @@ public class AddEnvironment extends ActionBarActivity {
             latLocationEditText.setEnabled(flag);
             lonLocationEditText.setEnabled(flag);
             radLocationEditText.setEnabled(flag);
+            selectLocationTextView.setEnabled(flag);
         }
 
         public void onDoneButtonClick(){
@@ -400,17 +423,6 @@ public class AddEnvironment extends ActionBarActivity {
             //List to store all the environment variables
             ArrayList<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
 
-
-            /*Log.v("Done Details: ","Name: "+environmentName+"\n"+
-                            "Hint: "+environmentHint+"\n"+
-                            "bluetooth: "+bluetoothFlag+"\n"+
-                            "wifi: "+wifiFlag+"\n"+
-                            "location: "+locationFlag+"\n"+
-                            "lname: "+locationName+"\n"+
-                            "lat: "+latLocation+"\n"+
-                            "lon: "+lonLocation+"\n"+
-                            "rad: "+radLocation+"\n"
-            );*/
 
             /* Parsing the Data */
             if(environmentName.equals("")){
