@@ -3,15 +3,14 @@
     package="com.pvsagar.smartlockscreen" >
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
+    
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
@@ -43,6 +42,16 @@
         <provider
             android:name=".environmentdb.EnvironmentProvider"
             android:authorities="com.pvsagar.smartlockscreen.app" />
+
+        <service
+            android:name=".services.BaseService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+        <service
+            android:name=".services.GeoFenceIntentService"
+            android:exported="false" >
+        </service>
 
         <activity
             android:name=".ManageEnvironment"
