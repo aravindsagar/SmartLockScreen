@@ -28,6 +28,8 @@
                 android:hint="@string/edit_text_environment_hint"
                 android:singleLine="true"
                 android:layout_marginTop="10dp"/>
+
+
             <!-- Bluetooth -->
             <TextView
                 android:id="@+id/text_view_bluetooth"
@@ -56,6 +58,13 @@
                 android:layout_height="@dimen/abc_action_bar_default_height"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:layout_marginTop="10dp"/>
+
+            <CheckBox
+                android:id="@+id/checkbox_bluetooth_all"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/checkbox_bluetooth_all"
+                android:layout_marginTop="20dp"/>
 
             <!-- Wifi -->
 

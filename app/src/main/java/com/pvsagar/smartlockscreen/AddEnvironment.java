@@ -148,6 +148,7 @@ public class AddEnvironment extends ActionBarActivity {
         /* Bluetooth */
         private CheckBox enableBluetoothCheckBox;
         private TextView selectBluetoothDevicesTextView;
+        private CheckBox bluetoothAllCheckbox;
         /* WiFi */
         private CheckBox enableWiFiCheckBox;
         private TextView selectWiFiConnectionTextView;
@@ -174,6 +175,7 @@ public class AddEnvironment extends ActionBarActivity {
             //Bluetooth
             enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
             selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
+            bluetoothAllCheckbox = (CheckBox)rootView.findViewById(R.id.checkbox_bluetooth_all);
             //WiFi
             enableWiFiCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_wifi);
             selectWiFiConnectionTextView = (TextView)rootView.findViewById(R.id.text_view_wifi_connection_select);
@@ -230,6 +232,7 @@ public class AddEnvironment extends ActionBarActivity {
             mSelectedBluetoothItems = new ArrayList<Integer>();
             mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
             setBluetoothItemsEnabled(false);
+            bluetoothAllCheckbox.setChecked(false);
 
             /* CheckBox CheckedChange Listener */
             enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -391,6 +394,7 @@ public class AddEnvironment extends ActionBarActivity {
 
         public void setBluetoothItemsEnabled(boolean flag){
             selectBluetoothDevicesTextView.setEnabled(flag);
+            bluetoothAllCheckbox.setEnabled(flag);
         }
 
         public void setWiFiItemsEnabled(boolean flag){
@@ -411,6 +415,7 @@ public class AddEnvironment extends ActionBarActivity {
             String environmentHint = environmentHintEditText.getText().toString();
             //Bluetooth details
             boolean bluetoothFlag = enableBluetoothCheckBox.isChecked();
+            boolean bluetoothAllFlag;
             //Wifi Details
             boolean wifiFlag = enableWiFiCheckBox.isChecked();
             //Location
@@ -453,6 +458,7 @@ public class AddEnvironment extends ActionBarActivity {
                     builder.create().show();
                     return;
                 }
+                bluetoothAllFlag = bluetoothAllCheckbox.isChecked();
             }
             if(wifiFlag){
                 if(mSelectedWifiConfiguration != null){
