@@ -85,7 +85,9 @@ public class BaseService extends Service implements
                 PendingIntent geofenceIntent = PendingIntent.getService(this, 2,
                         GeoFenceIntentService.getIntent(this), 0);
                 List<Geofence> geofenceList = GeofenceHelper.getAndroidGeofences(this);
-                mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
+                if(geofenceList != null && !geofenceList.isEmpty()) {
+                    mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
+                }
         }
 
     }

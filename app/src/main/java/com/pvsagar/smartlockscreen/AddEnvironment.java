@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.pvsagar.smartlockscreen.applogic_helpers.EnvironmentHelper;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
@@ -415,7 +416,7 @@ public class AddEnvironment extends ActionBarActivity {
             String environmentHint = environmentHintEditText.getText().toString();
             //Bluetooth details
             boolean bluetoothFlag = enableBluetoothCheckBox.isChecked();
-            boolean bluetoothAllFlag;
+            boolean bluetoothAllFlag = false;
             //Wifi Details
             boolean wifiFlag = enableWiFiCheckBox.isChecked();
             //Location
@@ -530,8 +531,11 @@ public class AddEnvironment extends ActionBarActivity {
             EnvironmentVariable[] environmentVariablesArray = new EnvironmentVariable[environmentVariables.size()];
             environmentVariables.toArray(environmentVariablesArray);
             Environment environment = new Environment(environmentName,environmentVariablesArray);
+            if(bluetoothFlag){
+                environment.setBluetoothAllOrAny(bluetoothAllFlag);
+            }
             //Todo: Add code to add environment to the database
-
+            EnvironmentHelper.insertEnvironment(environment,getActivity());
             getActivity().finish();
 
         }
