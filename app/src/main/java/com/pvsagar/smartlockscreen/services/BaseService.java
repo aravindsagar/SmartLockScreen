@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -85,7 +86,9 @@ public class BaseService extends Service implements
                 PendingIntent geofenceIntent = PendingIntent.getService(this,
                         GEOFENCE_SERVICE_REQUEST_CODE, GeoFenceIntentService.getIntent(this), 0);
                 List<Geofence> geofenceList = LocationEnvironmentVariable.getAndroidGeofences(this);
-                mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
+                if(geofenceList != null && !geofenceList.isEmpty()) {
+                    mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
+                }
         }
 
     }
@@ -97,7 +100,7 @@ public class BaseService extends Service implements
 
     @Override
     public void onAddGeofencesResult(int i, String[] strings) {
-
+        Toast.makeText(this, "Geofence added: " + strings[0], Toast.LENGTH_SHORT).show();
     }
 
     @Override
