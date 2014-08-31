@@ -3,7 +3,14 @@ package com.pvsagar.smartlockscreen.services;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
+import android.util.Log;
+
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.LocationClient;
+
+import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -14,44 +21,6 @@ import android.net.Uri;
  */
 public class GeoFenceIntentService extends IntentService {
     private static final String LOG_TAG = GeoFenceIntentService.class.getSimpleName();
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "com.pvsagar.smartlockscreen.services.action.FOO";
-    private static final String ACTION_BAZ = "com.pvsagar.smartlockscreen.services.action.BAZ";
-
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "com.pvsagar.smartlockscreen.services.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "com.pvsagar.smartlockscreen.services.extra.PARAM2";
-
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, GeoFenceIntentService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
-
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, GeoFenceIntentService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
 
     public static Intent getIntent(Context context){
         Intent intent = new Intent(context, GeoFenceIntentService.class);
@@ -62,43 +31,45 @@ public class GeoFenceIntentService extends IntentService {
         super("GeoFenceIntentService");
     }
 
-    @Override
+
     protected void onHandleIntent(Intent intent) {
-        if (intent != null) {
-            final String action = intent.getAction();
-            if (ACTION_FOO.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionFoo(param1, param2);
-            } else if (ACTION_BAZ.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionBaz(param1, param2);
+        Log.d(LOG_TAG, "onHandleIntentCalled.");
+        // First check for errors
+        if (LocationClient.hasError(intent)) {
+            // Get the error code with a static method
+            int errorCode = LocationClient.getErrorCode(intent);
+            // Log the error
+            Log.e("ReceiveTransitionsIntentService",
+                    "Location Services error: " +
+                            Integer.toString(errorCode));
+
+        /*
+         * If there's no error, get the transition type and the IDs
+         * of the geofence or geofences that triggered the transition
+         */
+        } else {
+            // Get the type of transition (entry or exit)
+            int transitionType =
+                    LocationClient.getGeofenceTransition(intent);
+            // Test that a valid transition was reported
+            if ((transitionType == Geofence.GEOFENCE_TRANSITION_ENTER)
+                            || (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT)) {
+                List <Geofence> triggerList = LocationClient.getTriggeringGeofences(intent);
+                Location triggerLocation = LocationClient.getTriggeringLocation(intent);
+                Intent intentToBaseService = new Intent(this, BaseService.class);
+                intentToBaseService.setData(Uri.parse("Geofence transition at " +
+                        triggerLocation.getLatitude() + ", " + triggerLocation.getLongitude()));
+                startService(intentToBaseService);
+            } else {
+                // An invalid transition was reported
+                Log.e("ReceiveTransitionsIntentService",
+                        "Geofence transition error: " +
+                                Integer.toString(transitionType));
             }
         }
-        Intent intent1 = new Intent();
-        intent1.setClass(this, BaseService.class);
-        intent1.setData(Uri.parse("Sample change"));
-        startService(intent1);
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionFoo(String param1, String param2) {
-        // TODO: Handle action Foo
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionBaz(String param1, String param2) {
-        // TODO: Handle action Baz
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 
     @Override
     public void onDestroy() {

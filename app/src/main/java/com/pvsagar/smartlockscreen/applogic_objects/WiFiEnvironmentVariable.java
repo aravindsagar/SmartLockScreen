@@ -37,7 +37,7 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
 
     @Override
     public boolean isStringValuesSupported() {
-        return false;
+        return true;
     }
 
     @Override

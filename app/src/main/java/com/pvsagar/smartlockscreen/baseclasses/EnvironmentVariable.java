@@ -1,11 +1,14 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
+import android.util.Log;
+
 /**
  * Created by aravind on 5/8/14.
  *
  * Abstract class for Environment Variables. Each variable will extend it and use it accordingly
  */
 public abstract class EnvironmentVariable {
+    private static final String LOG_TAG = EnvironmentVariable.class.getSimpleName();
 
     /**
      * Constant values for use
@@ -40,20 +43,23 @@ public abstract class EnvironmentVariable {
                                int numberOfFloatValues, int numberOfStringValues){
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(isValid){
+            isInitialized = true;
             this.variableType = variableType;
             setFloatValues(new float[numberOfFloatValues]);
             setStringValues(stringValues = new String[numberOfStringValues]);
-            isInitialized = true;
         }
     }
 
     public EnvironmentVariable(String variableType, float[] floatValues, String[] stringValues){
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
+        if(!isValid) {
+            Log.w(LOG_TAG, "Initialization of environment variable not valid. Type: " + variableType);
+        }
         if(isValid){
+            isInitialized = true;
             this.variableType = variableType;
             setFloatValues(floatValues);
             setStringValues(stringValues);
-            isInitialized = true;
         }
     }
 

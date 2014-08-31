@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -67,6 +68,7 @@ public class BaseService extends Service implements
             Uri uri = intent.getData();
 
             if (uri != null) {
+                Log.d(LOG_TAG, "Uri: " + uri);
                 startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                         uri.toString()));
             }

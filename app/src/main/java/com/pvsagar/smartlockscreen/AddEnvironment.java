@@ -23,7 +23,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pvsagar.smartlockscreen.applogic_helpers.EnvironmentHelper;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
@@ -451,6 +450,8 @@ public class AddEnvironment extends ActionBarActivity {
                 if(mSelectedBluetoothDevices != null && mSelectedBluetoothDevices.size() != 0){
                     for (BluetoothDevice bluetoothDevice : mSelectedBluetoothDevices) {
                         environmentVariables.add(new BluetoothEnvironmentVariable(bluetoothDevice.getName(),bluetoothDevice.getAddress()));
+                        if(bluetoothDevice.getName() == null) Log.w(LOG_TAG, "Bluetooth deviceName null.");
+                        if(bluetoothDevice.getAddress() == null) Log.w(LOG_TAG, "Bluetooth deviceAddress null.");
                     }
                 } else{
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -535,7 +536,7 @@ public class AddEnvironment extends ActionBarActivity {
                 environment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
             //Todo: Add code to add environment to the database
-            EnvironmentHelper.insertEnvironment(environment,getActivity());
+            environment.insertIntoDatabase(getActivity());
             getActivity().finish();
 
         }

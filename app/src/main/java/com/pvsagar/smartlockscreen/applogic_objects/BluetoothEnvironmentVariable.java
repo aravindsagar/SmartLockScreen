@@ -29,11 +29,12 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
     public BluetoothEnvironmentVariable(String deviceName, String deviceAddress){
         super(EnvironmentVariable.TYPE_BLUETOOTH_DEVICES, null,
                 new String[]{deviceName, deviceAddress});
+        Log.d(LOG_TAG, deviceName + ": " + deviceAddress);
     }
 
     @Override
     public boolean isStringValuesSupported() {
-        return false;
+        return true;
     }
 
     @Override

@@ -142,6 +142,13 @@ public class Environment {
             environmentValues.put(
                     EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,
                     e.getNoiseLevelEnvironmentVariable().getLowerLimit());
+        } else {
+            environmentValues.put(
+                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED,
+                    false);
+            environmentValues.put(
+                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED,
+                    false);
         }
 
         Uri environmentUri = context.getContentResolver().insert(
