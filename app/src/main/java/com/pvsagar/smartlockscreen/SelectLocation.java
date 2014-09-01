@@ -1,13 +1,15 @@
 package com.pvsagar.smartlockscreen;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,36 +37,61 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_location);
+
+        /* Adding Contextual Action Bar with Done and Cancel Button */
+        final LayoutInflater layoutInflater = (LayoutInflater) getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View customActionBarView = layoutInflater.inflate(R.layout.actionbar_custom_view_done, null);
+        customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // "Done"
+                        onDoneButtonClick();
+                    }
+                });
+
+        final ActionBar actionBar = getActionBar();
+        actionBar.setDisplayOptions(
+                ActionBar.DISPLAY_SHOW_CUSTOM,
+                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
+                        | ActionBar.DISPLAY_SHOW_TITLE);
+        actionBar.setCustomView(customActionBarView,
+                new ActionBar.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+            /* End of Action Bar Code */
+
+
         googleMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.map_select_location)).getMap();
         googleMap.setMyLocationEnabled(true);
         googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
                 selectedLocation = googleMap.getMyLocation();
-                googleMap.clear();
-                googleMap.addMarker(new MarkerOptions().position(new LatLng(selectedLocation.getLatitude(),selectedLocation.getLongitude())));
+                if(selectedLocation != null){
+                    googleMap.clear();
+                    googleMap.addMarker(new MarkerOptions().position(new LatLng(selectedLocation.getLatitude(),selectedLocation.getLongitude())));
+                }else{
+                    Toast.makeText(getBaseContext(),"Unable to get Location",Toast.LENGTH_SHORT).show();
+                }
                 return false;
             }
         });
         mLocationClient = new LocationClient(this,this,this);
         initGoogleMap();
+    }
 
-        final Button selectLocationButton = (Button)findViewById(R.id.button_select_location);
-        selectLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(selectedLocation != null){
-                    Intent _resultIntent = new Intent();
-                    _resultIntent.putExtra("selectedLocation",selectedLocation);
-                    setResult(Activity.RESULT_OK, _resultIntent);
-                    finish();
-                }
-                else{
-                    setResult(Activity.RESULT_CANCELED);
-                    finish();
-                }
-            }
-        });
+    private void onDoneButtonClick(){
+        if(selectedLocation != null){
+            Intent _resultIntent = new Intent();
+            _resultIntent.putExtra("selectedLocation",selectedLocation);
+            setResult(Activity.RESULT_OK, _resultIntent);
+            finish();
+        }
+        else{
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+        }
     }
 
     @Override

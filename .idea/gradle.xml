@@ -5,15 +5,10 @@
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
-          </set>
-        </option>
       </GradleProjectSettings>
     </option>
     <option name="gradleVmOptions" value="-Dhttp.proxyHost=webproxy.indore.iiti.ac.in -Dhttp.proxyPort=8080 -Dhttp.proxyUser=cs1100104 -D&quot;http.proxyPassword=broadwell 2014&quot;" />
+    <option name="offlineWork" value="true" />
   </component>
 </project>
 
