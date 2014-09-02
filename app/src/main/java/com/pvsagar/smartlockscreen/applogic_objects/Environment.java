@@ -2,11 +2,18 @@ package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
-import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
+import com.pvsagar.smartlockscreen.environmentdb.mappers.DatabaseToObjectMapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -31,6 +38,14 @@ public class Environment {
         this();
         setName(name);
         addEnvironmentVariables(variables);
+    }
+
+    public Environment(String name, List<EnvironmentVariable> variables){
+        this();
+        EnvironmentVariable[] variableArray = new EnvironmentVariable[variables.size()];
+        variables.toArray(variableArray);
+        setName(name);
+        addEnvironmentVariables(variableArray);
     }
 
     public void setName(String name){
@@ -117,76 +132,102 @@ public class Environment {
     public void insertIntoDatabase(Context context){
         Environment e = this;
         ContentValues environmentValues = new ContentValues();
-        environmentValues.put(EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_NAME,
-                e.getName());
-        environmentValues.put(
-                EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 0);
-        environmentValues.put(
-                EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 0);
-        environmentValues.put(
-                EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY,
+        environmentValues.put(EnvironmentEntry.COLUMN_NAME, e.getName());
+        environmentValues.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 0);
+        environmentValues.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 0);
+        environmentValues.put(EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY,
                 e.isBluetoothAllOrAny()?1:0);
-        environmentValues.put(
-                EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, 0);
+        environmentValues.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, 0);
 
         if(e.hasNoiseLevel && e.getNoiseLevelEnvironmentVariable() != null){
-            environmentValues.put(
-                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED,
+            environmentValues.put(EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED,
                     e.getNoiseLevelEnvironmentVariable().hasUpperLimit);
-            environmentValues.put(
-                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED,
+            environmentValues.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED,
                     e.getNoiseLevelEnvironmentVariable().hasLowerLimit);
-            environmentValues.put(
-                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL,
+            environmentValues.put(EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL,
                     e.getNoiseLevelEnvironmentVariable().getUpperLimit());
-            environmentValues.put(
-                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,
+            environmentValues.put(EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,
                     e.getNoiseLevelEnvironmentVariable().getLowerLimit());
         } else {
-            environmentValues.put(
-                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED,
-                    false);
-            environmentValues.put(
-                    EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED,
-                    false);
+            environmentValues.put(EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED, false);
+            environmentValues.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED, false);
         }
 
         Uri environmentUri = context.getContentResolver().insert(
-                EnvironmentDatabaseContract.EnvironmentEntry.CONTENT_URI, environmentValues);
-        long environmentId = EnvironmentDatabaseContract.EnvironmentEntry.
-                getEnvironmentIdFromUri(environmentUri);
+                EnvironmentEntry.CONTENT_URI, environmentValues);
+        long environmentId = EnvironmentEntry.getEnvironmentIdFromUri(environmentUri);
 
         if(e.hasBluetoothDevices && e.getBluetoothEnvironmentVariables() != null
                 && !e.getBluetoothEnvironmentVariables().isEmpty()){
             Vector<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables =
                     e.getBluetoothEnvironmentVariables();
-            Uri insertUri = EnvironmentDatabaseContract.EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId);
+            Uri insertUri = EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId);
             for(BluetoothEnvironmentVariable variable: bluetoothEnvironmentVariables) {
                 ContentValues bluetoothValues = new ContentValues();
-                bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_NAME,
+                bluetoothValues.put(BluetoothDevicesEntry.COLUMN_DEVICE_NAME,
                         variable.getDeviceName());
-                bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS,
+                bluetoothValues.put(BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS,
                         variable.getDeviceAddress());
                 context.getContentResolver().insert(insertUri, bluetoothValues);
             }
         }
         if(e.hasLocation && e.getLocationEnvironmentVariable() != null){
             LocationEnvironmentVariable variable = e.getLocationEnvironmentVariable();
-            Uri insertUri = EnvironmentDatabaseContract.EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId);
+            Uri insertUri = EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId);
             ContentValues locationValues = new ContentValues();
-            locationValues.put(EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LAT, variable.getLatitude());
-            locationValues.put(EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LONG, variable.getLongitude());
-            locationValues.put(EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_RADIUS, variable.getRadius());
-            locationValues.put(EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_LOCATION_NAME, variable.getLocationName());
+            locationValues.put(GeoFenceEntry.COLUMN_COORD_LAT, variable.getLatitude());
+            locationValues.put(GeoFenceEntry.COLUMN_COORD_LONG, variable.getLongitude());
+            locationValues.put(GeoFenceEntry.COLUMN_RADIUS, variable.getRadius());
+            locationValues.put(GeoFenceEntry.COLUMN_LOCATION_NAME, variable.getLocationName());
             context.getContentResolver().insert(insertUri, locationValues);
         }
         if(e.hasWiFiNetwork && e.getWiFiEnvironmentVariable() != null){
             WiFiEnvironmentVariable variable = e.getWiFiEnvironmentVariable();
-            Uri insertUri = EnvironmentDatabaseContract.EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId);
+            Uri insertUri = EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId);
             ContentValues wifiValues = new ContentValues();
-            wifiValues.put(EnvironmentDatabaseContract.WiFiNetworksEntry.COLUMN_SSID, variable.getSSID());
-            wifiValues.put(EnvironmentDatabaseContract.WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, variable.getEncryptionType());
+            wifiValues.put(WiFiNetworksEntry.COLUMN_SSID, variable.getSSID());
+            wifiValues.put(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, variable.getEncryptionType());
             context.getContentResolver().insert(insertUri, wifiValues);
         }
+    }
+
+    /**
+     * Returns list of names of all the environment in the database.
+     * To get the full environment details, see getFullEnvironment()
+     * @param context
+     * @return
+     */
+    public static List<String> getAllEnvironments(Context context){
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                null, null, null);
+        ArrayList<String> environmentNames = new ArrayList<String>();
+
+        for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
+            String envName = new String(envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_NAME)));
+            environmentNames.add(envName);
+        }
+        return environmentNames;
+    }
+
+    public static Environment getFullEnvironment(Context context, String environmentName){
+        String selection = EnvironmentEntry.COLUMN_NAME + " = ? ";
+        String[] selectionArgs = new String[]{environmentName};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        Environment e;
+        if(envCursor.moveToFirst()){
+            long environmentId = envCursor.getLong(envCursor.getColumnIndex(EnvironmentEntry._ID));
+            Cursor bluetoothCursor = context.getContentResolver().query(
+                    EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId),
+                    null, null, null, null);
+            List<EnvironmentVariable> environmentVariables = DatabaseToObjectMapper.
+                    getBluetoothEnvironmentVariablesFromCursor(bluetoothCursor);
+            //TODO populate other environment variables
+            e = new Environment(environmentName, environmentVariables);
+        } else {
+            return null;
+        }
+        return e;
     }
 }
