@@ -218,12 +218,23 @@ public class Environment {
         Environment e;
         if(envCursor.moveToFirst()){
             long environmentId = envCursor.getLong(envCursor.getColumnIndex(EnvironmentEntry._ID));
-            Cursor bluetoothCursor = context.getContentResolver().query(
-                    EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId),
-                    null, null, null, null);
+            Cursor bluetoothCursor = context.getContentResolver().query
+                    (EnvironmentEntry.buildEnvironmentUriWithIdAndBluetooth(environmentId),
+                            null, null, null, null),
+                    wifiCursor = context.getContentResolver().query(
+                            EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId),
+                            null, null, null, null),
+                    locationCursor = context.getContentResolver().query(
+                            EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId),
+                            null, null, null, null);
             List<EnvironmentVariable> environmentVariables = DatabaseToObjectMapper.
                     getBluetoothEnvironmentVariablesFromCursor(bluetoothCursor);
-            //TODO populate other environment variables
+            environmentVariables.addAll(DatabaseToObjectMapper.
+                    getLocationEnvironmentVariablesFromCursor(locationCursor));
+            environmentVariables.addAll(DatabaseToObjectMapper.
+                    getWiFiEnvironmentVariablesFromCursor(wifiCursor));
+            environmentVariables.addAll(DatabaseToObjectMapper.
+                    getNoiseLevelEnvironmentVariablesFromCursor(envCursor));
             e = new Environment(environmentName, environmentVariables);
         } else {
             return null;
