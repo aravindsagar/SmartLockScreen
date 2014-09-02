@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
+import com.pvsagar.smartlockscreen.environmentdb.mappers.DatabaseToObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,25 +106,12 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
 
     private static final int NOTIFICATION_RESPONSIVENESS = 30000;
 
-    public static List<LocationEnvironmentVariable> getLocationEnvironmentVariables
+    public static List<EnvironmentVariable> getLocationEnvironmentVariables
             (Context context){
         Cursor cursor = context.getContentResolver().query(EnvironmentDatabaseContract.
                         GeoFenceEntry.CONTENT_URI, null, null, null, null);
-        ArrayList<LocationEnvironmentVariable> locationEnvironmentVariables =
-                new ArrayList<LocationEnvironmentVariable>();
-        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
-            LocationEnvironmentVariable variable = new LocationEnvironmentVariable(
-                    cursor.getFloat(cursor.getColumnIndex(
-                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LAT)),
-                    cursor.getFloat(cursor.getColumnIndex(
-                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_COORD_LONG)),
-                    (int) cursor.getFloat(cursor.getColumnIndex(
-                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_RADIUS)),
-                    cursor.getString(cursor.getColumnIndex(
-                            EnvironmentDatabaseContract.GeoFenceEntry.COLUMN_LOCATION_NAME))
-            );
-            locationEnvironmentVariables.add(variable);
-        }
+        List<EnvironmentVariable> locationEnvironmentVariables =
+                DatabaseToObjectMapper.getLocationEnvironmentVariablesFromCursor(cursor);
         return locationEnvironmentVariables;
     }
 

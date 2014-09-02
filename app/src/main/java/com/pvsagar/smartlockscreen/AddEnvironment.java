@@ -529,13 +529,12 @@ public class AddEnvironment extends ActionBarActivity {
             /* Data Parsed */
 
             /* Creating Environment */
-            EnvironmentVariable[] environmentVariablesArray = new EnvironmentVariable[environmentVariables.size()];
-            environmentVariables.toArray(environmentVariablesArray);
-            Environment environment = new Environment(environmentName,environmentVariablesArray);
+            Environment environment = new Environment(environmentName,environmentVariables);
             if(bluetoothFlag){
                 environment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
-            //Todo: Add code to add environment to the database
+            environment.setHint(environmentHint);
+
             environment.insertIntoDatabase(getActivity());
             getActivity().finish();
 
