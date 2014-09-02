@@ -122,6 +122,10 @@ public class EnvironmentDatabaseContract {
 
         public static final String COLUMN_MAX_NOISE_LEVEL = "max_noise_level";
 
+        public static final String COLUMN_IS_ENABLED = "is_environment_enabled";
+
+        public static final String COLUMN_ENVIRONMENT_HINT = "environment_hint";
+
         public static Uri buildEnvironmentUriWithId(long id){
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
         }

@@ -26,12 +26,14 @@ public class Environment {
     private boolean bluetoothAllOrAny;
     private WiFiEnvironmentVariable wiFiEnvironmentVariable;
     private NoiseLevelEnvironmentVariable noiseLevelEnvironmentVariable;
-    private String name;
+    private String name, hint;
+    private boolean isEnabled;
 
     public boolean hasLocation, hasBluetoothDevices, hasWiFiNetwork, hasNoiseLevel;
     public Environment(){
         hasLocation = hasNoiseLevel = hasWiFiNetwork = hasBluetoothDevices = false;
         bluetoothAllOrAny = false;
+        isEnabled = true;
     }
 
     public Environment(String name, EnvironmentVariable... variables){
@@ -129,6 +131,22 @@ public class Environment {
         return bluetoothAllOrAny;
     }
 
+    public boolean isEnabled(){
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled){
+        isEnabled = enabled;
+    }
+
+    public String getHint(){
+        return hint;
+    }
+
+    public void setHint(String hint){
+        this.hint = hint;
+    }
+
     public void insertIntoDatabase(Context context){
         Environment e = this;
         ContentValues environmentValues = new ContentValues();
@@ -138,6 +156,8 @@ public class Environment {
         environmentValues.put(EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY,
                 e.isBluetoothAllOrAny()?1:0);
         environmentValues.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, 0);
+        environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, e.isEnabled()?1:0);
+        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_HINT, e.getHint());
 
         if(e.hasNoiseLevel && e.getNoiseLevelEnvironmentVariable() != null){
             environmentValues.put(EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED,
@@ -195,7 +215,7 @@ public class Environment {
      * Returns list of names of all the environment in the database.
      * To get the full environment details, see getFullEnvironment()
      * @param context
-     * @return
+     * @return A list of strings of environment names
      */
     public static List<String> getAllEnvironments(Context context){
         Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
@@ -203,8 +223,8 @@ public class Environment {
         ArrayList<String> environmentNames = new ArrayList<String>();
 
         for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
-            String envName = new String(envCursor.getString(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_NAME)));
+            String envName = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_NAME));
             environmentNames.add(envName);
         }
         return environmentNames;
@@ -236,6 +256,11 @@ public class Environment {
             environmentVariables.addAll(DatabaseToObjectMapper.
                     getNoiseLevelEnvironmentVariablesFromCursor(envCursor));
             e = new Environment(environmentName, environmentVariables);
+
+            e.setBluetoothAllOrAny(envCursor.getInt(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY)) == 1);
+            e.setHint(envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT)));
         } else {
             return null;
         }

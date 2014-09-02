@@ -533,6 +533,7 @@ public class AddEnvironment extends ActionBarActivity {
             if(bluetoothFlag){
                 environment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
+            environment.setHint(environmentHint);
 
             environment.insertIntoDatabase(getActivity());
             getActivity().finish();

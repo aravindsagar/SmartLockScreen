@@ -80,6 +80,8 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL + " REAL, " +
                 EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED + " INTEGER NOT NULL, " +
                 EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL + " REAL, " +
+                EnvironmentEntry.COLUMN_IS_ENABLED + " INTEGER NOT NULL, " +
+                EnvironmentEntry.COLUMN_ENVIRONMENT_HINT + " TEXT, " +
                 " FOREIGN KEY (" + EnvironmentEntry.COLUMN_GEOFENCE_ID + ") REFERENCES " +
                 GeoFenceEntry.TABLE_NAME + "(" + GeoFenceEntry._ID + "), " +
                 " FOREIGN KEY (" + EnvironmentEntry.COLUMN_WIFI_ID + ") REFERENCES " +
