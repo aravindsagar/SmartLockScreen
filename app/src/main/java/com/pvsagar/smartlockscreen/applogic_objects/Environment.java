@@ -20,6 +20,8 @@ import java.util.Vector;
  * Created by aravind on 10/8/14.
  */
 public class Environment {
+    private static final String LOG_TAG = Environment.class.getSimpleName();
+
     private LocationEnvironmentVariable locationEnvironmentVariable;
     private Vector<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables;
     //true for all, false for any
@@ -261,6 +263,8 @@ public class Environment {
                     EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY)) == 1);
             e.setHint(envCursor.getString(envCursor.getColumnIndex(
                     EnvironmentEntry.COLUMN_ENVIRONMENT_HINT)));
+            e.setEnabled(envCursor.getInt(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1);
         } else {
             return null;
         }

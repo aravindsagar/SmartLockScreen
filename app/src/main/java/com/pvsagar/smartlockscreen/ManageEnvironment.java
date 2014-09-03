@@ -13,8 +13,9 @@ import android.widget.ListView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 
-
 public class ManageEnvironment extends ActionBarActivity {
+
+    private static final String LOG_TAG = ManageEnvironment.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
