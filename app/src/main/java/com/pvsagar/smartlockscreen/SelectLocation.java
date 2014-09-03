@@ -84,7 +84,7 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
     private void onDoneButtonClick(){
         if(selectedLocation != null){
             Intent _resultIntent = new Intent();
-            _resultIntent.putExtra("selectedLocation",selectedLocation);
+            _resultIntent.putExtra(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION,selectedLocation);
             setResult(Activity.RESULT_OK, _resultIntent);
             finish();
         }

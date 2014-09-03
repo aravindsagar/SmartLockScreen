@@ -36,6 +36,7 @@ public class AddEnvironment extends ActionBarActivity {
 
     private static final String LOG_TAG = AddEnvironment.class.getSimpleName();
     public static final int REQUEST_LOCATION_SELECT = 31;
+    public static final String INTENT_EXTRA_SELECTED_LOCATION = "selectedLocation";
 
     /* Bluetooth */
     private static ArrayList<BluetoothDevice> bluetoothDevices;
@@ -116,7 +117,7 @@ public class AddEnvironment extends ActionBarActivity {
         else if(requestCode == REQUEST_LOCATION_SELECT){
             if(resultCode == RESULT_OK){
                 Bundle bundle = data.getExtras();
-                Location location = (Location)bundle.get("selectedLocation");
+                Location location = (Location)bundle.get(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION);
                 placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
                 placeholderFragment.lonLocationEditText.setText(""+location.getLongitude());
             }
@@ -436,6 +437,8 @@ public class AddEnvironment extends ActionBarActivity {
                 builder.setPositiveButton(R.string.ok,null);
                 builder.create().show();
                 return;
+            } else{
+                //Todo: check for unique environment name
             }
 
             if(environmentHint.equals("")){

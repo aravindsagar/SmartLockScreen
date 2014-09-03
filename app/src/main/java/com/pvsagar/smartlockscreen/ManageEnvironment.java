@@ -9,7 +9,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
+import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 
 
 public class ManageEnvironment extends ActionBarActivity {
@@ -54,6 +56,8 @@ public class ManageEnvironment extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
+        String[] environmentNames;
+
         public PlaceholderFragment() {
         }
 
@@ -61,6 +65,16 @@ public class ManageEnvironment extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
+
+            //Init
+            environmentNames = Environment.getAllEnvironments(getActivity()).toArray(new String[0]);    //Getting environment list
+            ListView environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
+
+            /* Creating the adapter */
+            EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),environmentNames);
+            environmentsListView.setAdapter(listAdapter);
+            /* End of adapter code */
+
             return rootView;
         }
     }

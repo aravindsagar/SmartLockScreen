@@ -266,4 +266,20 @@ public class Environment {
         }
         return e;
     }
+
+    //Todo: A function which will take context and environment name and return whether it is enabled or not
+    public static boolean getEnvironmentEnabled(Context context, String environmentName){
+        String selection = EnvironmentEntry.COLUMN_NAME + " = ? ";
+        String[] selectionArgs = new String[]{environmentName};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        Environment e;
+        if(envCursor.moveToFirst()){
+            long environmentId = envCursor.getLong(envCursor.getColumnIndex(EnvironmentEntry._ID));
+            return (envCursor.getInt(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_IS_ENABLED)) == 1?true:false);
+        } else {
+            return false;
+        }
+    }
+    //Todo: A function which will take the context, environment and boolean to setenabled : directly to database
 }
