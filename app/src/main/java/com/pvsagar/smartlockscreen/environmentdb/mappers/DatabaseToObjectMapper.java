@@ -73,6 +73,7 @@ public class DatabaseToObjectMapper {
 
     public static List<EnvironmentVariable> getNoiseLevelEnvironmentVariablesFromCursor
             (Cursor environmentCursor){
+        int initialCursorPosition = environmentCursor.getPosition();
         ArrayList<EnvironmentVariable> environmentVariables =
                 new ArrayList<EnvironmentVariable>();
         try {
@@ -91,6 +92,8 @@ public class DatabaseToObjectMapper {
         } catch (Exception e){
             Log.w(LOG_TAG, e + ": " + e.getMessage());
         }
+        environmentCursor.moveToFirst();
+        environmentCursor.move(initialCursorPosition);
         return environmentVariables;
     }
 

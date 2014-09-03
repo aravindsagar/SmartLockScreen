@@ -11,8 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-
 public class ManageEnvironment extends ActionBarActivity {
+
+    private static final String LOG_TAG = ManageEnvironment.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
