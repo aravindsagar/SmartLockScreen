@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -81,22 +79,8 @@ public class EditEnvironment extends ActionBarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.edit_environment, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public void onBackPressed() {
+        placeholderFragment.onCancelButtonClick();
     }
 
     /**
@@ -233,7 +217,6 @@ public class EditEnvironment extends ActionBarActivity {
             enableBluetoothCheckBox.setChecked(true);
             bluetoothAllCheckbox.setChecked(false);
 
-            //Todo: setallorany
             if(environment.isBluetoothAllOrAny()){
                 enableBluetoothCheckBox.setChecked(true);
             }
@@ -422,7 +405,7 @@ public class EditEnvironment extends ActionBarActivity {
                     LocationEnvironmentVariable location = environment.getLocationEnvironmentVariable();
                     Bundle bundle = new Bundle();
                     bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE,location.getLatitude());
-                    bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LONGITUDE,location.getLongitude());
+                    bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LONGITUDE, location.getLongitude());
                     intent.putExtras(bundle);
                     Toast.makeText(getActivity(),"Select Location edit",Toast.LENGTH_SHORT).show();
                     getActivity().startActivityForResult(intent,REQUEST_LOCATION_SELECT);
@@ -475,7 +458,20 @@ public class EditEnvironment extends ActionBarActivity {
                 builder.create().show();
                 return;
             } else{
-                //Todo: check for unique environment name
+                if(!environmentName.equals(this.environmentName)) {
+                    Toast.makeText(getActivity(),"Name Check",Toast.LENGTH_SHORT).show();
+                    for (String s : Environment.getAllEnvironments(getActivity())) {
+                        if (s.equals(environmentName)){
+                            //Error
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle(R.string.alert_environment_name_unique_title).setMessage(R.string.alert_environment_name_unique_message);
+                            builder.setPositiveButton(R.string.ok,null);
+                            builder.create().show();
+                            return;
+                        }
+                    }
+                }
+
             }
 
             if(environmentHint.equals("")){
@@ -582,7 +578,7 @@ public class EditEnvironment extends ActionBarActivity {
         }
         public void onCancelButtonClick(){
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_add_environment_message);
+            builder.setTitle(R.string.alert_cancel_edit_environment_title).setMessage(R.string.alert_cancel_edit_environment_message);
             builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

@@ -57,6 +57,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/abc_action_bar_default_height"
                 android:textAppearance="?android:attr/textAppearanceMedium"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:gravity="center_vertical"
                 android:layout_marginTop="10dp"/>
 
             <CheckBox
@@ -64,7 +67,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/checkbox_bluetooth_all"
-                android:layout_marginTop="20dp"/>
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
 
             <!-- Wifi -->
 
@@ -91,6 +95,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/abc_action_bar_default_height"
                 android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:gravity="center_vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
 
             <!-- Location -->
@@ -117,7 +125,10 @@
                 android:text="@string/text_view_select_location"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/abc_action_bar_default_height"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:gravity="center_vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
 
             <EditText
