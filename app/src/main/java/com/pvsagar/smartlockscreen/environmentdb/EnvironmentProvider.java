@@ -368,17 +368,25 @@ public class EnvironmentProvider extends ContentProvider {
             case USER:
                 returnValue = deleteUser(db, selection, selectionArgs);
                 break;
+            case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
+                long environmentId = Long.parseLong(uri.getPathSegments().get(1));
+                long geofenceId = changeEnvironmentVariableValue(
+                        EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 0,
+                        EnvironmentEntry.COLUMN_GEOFENCE_ID, -1, environmentId, db);
+                selection = GeoFenceEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(geofenceId)};
             case GEOFENCE:
-                returnValue = db.delete(GeoFenceEntry.TABLE_NAME,
-                        selection, selectionArgs);
+                returnValue = deleteEnvironmentVariableWithUsageSearch(
+                        EnvironmentEntry.COLUMN_GEOFENCE_ID, GeoFenceEntry._ID,
+                        GeoFenceEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
             case WIFI_NETWORK:
-                returnValue = db.delete(WiFiNetworksEntry.TABLE_NAME,
-                        selection, selectionArgs);
+                returnValue = deleteEnvironmentVariableWithUsageSearch(
+                        EnvironmentEntry.COLUMN_WIFI_ID, WiFiNetworksEntry._ID,
+                        WiFiNetworksEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
             case BLUETOOTH_DEVICE:
-                returnValue = db.delete(BluetoothDevicesEntry.TABLE_NAME,
-                        selection, selectionArgs);
+                returnValue = db.delete(BluetoothDevicesEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
@@ -390,7 +398,31 @@ public class EnvironmentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        int returnValue;
+        SQLiteDatabase db = mEnvironmentDbHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)){
+            case ENVIRONMENT:
+                returnValue = db.update(EnvironmentEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
+                long environmentId = Long.parseLong(uri.getPathSegments().get(1));
+                long newGeofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
+                long oldGeofenceId = changeEnvironmentVariableValue(
+                        EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 1,
+                        EnvironmentEntry.COLUMN_GEOFENCE_ID, newGeofenceId, environmentId, db);
+                selection = GeoFenceEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(oldGeofenceId)};
+                returnValue = (newGeofenceId != oldGeofenceId)?1:0;
+                returnValue += deleteEnvironmentVariableWithUsageSearch(
+                        EnvironmentEntry.COLUMN_GEOFENCE_ID, GeoFenceEntry._ID,
+                        GeoFenceEntry.TABLE_NAME, selection, selectionArgs, db);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown Uri " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return returnValue;
     }
 
     private static UriMatcher buildUriMatcher(){
@@ -615,7 +647,78 @@ public class EnvironmentProvider extends ContentProvider {
                 EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
     }
 
+    /**
+     * Changes the environment variable values (id, enabled) of an environment to new specified
+     * values, updates in the db.
+     * @param enabledColumnName
+     * @param newEnabledValue
+     * @param idColumnName
+     * @param newId
+     * @param environmentId
+     * @param db
+     * @return The id of the variable before the environment was updated
+     */
+    private long changeEnvironmentVariableValue(String enabledColumnName, int newEnabledValue,
+            String idColumnName, long newId, long environmentId, SQLiteDatabase db){
+        long variableId;
+        Cursor environmentCursor = query(EnvironmentEntry.
+                buildEnvironmentUriWithId(environmentId), null, null, null, null);
+        if(environmentCursor.moveToFirst()){
+            variableId = environmentCursor.getLong(environmentCursor.getColumnIndex
+                    (idColumnName));
+            ContentValues environmentUpdateValues = new ContentValues();
+            environmentUpdateValues.put(enabledColumnName, newEnabledValue);
+            if(newEnabledValue == 1){
+                environmentUpdateValues.put(idColumnName, newId);
+            } else {
+                environmentUpdateValues.put(idColumnName, (String) null);
+            }
+            String environmentSelection = EnvironmentEntry._ID + " = ? ";
+            String[] environmentSelectionArgs = new String[]{String.valueOf(environmentId)};
+            db.update(EnvironmentEntry.TABLE_NAME, environmentUpdateValues,
+                    environmentSelection, environmentSelectionArgs);
+        } else {
+            Log.e(LOG_TAG, "Invalid environment id passed: " + environmentId);
+            throw new IllegalArgumentException(
+                    "Invalid environment id passed: " + environmentId);
+        }
+        return variableId;
+    }
+
     private static String getIdFromUriAsString(Uri uri){
         return String.valueOf(ContentUris.parseId(uri));
+    }
+
+    /**
+     * Deletes any environment variable type with usage search
+     * @param idColumnNameInEnvironment
+     * @param idColumnNameInVariableTable
+     * @param tableName Table name of environment variable,eg wifi_networks
+     * @param selection
+     * @param selectionArgs
+     * @param db
+     * @return number of entries deleted
+     */
+    private int deleteEnvironmentVariableWithUsageSearch(String idColumnNameInEnvironment,
+            String idColumnNameInVariableTable, String tableName,
+            String selection, String[] selectionArgs, SQLiteDatabase db){
+        String[] projection = new String[]{idColumnNameInVariableTable};
+        Cursor variableCursor = db.query(tableName, projection, selection, selectionArgs, null,
+                null, null);
+        if(!variableCursor.moveToFirst()) return 0;
+        for(; !variableCursor.isAfterLast(); variableCursor.moveToNext()){
+            long variableId = variableCursor.getLong(variableCursor.getColumnIndex(
+                    idColumnNameInVariableTable));
+            String environmentSelection = idColumnNameInEnvironment + " = ? ";
+            String[] environmentSelectionArgs = new String[]{String.valueOf(variableId)};
+            Cursor environmentCursor = query(EnvironmentEntry.CONTENT_URI, null,
+                    environmentSelection, environmentSelectionArgs, null);
+            if(environmentCursor.getCount() > 0){
+                Log.w(LOG_TAG, "Environment variable in use, cannot delete. id: " + variableId +
+                        ". Table: " + tableName);
+                return 0;
+            }
+        }
+        return db.delete(tableName, selection,selectionArgs);
     }
 }

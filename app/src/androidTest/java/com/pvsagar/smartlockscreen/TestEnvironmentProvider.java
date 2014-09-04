@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -31,6 +32,19 @@ public class TestEnvironmentProvider extends AndroidTestCase {
 
     private void deleteAllRecords(Uri... uris){
         Cursor cursor;
+        ContentResolver resolver = mContext.getContentResolver();
+        cursor = resolver.query(EnvironmentEntry.CONTENT_URI, null, null, null, null);
+        if(cursor.moveToFirst()) {
+            for (; !cursor.isAfterLast(); cursor.moveToNext()){
+                long environmentId = cursor.getLong(cursor.getColumnIndex(EnvironmentEntry._ID));
+                Log.d(LOG_TAG, "Deleting geofence entry for envId = " + environmentId);
+                resolver.delete(EnvironmentEntry.
+                        buildEnvironmentUriWithIdAndLocation(environmentId), null, null);
+            }
+        }
+        resolver.delete(GeoFenceEntry.CONTENT_URI, null, null);
+        cursor = resolver.query(GeoFenceEntry.CONTENT_URI, null, null, null, null);
+        assertEquals(0, cursor.getCount());
         for(Uri uri: uris){
             mContext.getContentResolver().delete(uri, null, null);
             cursor = mContext.getContentResolver().query(uri, null, null, null, null);
@@ -44,8 +58,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
     }
 
     public void testDeleteAllRecordsBefore() {
-        deleteAllRecords(GeoFenceEntry.CONTENT_URI, WiFiNetworksEntry.CONTENT_URI,
-                BluetoothDevicesEntry.CONTENT_URI, EnvironmentEntry.CONTENT_URI,
+        deleteAllRecords(GeoFenceEntry.CONTENT_URI, EnvironmentEntry.CONTENT_URI,
+                WiFiNetworksEntry.CONTENT_URI, BluetoothDevicesEntry.CONTENT_URI,
                 UsersEntry.CONTENT_URI);
         SQLiteDatabase db = new EnvironmentDbHelper(mContext).getReadableDatabase();
         Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
@@ -338,6 +352,27 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         environmentCursor = mContext.getContentResolver().query(EnvironmentEntry.CONTENT_URI,
                 null, null, null, null);
         validateCursor(environmentValues, environmentCursor);
+
+        //Updating the environment
+        geofenceValues = getAlternateGeofenceValues();
+        int updatedRows = mContext.getContentResolver().update(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId),
+                geofenceValues, null, null);
+        Log.d(LOG_TAG, "Rows modified: " + updatedRows);
+
+        geofenceCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId),
+                null, null, null, null);
+        validateCursor(geofenceValues, geofenceCursor);
+        geofenceCursor.moveToFirst();
+        geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
+        assertTrue(geofenceId != -1);
+
+        //Environment check after updation
+        environmentValues = getEnvironmentContentValues(geofenceId, wifiNetworkId);
+        environmentCursor = mContext.getContentResolver().query(EnvironmentEntry.CONTENT_URI,
+                null, null, null, null);
+        validateCursor(environmentValues, environmentCursor);
     }
 
     public void testDeleteAllRecordsAfter(){
@@ -373,6 +408,20 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         return values;
     }
 
+    private ContentValues getAlternateGeofenceValues() {
+        ContentValues values = new ContentValues();
+        final double testLatitude = 24.5;
+        final double testLongitude = 78.9;
+        final int testRadius = 25;
+        final String testLocationName = "work";
+
+        values.put(GeoFenceEntry.COLUMN_COORD_LAT, testLatitude);
+        values.put(GeoFenceEntry.COLUMN_COORD_LONG, testLongitude);
+        values.put(GeoFenceEntry.COLUMN_RADIUS, testRadius);
+        values.put(GeoFenceEntry.COLUMN_LOCATION_NAME, testLocationName);
+        return values;
+    }
+
     private ContentValues getBluetoothDeviceValues(){
         ContentValues values = new ContentValues();
         final String testDeviceName = "Nexus 4";
@@ -395,6 +444,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         ContentValues values = new ContentValues();
         final int testEnbled = 1;
         final String testEnvironmentName = "home";
+        final String testHint = "hint";
         final double testMaxNoiseLevel = 30.2;
         final double testMinNoiseLevel = 11.1;
         values.put(EnvironmentEntry.COLUMN_NAME, testEnvironmentName);
@@ -408,6 +458,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         values.put(EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL, testMaxNoiseLevel);
         values.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED, testEnbled);
         values.put(EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,testMinNoiseLevel);
+        values.put(EnvironmentEntry.COLUMN_IS_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_ENVIRONMENT_HINT, testHint);
         return values;
     }
 
@@ -418,6 +470,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         final String testEnvironmentName = "home";
         final double testMaxNoiseLevel = 30.2;
         final double testMinNoiseLevel = 11.1;
+        final String testHint = "hint";
         values.put(EnvironmentEntry.COLUMN_NAME, testEnvironmentName);
         values.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, testNotEnabled);
         values.put(EnvironmentEntry.COLUMN_IS_BLUETOOTH_ENABLED, testNotEnabled);
@@ -427,6 +480,8 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         values.put(EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL, testMaxNoiseLevel);
         values.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED, testEnbled);
         values.put(EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,testMinNoiseLevel);
+        values.put(EnvironmentEntry.COLUMN_IS_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_ENVIRONMENT_HINT, testHint);
         return values;
     }
 
