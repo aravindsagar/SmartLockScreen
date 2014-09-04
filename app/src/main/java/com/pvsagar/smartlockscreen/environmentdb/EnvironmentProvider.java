@@ -393,7 +393,9 @@ public class EnvironmentProvider extends ContentProvider {
                         WiFiNetworksEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
             case BLUETOOTH_DEVICE:
-                returnValue = db.delete(BluetoothDevicesEntry.TABLE_NAME, selection, selectionArgs);
+                returnValue = deleteEnvironmentVariableWithUsageSearch(
+                        EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID, BluetoothDevicesEntry._ID,
+                        BluetoothDevicesEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
@@ -424,6 +426,19 @@ public class EnvironmentProvider extends ContentProvider {
                 returnValue += deleteEnvironmentVariableWithUsageSearch(
                         EnvironmentEntry.COLUMN_GEOFENCE_ID, GeoFenceEntry._ID,
                         GeoFenceEntry.TABLE_NAME, selection, selectionArgs, db);
+                break;
+            case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
+                environmentId = Long.parseLong(uri.getPathSegments().get(1));
+                long newWifiId = db.insert(WiFiNetworksEntry.TABLE_NAME, null, values);
+                long oldWifiId = changeEnvironmentVariableValue(
+                        EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1,
+                        EnvironmentEntry.COLUMN_WIFI_ID, newWifiId, environmentId, db);
+                selection = WiFiNetworksEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(oldWifiId)};
+                returnValue = (newWifiId != oldWifiId)?1:0;
+                returnValue += deleteEnvironmentVariableWithUsageSearch(
+                        EnvironmentEntry.COLUMN_WIFI_ID, WiFiNetworksEntry._ID,
+                        WiFiNetworksEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);

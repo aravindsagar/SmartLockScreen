@@ -358,6 +358,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         validateCursor(environmentValues, environmentCursor);
 
         //Updating the environment
+        //Updating geofence
         geofenceValues = getAlternateGeofenceValues();
         int updatedRows = mContext.getContentResolver().update(
                 EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId),
@@ -371,6 +372,22 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         geofenceCursor.moveToFirst();
         geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
         assertTrue(geofenceId != -1);
+
+        //updating wifi
+        wifiNetworkValues = getAlternateWifiNetworkContentValues();
+        updatedRows = mContext.getContentResolver().update(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId),
+                wifiNetworkValues, null, null);
+        Log.d(LOG_TAG, "Rows modified: " + updatedRows);
+
+        wifiNetworkCursor = mContext.getContentResolver().query(
+                EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId),
+                null, null, null, null);
+        validateCursor(wifiNetworkValues, wifiNetworkCursor);
+        wifiNetworkCursor.moveToFirst();
+        wifiNetworkId = wifiNetworkCursor.getLong(wifiNetworkCursor.
+                getColumnIndex(WiFiNetworksEntry._ID));
+        assertTrue(wifiNetworkId != -1);
 
         //Environment check after updation
         environmentValues = getEnvironmentContentValues(geofenceId, wifiNetworkId);
@@ -438,6 +455,15 @@ public class TestEnvironmentProvider extends AndroidTestCase {
     private ContentValues getWifiNetworkContentValues(){
         ContentValues values = new ContentValues();
         final String testSSID = "homeWifi";
+        final String testEncryptionType = "WPA";
+        values.put(WiFiNetworksEntry.COLUMN_SSID, testSSID);
+        values.put(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, testEncryptionType);
+        return values;
+    }
+
+    private ContentValues getAlternateWifiNetworkContentValues(){
+        ContentValues values = new ContentValues();
+        final String testSSID = "workWifi";
         final String testEncryptionType = "WEP";
         values.put(WiFiNetworksEntry.COLUMN_SSID, testSSID);
         values.put(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, testEncryptionType);
