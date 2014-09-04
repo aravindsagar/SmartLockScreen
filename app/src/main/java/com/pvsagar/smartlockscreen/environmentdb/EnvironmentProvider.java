@@ -392,10 +392,12 @@ public class EnvironmentProvider extends ContentProvider {
                         EnvironmentEntry.COLUMN_WIFI_ID, WiFiNetworksEntry._ID,
                         WiFiNetworksEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
+            case ENVIRONMENT_WITH_ID_AND_BLUETOOTH_DEVICES:
+                environmentId = Long.parseLong(uri.getPathSegments().get(1));
+                returnValue = deleteBluetoothEnvironmentVariable(environmentId, db);
+                break;
             case BLUETOOTH_DEVICE:
-                returnValue = deleteEnvironmentVariableWithUsageSearch(
-                        EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID, BluetoothDevicesEntry._ID,
-                        BluetoothDevicesEntry.TABLE_NAME, selection, selectionArgs, db);
+                returnValue = deleteAllUnusedBluetoothEnvironmentVariables(db);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
@@ -742,5 +744,53 @@ public class EnvironmentProvider extends ContentProvider {
             }
         }
         return db.delete(tableName, selection,selectionArgs);
+    }
+
+    private int deleteBluetoothEnvironmentVariable(long environmentId, SQLiteDatabase db){
+        String selection = EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID+ " = ? ";
+        String[] selectionArgs = new String[]{String.valueOf(environmentId)};
+        Cursor oldBluetoothEntries = db.query(EnvironmentBluetoothEntry.TABLE_NAME, null,
+                selection, selectionArgs, null, null, null);
+        int returnValue = db.delete(EnvironmentBluetoothEntry.TABLE_NAME, selection, selectionArgs);
+        String bluetoothSelection = BluetoothDevicesEntry._ID + " = ? ";
+        if(oldBluetoothEntries.moveToFirst()){
+            for(; !oldBluetoothEntries.isAfterLast(); oldBluetoothEntries.moveToNext()){
+                long bluetoothId = oldBluetoothEntries.getLong(oldBluetoothEntries.
+                        getColumnIndex(EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID));
+                selection = EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(bluetoothId)};
+                Cursor bluetoothCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
+                        null, selection, selectionArgs, null, null, null, null);
+                if(bluetoothCursor.getCount() == 0){
+                    returnValue += db.delete(BluetoothDevicesEntry.TABLE_NAME, bluetoothSelection,
+                            selectionArgs);
+                }
+            }
+        }
+        return returnValue;
+    }
+
+    private int deleteAllUnusedBluetoothEnvironmentVariables(SQLiteDatabase db){
+        Cursor oldBluetoothEntries = db.query(BluetoothDevicesEntry.TABLE_NAME, null,
+                null, null, null, null, null);
+        String selection;
+        String[] selectionArgs;
+        int returnValue = 0;
+        String bluetoothSelection = BluetoothDevicesEntry._ID + " = ? ";
+        if(oldBluetoothEntries.moveToFirst()){
+            for(; !oldBluetoothEntries.isAfterLast(); oldBluetoothEntries.moveToNext()){
+                long bluetoothId = oldBluetoothEntries.getLong(oldBluetoothEntries.
+                        getColumnIndex(BluetoothDevicesEntry._ID));
+                selection = EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(bluetoothId)};
+                Cursor bluetoothCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
+                        null, selection, selectionArgs, null, null, null, null);
+                if(bluetoothCursor.getCount() == 0){
+                    returnValue += db.delete(BluetoothDevicesEntry.TABLE_NAME, bluetoothSelection,
+                            selectionArgs);
+                }
+            }
+        }
+        return returnValue;
     }
 }

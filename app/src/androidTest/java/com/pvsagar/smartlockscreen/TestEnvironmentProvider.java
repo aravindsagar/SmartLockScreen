@@ -41,14 +41,20 @@ public class TestEnvironmentProvider extends AndroidTestCase {
                         buildEnvironmentUriWithIdAndLocation(environmentId), null, null);
                 resolver.delete(EnvironmentEntry.buildEnvironmentUriWithIdAndWifi(environmentId),
                         null, null);
+                resolver.delete(EnvironmentEntry.
+                        buildEnvironmentUriWithIdAndBluetooth(environmentId), null, null);
             }
         }
         resolver.delete(GeoFenceEntry.CONTENT_URI, null, null);
         resolver.delete(WiFiNetworksEntry.CONTENT_URI, null, null);
+        resolver.delete(BluetoothDevicesEntry.CONTENT_URI, null, null);
         cursor = resolver.query(GeoFenceEntry.CONTENT_URI, null, null, null, null);
         assertEquals(0, cursor.getCount());
         cursor = resolver.query(WiFiNetworksEntry.CONTENT_URI, null, null, null, null);
         assertEquals(0, cursor.getCount());
+        cursor = resolver.query(BluetoothDevicesEntry.CONTENT_URI, null, null, null, null);
+        assertEquals(0, cursor.getCount());
+
         for(Uri uri: uris){
             mContext.getContentResolver().delete(uri, null, null);
             cursor = mContext.getContentResolver().query(uri, null, null, null, null);
@@ -63,7 +69,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
 
     public void testDeleteAllRecordsBefore() {
         deleteAllRecords(GeoFenceEntry.CONTENT_URI, WiFiNetworksEntry.CONTENT_URI,
-                EnvironmentEntry.CONTENT_URI, BluetoothDevicesEntry.CONTENT_URI,
+                BluetoothDevicesEntry.CONTENT_URI, EnvironmentEntry.CONTENT_URI,
                 UsersEntry.CONTENT_URI);
         SQLiteDatabase db = new EnvironmentDbHelper(mContext).getReadableDatabase();
         Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
