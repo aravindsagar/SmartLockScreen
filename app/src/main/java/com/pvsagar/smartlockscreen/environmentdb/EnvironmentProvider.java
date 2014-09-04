@@ -380,6 +380,13 @@ public class EnvironmentProvider extends ContentProvider {
                         EnvironmentEntry.COLUMN_GEOFENCE_ID, GeoFenceEntry._ID,
                         GeoFenceEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
+            case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
+                environmentId = Long.parseLong(uri.getPathSegments().get(1));
+                long wifiId = changeEnvironmentVariableValue(
+                        EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 0,
+                        EnvironmentEntry.COLUMN_WIFI_ID, -1, environmentId, db);
+                selection = WiFiNetworksEntry._ID + " = ? ";
+                selectionArgs = new String[]{String.valueOf(wifiId)};
             case WIFI_NETWORK:
                 returnValue = deleteEnvironmentVariableWithUsageSearch(
                         EnvironmentEntry.COLUMN_WIFI_ID, WiFiNetworksEntry._ID,
