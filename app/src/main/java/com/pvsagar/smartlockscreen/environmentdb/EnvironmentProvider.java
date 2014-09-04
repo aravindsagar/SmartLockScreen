@@ -412,6 +412,9 @@ public class EnvironmentProvider extends ContentProvider {
         int returnValue;
         SQLiteDatabase db = mEnvironmentDbHelper.getWritableDatabase();
         switch (sUriMatcher.match(uri)){
+            case ENVIRONMENT_WITH_ID:
+                selection = EnvironmentEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
             case ENVIRONMENT:
                 returnValue = db.update(EnvironmentEntry.TABLE_NAME, values, selection,
                         selectionArgs);

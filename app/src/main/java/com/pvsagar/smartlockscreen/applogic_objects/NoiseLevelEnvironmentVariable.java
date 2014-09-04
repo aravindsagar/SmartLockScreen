@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
@@ -33,6 +34,11 @@ public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
     @Override
     public boolean isFloatValuesSupported() {
         return true;
+    }
+
+    @Override
+    public ContentValues getContentValues() {
+        return null;
     }
 
     public float getUpperLimit(){

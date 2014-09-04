@@ -3,11 +3,13 @@ package com.pvsagar.smartlockscreen.applogic_objects;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
 
 import java.util.ArrayList;
 
@@ -116,4 +118,13 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         return bluetoothDevices;
     }
 
+    @Override
+    public ContentValues getContentValues() {
+        ContentValues bluetoothValues = new ContentValues();
+        bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_NAME,
+                getDeviceName());
+        bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS,
+                getDeviceAddress());
+        return bluetoothValues;
+    }
 }
