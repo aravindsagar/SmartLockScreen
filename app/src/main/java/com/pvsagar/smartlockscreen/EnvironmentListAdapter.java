@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     }
 
     @Override
-    public View getView(int position, final View convertView, ViewGroup parent) {
+    public View getView(final int position, final View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
         Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
@@ -44,7 +45,10 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Todo: Start AddEnvironment Activity in edit mode
+                //Todo: Start EditEnvironment Activity
+                Intent intent = new Intent(context,EditEnvironment.class);
+                intent.putExtra(EditEnvironment.INTENT_EXTRA_ENVIRONMENT,environmentNames[position]);
+                context.startActivity(intent);
             }
         });
         return rootView;

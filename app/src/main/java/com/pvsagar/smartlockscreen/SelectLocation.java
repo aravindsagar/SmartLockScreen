@@ -27,17 +27,32 @@ import java.util.Date;
 
 public class SelectLocation extends ActionBarActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 
-    private String LOG_TAG = SelectLocation.class.getSimpleName();
+    private final String LOG_TAG = SelectLocation.class.getSimpleName();
+    public static final String INTENT_EXTRA_SELECTED_LATITUDE = "selectedLatitude";
+    public static final String INTENT_EXTRA_SELECTED_LONGITUDE = "selectedLongitude";
+
     private GoogleMap googleMap;
     private static final int MAP_DFAULT_ZOOM_LEVEL = 14;
     private Location selectedLocation;
     private LocationClient mLocationClient;
+
+    //Intent
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_location);
 
+        //Intent
+        intent = getIntent();
+        //Init
+        setUpActionBar();
+        setUpGoogleMap();
+
+    }
+
+    private void setUpActionBar(){
         /* Adding Contextual Action Bar with Done and Cancel Button */
         final LayoutInflater layoutInflater = (LayoutInflater) getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         final View customActionBarView = layoutInflater.inflate(R.layout.actionbar_custom_view_done, null);
@@ -60,8 +75,9 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
             /* End of Action Bar Code */
+    }
 
-
+    private void setUpGoogleMap(){
         googleMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.map_select_location)).getMap();
         googleMap.setMyLocationEnabled(true);
         googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
@@ -78,7 +94,19 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
             }
         });
         mLocationClient = new LocationClient(this,this,this);
-        initGoogleMap();
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                selectedLocation = new Location("selectedLocation");
+                selectedLocation.setTime(new Date().getTime());
+                selectedLocation.setLatitude(latLng.latitude);
+                selectedLocation.setLongitude(latLng.longitude);
+                googleMap.clear();
+                googleMap.addMarker(new MarkerOptions().position(latLng));
+            }
+        });
+
     }
 
     private void onDoneButtonClick(){
@@ -106,19 +134,6 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
         super.onStop();
     }
 
-    private void initGoogleMap(){
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                selectedLocation = new Location("selectedLocation");
-                selectedLocation.setTime(new Date().getTime());
-                selectedLocation.setLatitude(latLng.latitude);
-                selectedLocation.setLongitude(latLng.longitude);
-                googleMap.clear();
-                googleMap.addMarker(new MarkerOptions().position(latLng));
-            }
-        });
-    }
 
     private boolean checkServicesConnected(){
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -133,11 +148,33 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
 
     @Override
     public void onConnected(Bundle bundle) {
-        selectedLocation = mLocationClient.getLastLocation();
-        LatLng latLng = new LatLng(selectedLocation.getLatitude(),selectedLocation.getLongitude());
-        googleMap.addMarker(new MarkerOptions().position(latLng));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,MAP_DFAULT_ZOOM_LEVEL));
-        mLocationClient.disconnect();
+        Bundle intentBundle = intent.getExtras();
+        double latitude = -1;
+        double longitude = -1;
+        if(intentBundle != null && intentBundle.containsKey(INTENT_EXTRA_SELECTED_LATITUDE) && intentBundle.containsKey(INTENT_EXTRA_SELECTED_LONGITUDE)) {
+            latitude = intentBundle.getDouble(INTENT_EXTRA_SELECTED_LATITUDE, -1);
+            longitude = intentBundle.getDouble(INTENT_EXTRA_SELECTED_LONGITUDE, -1);
+        }
+        else{
+            latitude = -1;
+            longitude = -1;
+        }
+        if(latitude != -1 && longitude != -1){
+            selectedLocation = new Location("Selected Location");
+            selectedLocation.setLatitude(latitude);
+            selectedLocation.setLongitude(longitude);
+            LatLng latLng = new LatLng(latitude,longitude);
+            googleMap.addMarker(new MarkerOptions().position(latLng));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DFAULT_ZOOM_LEVEL));
+
+        } else {
+            selectedLocation = mLocationClient.getLastLocation();
+            LatLng latLng = new LatLng(selectedLocation.getLatitude(),selectedLocation.getLongitude());
+            googleMap.addMarker(new MarkerOptions().position(latLng));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_DFAULT_ZOOM_LEVEL));
+            mLocationClient.disconnect();
+        }
+
     }
 
     @Override

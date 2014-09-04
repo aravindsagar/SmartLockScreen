@@ -73,6 +73,20 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
         setStringValue(encryptionType, INDEX_ENCRYPTION_TYPE);
     }
 
+    public static boolean enableWifi(Context context){
+        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+
+        if(wifiManager == null){
+            Log.e(LOG_TAG,"WiFi Hardware not available");
+            return false;
+        }
+        if(!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+            return true;
+        }
+        return true;
+    }
+
     public static ArrayList<WifiConfiguration> getConfiguredWiFiConnections(Context context){
 
         WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);

@@ -5,10 +5,8 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -31,13 +29,14 @@ import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 
-public class AddEnvironment extends ActionBarActivity {
+public class EditEnvironment extends ActionBarActivity {
 
-    private static final String LOG_TAG = AddEnvironment.class.getSimpleName();
+    private static final String LOG_TAG = EditEnvironment.class.getSimpleName();
     public static final int REQUEST_LOCATION_SELECT = 31;
-    public static final String INTENT_EXTRA_SELECTED_LOCATION = "selectedLocation";
+    public static final String INTENT_EXTRA_ENVIRONMENT = "environmentName";
 
     /* Bluetooth */
     private static ArrayList<BluetoothDevice> bluetoothDevices;
@@ -54,75 +53,38 @@ public class AddEnvironment extends ActionBarActivity {
     private static double lonLocation;
     private static double radLocation;
 
-
-    private PlaceholderFragment placeholderFragment;
-
+    PlaceholderFragment placeholderFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_add_environment);
+        setContentView(R.layout.activity_edit_environment);
         if (savedInstanceState == null) {
             placeholderFragment = new PlaceholderFragment();
             getFragmentManager().beginTransaction()
                     .add(R.id.container, placeholderFragment)
                     .commit();
         }
-
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == BluetoothEnvironmentVariable.REQUEST_BLUETOOTH_ENABLE){
+            if(resultCode == RESULT_OK){
+                placeholderFragment.setUpBluetoothElements();
+            } else{
+                Toast.makeText(this,"Bluetooth not available. Exiting edit environment",Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.add_environment, menu);
+        getMenuInflater().inflate(R.menu.edit_environment, menu);
         return true;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == BluetoothEnvironmentVariable.REQUEST_BLUETOOTH_ENABLE){
-            /* Bluetooth request */
-            CheckBox enableBluetoothCheckBox = (CheckBox)findViewById(R.id.checkbox_enable_bluetooth);
-
-            // Checking whether bluetooth is enabled or not
-            if(resultCode == RESULT_OK){
-                //Bluetooth Enabled
-                //Get the list of paired devices, populate the list, set the adapter
-                Toast.makeText(getBaseContext(),"Bluetooth switched on",Toast.LENGTH_SHORT).show();
-                enableBluetoothCheckBox.setChecked(true);
-                ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(this);
-                ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
-                if(bluetoothDevices != null) {
-                    //Populate the String list and Set the adapter for the list view
-                    for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
-                        deviceNamesArrayList.add(bluetoothDevice.getName());
-                    }
-                    AddEnvironment.bluetoothDevices = bluetoothDevices;
-                    placeholderFragment.setBluetoothItemsEnabled(true);
-                }
-
-            }
-            else{
-                //Bluetooth not enabled
-                //Un check the checkbox, disable the list
-                Toast.makeText(getBaseContext(),"Unable to switch on Bluetooth",Toast.LENGTH_SHORT).show();
-                enableBluetoothCheckBox.setChecked(false);
-                AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                placeholderFragment.setBluetoothItemsEnabled(false);
-
-            }
-        }
-        else if(requestCode == REQUEST_LOCATION_SELECT){
-            if(resultCode == RESULT_OK){
-                Bundle bundle = data.getExtras();
-                Location location = (Location)bundle.get(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION);
-                placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
-                placeholderFragment.lonLocationEditText.setText(""+location.getLongitude());
-            }
-        }
     }
 
     @Override
@@ -137,12 +99,13 @@ public class AddEnvironment extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
     /**
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+
+        Environment environment;
+        String environmentName;
 
         /* Environment Details */
         private EditText environmentNameEditText;
@@ -170,6 +133,11 @@ public class AddEnvironment extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
 
+            //Get the environment
+            Intent passedIntent = getActivity().getIntent();
+            environmentName = passedIntent.getStringExtra(EditEnvironment.INTENT_EXTRA_ENVIRONMENT);
+            environment = Environment.getFullEnvironment(getActivity(),environmentName);
+
             /* Variable Initialization */
             //Environment details
             environmentNameEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_name);
@@ -189,19 +157,20 @@ public class AddEnvironment extends ActionBarActivity {
             radLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_rad);
             selectLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_location);
 
-            /* Initialization */
-            setUpBluetoothElements();
-            setUpWiFiElements();
-            setUpLocationElements();
 
             setUpActionBar();
+
+
+            /* Initialization */
+            setUpEditEnvironment();
+            /* End of Initialization */
 
             return rootView;
         }
 
         private void setUpActionBar(){
             /* Adding Contextual Action Bar with Done and Cancel Button */
-            final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getActionBar().getThemedContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
             final View customActionBarView = layoutInflater.inflate(R.layout.actionbar_custom_view_done_cancel, null);
             customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
                     new View.OnClickListener() {
@@ -231,14 +200,55 @@ public class AddEnvironment extends ActionBarActivity {
             /* End of Action Bar Code */
         }
 
-        public void setUpBluetoothElements(){
+        private void setUpEditEnvironment(){
+            /* Environment Details */
+            environmentNameEditText.setText(environment.getName());
+            environmentHintEditText.setText(environment.getHint());
+            /* Bluetooth Details */
+            if(environment.hasBluetoothDevices){
+                BluetoothEnvironmentVariable.enableBluetooth(getActivity());
+            }
+            /* Wi-Fi Details */
+            if(environment.hasWiFiNetwork){
+                if(!WiFiEnvironmentVariable.enableWifi(getActivity())){
+                    Toast.makeText(getActivity(),"Couldn't start Wi-Fi",Toast.LENGTH_SHORT).show();
+                    getActivity().finish();
+                } else{
+                    setUpWiFiElements();
+                }
+            }
 
+            if (environment.hasLocation){
+                setUpLocationElements();
+            }
+
+        }
+
+        private void setUpBluetoothElements(){
             /* Initialization */
             bluetoothDevices = new ArrayList<BluetoothDevice>();
             mSelectedBluetoothItems = new ArrayList<Integer>();
             mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
-            setBluetoothItemsEnabled(false);
+            setBluetoothItemsEnabled(true);
+            enableBluetoothCheckBox.setChecked(true);
             bluetoothAllCheckbox.setChecked(false);
+
+            //Todo: setallorany
+            if(environment.isBluetoothAllOrAny()){
+                enableBluetoothCheckBox.setChecked(true);
+            }
+
+            /* Populating bluetooth list */
+            bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(getActivity());
+            Vector<BluetoothEnvironmentVariable> bluetoothVariables =  environment.getBluetoothEnvironmentVariables();
+            for(int i = 0; i < bluetoothDevices.size(); i++){
+                for(int j = 0; j < bluetoothVariables.size(); j++){
+                    if(bluetoothVariables.get(j).getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())){
+                        mSelectedBluetoothDevices.add(bluetoothDevices.get(i));
+                        mSelectedBluetoothItems.add(i);
+                    }
+                }
+            }
 
             /* CheckBox CheckedChange Listener */
             enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -252,7 +262,7 @@ public class AddEnvironment extends ActionBarActivity {
                             for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
                                 deviceNamesArrayList.add(bluetoothDevice.getName());
                             }
-                            AddEnvironment.bluetoothDevices = bluetoothDevices;
+                            EditEnvironment.bluetoothDevices = bluetoothDevices;
                             setBluetoothItemsEnabled(true);
 
 
@@ -261,14 +271,14 @@ public class AddEnvironment extends ActionBarActivity {
                             if (mBluetoothAdapter == null) {
                                 enableBluetoothCheckBox.setChecked(false);
                                 //Disable the list
-                                AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
+                                EditEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
                                 setBluetoothItemsEnabled(false);
                             }
                         }
 
                     } else {
                         //Disable the list
-                        AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
+                        EditEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
                         setBluetoothItemsEnabled(false);
                     }
                 }
@@ -317,10 +327,20 @@ public class AddEnvironment extends ActionBarActivity {
             });
         }
 
-        public void setUpWiFiElements(){
-            wifiConfigurations = new ArrayList<WifiConfiguration>();
+        private void setUpWiFiElements(){
+            enableWiFiCheckBox.setChecked(true);
+            wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(getActivity());
+            String wifiSSIDSelected = environment.getWiFiEnvironmentVariable().getSSID();
             mSelectedWiFiItem = -1;
-            setWiFiItemsEnabled(false);
+            //Finding selected Wi-Fi connection
+            for (int i = 0; i < wifiConfigurations.size(); i++) {
+                if(wifiSSIDSelected.equals(wifiConfigurations.get(i).SSID)){
+                    mSelectedWifiConfiguration = wifiConfigurations.get(i);
+                    mSelectedWiFiItem = i;
+                    break;
+                }
+            }
+            setWiFiItemsEnabled(true);
 
             /* Check Box listener */
             enableWiFiCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -371,18 +391,24 @@ public class AddEnvironment extends ActionBarActivity {
             });
         }
 
-        public void setUpLocationElements(){
+        private void setUpLocationElements(){
+            setLocationItemsEnabled(true);
+            enableLocationCheckBox.setChecked(true);
 
-            setLocationItemsEnabled(false);
-            enableLocationCheckBox.setChecked(false);
+            //setting current location
+            LocationEnvironmentVariable locationVariable = environment.getLocationEnvironmentVariable();
+            nameLocationEditText.setText(locationVariable.getLocationName());
+            latLocationEditText.setText(""+locationVariable.getLatitude());
+            lonLocationEditText.setText(""+locationVariable.getLongitude());
+            radLocationEditText.setText(""+locationVariable.getRadius());
+
 
             enableLocationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
+                    if (isChecked) {
                         setLocationItemsEnabled(true);
-                    }
-                    else {
+                    } else {
                         setLocationItemsEnabled(false);
                     }
                 }
@@ -391,8 +417,14 @@ public class AddEnvironment extends ActionBarActivity {
             selectLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.v(LOG_TAG,"Starting select location");
+                    Log.v(LOG_TAG, "Starting select location");
                     Intent intent = new Intent(getActivity(),SelectLocation.class);
+                    LocationEnvironmentVariable location = environment.getLocationEnvironmentVariable();
+                    Bundle bundle = new Bundle();
+                    bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE,location.getLatitude());
+                    bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LONGITUDE,location.getLongitude());
+                    intent.putExtras(bundle);
+                    Toast.makeText(getActivity(),"Select Location edit",Toast.LENGTH_SHORT).show();
                     getActivity().startActivityForResult(intent,REQUEST_LOCATION_SELECT);
                 }
             });
@@ -537,13 +569,14 @@ public class AddEnvironment extends ActionBarActivity {
             /* Data Parsed */
 
             /* Creating Environment */
-            Environment environment = new Environment(environmentName,environmentVariables);
+            Environment newEnvironment = new Environment(environmentName,environmentVariables);
             if(bluetoothFlag){
-                environment.setBluetoothAllOrAny(bluetoothAllFlag);
+                newEnvironment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
-            environment.setHint(environmentHint);
+            newEnvironment.setHint(environmentHint);
+            //Todo: Update the database
 
-            environment.insertIntoDatabase(getActivity());
+            //environment.insertIntoDatabase(getActivity());
             getActivity().finish();
 
         }

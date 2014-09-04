@@ -54,5 +54,6 @@
     <string name="text_view_select_location">Select Location from Map</string>
     <string name="checkbox_bluetooth_all">Check for all bluetooth connection</string>
     <string name="intent_extra_selected_location">selectedLocation</string>
+    <string name="title_activity_edit_environment">EditEnvironment</string>
 
 </resources>

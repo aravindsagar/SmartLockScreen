@@ -279,8 +279,7 @@ public class Environment {
                 selection, selectionArgs, null);
         Environment e;
         if(envCursor.moveToFirst()){
-            long environmentId = envCursor.getLong(envCursor.getColumnIndex(EnvironmentEntry._ID));
-            return (envCursor.getInt(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_IS_ENABLED)) == 1?true:false);
+            return (envCursor.getInt(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_IS_ENABLED)) == 1);
         } else {
             return false;
         }

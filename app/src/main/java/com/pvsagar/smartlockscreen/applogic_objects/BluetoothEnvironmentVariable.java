@@ -74,7 +74,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
      * This function requests the users to enable bluetooth
      * @param context Context of the calling activity
      */
-    public void enableBluetooth(Context context){
+    public static void enableBluetooth(Context context){
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //Checking for Bluetooth Hardware
