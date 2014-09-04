@@ -48,6 +48,11 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+        <receiver android:name=".receivers.WifiReceiver">
+            <intent-filter android:priority="100">
+                <action android:name="android.net.wifi.STATE_CHANGE"/>
+            </intent-filter>
+        </receiver>
         <service
             android:name=".services.GeoFenceIntentService"
             android:exported="false" >
