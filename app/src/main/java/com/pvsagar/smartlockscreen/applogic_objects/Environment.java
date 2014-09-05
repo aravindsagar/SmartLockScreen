@@ -288,6 +288,25 @@ public class Environment {
     }
 
     /**
+     * Sets the enabled flag of any environment in the database
+     * @param context
+     * @param environmentName Name of the environment whose enabled flag should b changed
+     * @param enabled The new enabled value
+     */
+    public static void setEnabledInDatabase(Context context, String environmentName,
+                                               boolean enabled){
+        ContentValues environmentValues = new ContentValues();
+        environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, enabled);
+        Environment e = getFullEnvironment(context, environmentName);
+        long id;
+        if(e != null) {
+            id = e.id;
+            context.getContentResolver().update(EnvironmentEntry.buildEnvironmentUriWithId(id),
+                    environmentValues, null, null);
+        }
+    }
+
+    /**
      * Returns list of names of all the environment in the database.
      * To get the full environment details, see getFullEnvironment()
      * @param context
@@ -307,6 +326,12 @@ public class Environment {
         return environmentNames;
     }
 
+    /**
+     * Get the complete environment details of an environment from the database
+     * @param context
+     * @param environmentName Name of the environment whose details are required
+     * @return An instance of Environment with the required details
+     */
     public static Environment getFullEnvironment(Context context, String environmentName){
         String selection = EnvironmentEntry.COLUMN_NAME + " = ? ";
         String[] selectionArgs = new String[]{environmentName};
