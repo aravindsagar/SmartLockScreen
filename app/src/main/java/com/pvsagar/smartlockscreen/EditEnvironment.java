@@ -460,7 +460,7 @@ public class EditEnvironment extends ActionBarActivity {
             } else{
                 if(!environmentName.equals(this.environmentName)) {
                     Toast.makeText(getActivity(),"Name Check",Toast.LENGTH_SHORT).show();
-                    for (String s : Environment.getAllEnvironments(getActivity())) {
+                    for (String s : Environment.getAllEnvironmentNames(getActivity())) {
                         if (s.equals(environmentName)){
                             //Error
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

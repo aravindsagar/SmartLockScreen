@@ -440,7 +440,7 @@ public class AddEnvironment extends ActionBarActivity {
                 builder.create().show();
                 return;
             } else{
-                for (String s : Environment.getAllEnvironments(getActivity())) {
+                for (String s : Environment.getAllEnvironmentNames(getActivity())) {
                     if (s.equals(environmentName)){
                         //Error
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

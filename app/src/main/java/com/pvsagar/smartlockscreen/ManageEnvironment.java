@@ -16,6 +16,7 @@ import android.widget.ListView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ManageEnvironment extends ActionBarActivity {
@@ -62,7 +63,10 @@ public class ManageEnvironment extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
-        List<String> environmentNames;
+        List<String> environmentNames = new ArrayList<String>();
+        List<Environment> environments;
+        List<Boolean> enabledValues = new ArrayList<Boolean>();
+        List<String> environmentHints = new ArrayList<String>();
         ListView environmentsListView;
 
         public PlaceholderFragment() {
@@ -79,9 +83,19 @@ public class ManageEnvironment extends ActionBarActivity {
         }
 
         private void init(){
-            environmentNames = Environment.getAllEnvironments(getActivity());    //Getting environment list
+
+            environments = Environment.getAllEnvironmentBarebones(getActivity());
+            enabledValues.clear();
+            environmentHints.clear();
+            environmentNames.clear();
+            for(Environment e : environments){
+                environmentNames.add(e.getName());
+                environmentHints.add(e.getHint());
+                enabledValues.add(e.isEnabled());
+            }
             /* Creating the adapter */
-            final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),environmentNames);
+            final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),
+                    environmentNames, enabledValues, environmentHints);
             environmentsListView.setAdapter(listAdapter);
             environmentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override

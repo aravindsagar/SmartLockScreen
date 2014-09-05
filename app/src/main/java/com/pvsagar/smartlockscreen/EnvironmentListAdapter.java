@@ -12,8 +12,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-
 import java.util.List;
 
 /**
@@ -23,12 +21,17 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     private Context context;
     private List<String> environmentNames;
     private SparseBooleanArray mSelectedItemsIds;
+    private List<Boolean> enabledValues;
+    private List<String> environmentHints;
 
-    public EnvironmentListAdapter(Context context, List<String> values){
-        super(context, R.layout.list_view_environments,values);
+    public EnvironmentListAdapter(Context context, List<String> environmentNames,
+                                  List<Boolean> enabledValues, List<String> environmentHints){
+        super(context, R.layout.list_view_environments,environmentNames);
         this.context = context;
-        this.environmentNames = values;
+        this.environmentNames = environmentNames;
         this.mSelectedItemsIds = new SparseBooleanArray();
+        this.enabledValues = enabledValues;
+        this.environmentHints = environmentHints;
     }
 
     @Override
@@ -39,10 +42,12 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
         textView.setText(environmentNames.get(position));
+        TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
+        hintTextView.setText(environmentHints.get(position));
         if(mSelectedItemsIds.get(position)){
             linearLayout.setBackgroundColor(context.getResources().getColor(R.color.wallet_holo_blue_light));
         }
-        mSwitch.setChecked(Environment.getEnvironmentEnabled(context,environmentNames.get(position)));
+        mSwitch.setChecked(enabledValues.get(position));
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
