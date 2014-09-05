@@ -38,26 +38,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <provider android:exported="false"
-            android:name=".environmentdb.EnvironmentProvider"
-            android:authorities="com.pvsagar.smartlockscreen.app" />
-
-        <service
-            android:name=".services.BaseService"
-            android:enabled="true"
-            android:exported="true" >
-        </service>
-        <receiver android:name=".receivers.WifiReceiver">
-            <intent-filter android:priority="100">
-                <action android:name="android.net.wifi.STATE_CHANGE"/>
-            </intent-filter>
-        </receiver>
-        <service
-            android:name=".services.GeoFenceIntentService"
-            android:exported="false" >
-        </service>
-
         <activity
             android:name=".ManageEnvironment"
             android:label="@string/title_activity_manage_environment"
@@ -78,6 +58,32 @@
             android:label="@string/title_activity_edit_environment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
         </activity>
+
+        <provider android:exported="false"
+            android:name=".environmentdb.EnvironmentProvider"
+            android:authorities="com.pvsagar.smartlockscreen.app" />
+
+        <service
+            android:name=".services.BaseService"
+            android:enabled="true" >
+        </service>
+        <service
+            android:name=".services.GeoFenceIntentService"
+            android:exported="false" >
+        </service>
+
+        <receiver android:name=".receivers.WifiReceiver">
+            <intent-filter android:priority="100">
+                <action android:name="android.net.wifi.STATE_CHANGE"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.BluetoothReceiver">
+            <intent-filter android:priority="100">
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED"/>
+                <action android:name= "android.bluetooth.device.action.ACL_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

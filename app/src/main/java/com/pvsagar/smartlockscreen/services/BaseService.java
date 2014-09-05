@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelUuid;
@@ -42,7 +43,7 @@ public class BaseService extends Service implements
 
     private LocationClient mLocationClient;
     // Defines the allowable request types.
-    public enum REQUEST_TYPE {ADD_GEOFENCES};
+    public enum REQUEST_TYPE {ADD_GEOFENCES}
     private REQUEST_TYPE mRequestType;
     // Flag that indicates if a request is underway.
     private boolean mInProgress;
@@ -65,26 +66,7 @@ public class BaseService extends Service implements
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
-
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(mBluetoothAdapter.isEnabled()){
-            Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
-            for(BluetoothDevice device: bondedDevices){
-                try {
-                    Method method = device.getClass().getMethod("getUuids"); /// get all services
-                    ParcelUuid[] parcelUuids = (ParcelUuid[]) method.invoke(device); /// get all services
-
-                    BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(parcelUuids[0].getUuid()); ///pick one at random
-                    socket.connect();
-                    socket.close();
-                    currentlyConnectedBluetoothDevices.add(new BluetoothEnvironmentVariable(
-                            device.getName(),device.getAddress()));
-                    Log.d(LOG_TAG, device.getName() + " added.");
-                } catch (Exception e) {
-                    Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
-                }
-            }
-        }
+        (new BluetoothDeviceSearch()).execute();
         super.onCreate();
     }
 
@@ -146,8 +128,49 @@ public class BaseService extends Service implements
         if(!mInProgress){
             mInProgress = true;
             mLocationClient.connect();
-        } else {
-            return;
+        }
+    }
+
+    public static void addBluetoothDeviceToConnectedDevices(BluetoothEnvironmentVariable newVariable){
+        for(BluetoothEnvironmentVariable variable:currentlyConnectedBluetoothDevices){
+            if(newVariable.equals(variable))
+                return;
+        }
+        currentlyConnectedBluetoothDevices.add(newVariable);
+    }
+
+    public static void removeBluetoothDeviceFromConnectedDevices(BluetoothEnvironmentVariable variable){
+        for(int i=0; i<currentlyConnectedBluetoothDevices.size(); i++){
+            BluetoothEnvironmentVariable v = currentlyConnectedBluetoothDevices.get(i);
+            if(variable.equals(v))
+                currentlyConnectedBluetoothDevices.remove(i);
+        }
+    }
+
+    private class BluetoothDeviceSearch extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... params) {
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if(mBluetoothAdapter.isEnabled()){
+                Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+                for(BluetoothDevice device: bondedDevices){
+                    try {
+                        Method method = device.getClass().getMethod("getUuids"); /// get all services
+                        ParcelUuid[] parcelUuids = (ParcelUuid[]) method.invoke(device); /// get all services
+
+                        BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(parcelUuids[0].getUuid()); ///pick one at random
+
+                        socket.connect();
+                        socket.close();
+                        currentlyConnectedBluetoothDevices.add(new BluetoothEnvironmentVariable(
+                                device.getName(),device.getAddress()));
+                        Log.d(LOG_TAG, device.getName() + " added.");
+                    } catch (Exception e) {
+                        Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
+                    }
+                }
+            }
+            return null;
         }
     }
 }
