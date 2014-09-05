@@ -44,7 +44,7 @@ import java.util.List;
  *   environment.
  *   - More coming
  *
- *   TODO Bulk insert, Additional query parameters for environment, user etc, Update function
+ *   TODO Bulk insert, Additional query parameters for environment, user etc
  */
 public class EnvironmentProvider extends ContentProvider {
     private static final String LOG_TAG = EnvironmentProvider.class.getSimpleName();
@@ -362,6 +362,9 @@ public class EnvironmentProvider extends ContentProvider {
         int returnValue;
         SQLiteDatabase db = mEnvironmentDbHelper.getWritableDatabase();
         switch (sUriMatcher.match(uri)){
+            case ENVIRONMENT_WITH_ID:
+                selection = EnvironmentEntry._ID + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1)};
             case ENVIRONMENT:
                 returnValue = deleteEnvironment(db, selection, selectionArgs);
                 break;

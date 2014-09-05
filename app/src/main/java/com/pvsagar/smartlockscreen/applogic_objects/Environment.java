@@ -206,8 +206,8 @@ public class Environment {
      * Update the environment entry in database. Old name of the environment should be passed if
      * name has changed. If oldName is null, current name of the environment is taken and used for
      * finding the records to update
-     * @param context
-     * @param oldName
+     * @param context activity/service context
+     * @param oldName The name of the environment to be modified
      * @return success code
      */
     public boolean updateInDatabase(Context context, String oldName){
@@ -289,7 +289,7 @@ public class Environment {
 
     /**
      * Sets the enabled flag of any environment in the database
-     * @param context
+     * @param context activity/service context
      * @param environmentName Name of the environment whose enabled flag should b changed
      * @param enabled The new enabled value
      */
@@ -297,7 +297,7 @@ public class Environment {
                                                boolean enabled){
         ContentValues environmentValues = new ContentValues();
         environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, enabled);
-        Environment e = getFullEnvironment(context, environmentName);
+        Environment e = getBareboneEnvironment(context, environmentName);
         long id;
         if(e != null) {
             id = e.id;
@@ -309,10 +309,10 @@ public class Environment {
     /**
      * Returns list of names of all the environment in the database.
      * To get the full environment details, see getFullEnvironment()
-     * @param context
+     * @param context activity/service context
      * @return A list of strings of environment names
      */
-    public static List<String> getAllEnvironments(Context context){
+    public static List<String> getAllEnvironmentNames(Context context){
         Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
                 null, null, null);
         ArrayList<String> environmentNames = new ArrayList<String>();
@@ -327,8 +327,40 @@ public class Environment {
     }
 
     /**
+     * Returns a list of Environment instances, without the environment variables populated,
+     * for all environments in the database. Useful for getting id, name, isEnabled and Hint
+     * of all environments
+     * @param context Activity/ service context
+     * @return List of barebone Environment instances (without the Environment Variables populated)
+     */
+    public static List<Environment> getAllEnvironmentBarebones(Context context){
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                null, null, null);
+        ArrayList<Environment> environments = new ArrayList<Environment>();
+
+        for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
+            String envName = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_NAME));
+            String envHint = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT));
+            long id = envCursor.getLong(envCursor.getColumnIndex(
+                    EnvironmentEntry._ID));
+            boolean enabled = envCursor.getInt(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1;
+            Environment e = new Environment();
+            e.setName(envName);
+            e.setHint(envHint);
+            e.setEnabled(enabled);
+            e.id = id;
+            environments.add(e);
+        }
+        envCursor.close();
+        return environments;
+    }
+
+    /**
      * Get the complete environment details of an environment from the database
-     * @param context
+     * @param context activity/service context
      * @param environmentName Name of the environment whose details are required
      * @return An instance of Environment with the required details
      */
@@ -367,9 +399,61 @@ public class Environment {
                     EnvironmentEntry.COLUMN_IS_ENABLED)) == 1);
             e.id = environmentId;
             envCursor.close();
+            bluetoothCursor.close();
+            wifiCursor.close();
+            locationCursor.close();
         } else {
             return null;
         }
         return e;
+    }
+
+    /**
+     * Returns an environemt instance of the environment specified by its name. Only name, hint, id
+     * and enabled flag are populated. The environment variables are not populated
+     * @param context Activity/ service context
+     * @param environmentName Name of the environment whose details are required
+     * @return Instance of environment with specified fields populated.
+     */
+    public static Environment getBareboneEnvironment(Context context, String environmentName){
+        String selection = EnvironmentEntry.COLUMN_NAME + " = ? ";
+        String[] selectionArgs = new String[]{environmentName};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        Environment e = new Environment();
+        if(envCursor.moveToFirst()){
+            String envName = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_NAME));
+            String envHint = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT));
+            long id = envCursor.getLong(envCursor.getColumnIndex(
+                    EnvironmentEntry._ID));
+            boolean enabled = envCursor.getInt(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1;
+            e.setName(envName);
+            e.setHint(envHint);
+            e.setEnabled(enabled);
+            e.id = id;
+        }
+        return e;
+    }
+
+    /**
+     * Function to delete an environment from the database
+     * @param context Activity/ service context
+     * @param environmentName Name of the environment to be deleted
+     */
+    public static void deleteEnvironmentFromDatabase(Context context, String environmentName){
+        Environment e = getBareboneEnvironment(context, environmentName);
+        if(e != null){
+            context.getContentResolver().delete(EnvironmentEntry.
+                    buildEnvironmentUriWithIdAndBluetooth(e.id), null, null);
+            context.getContentResolver().delete(EnvironmentEntry.
+                    buildEnvironmentUriWithIdAndWifi(e.id), null, null);
+            context.getContentResolver().delete(EnvironmentEntry.
+                    buildEnvironmentUriWithIdAndLocation(e.id), null, null);
+            context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
+                    e.id), null, null);
+        }
     }
 }
