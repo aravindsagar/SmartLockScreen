@@ -13,22 +13,25 @@ import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
+ * a service on a separate handler thread. This service is invoked whenever a geofence transition
+ * happens, and handles the transition and takes the required actions
  *
  */
 public class GeoFenceIntentService extends IntentService {
     private static final String LOG_TAG = GeoFenceIntentService.class.getSimpleName();
 
     public static Intent getIntent(Context context){
-        Intent intent = new Intent(context, GeoFenceIntentService.class);
-        return intent;
+        return new Intent(context, GeoFenceIntentService.class);
     }
 
     public GeoFenceIntentService() {
         super("GeoFenceIntentService");
     }
 
-
+    /**
+     * Handle the intent received by the service.
+     * @param intent This will be a geofence transition intent.
+     */
     protected void onHandleIntent(Intent intent) {
         Log.d(LOG_TAG, "onHandleIntentCalled.");
         // First check for errors

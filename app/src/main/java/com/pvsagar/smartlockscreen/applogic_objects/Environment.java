@@ -15,6 +15,10 @@ import java.util.Vector;
 
 /**
  * Created by aravind on 10/8/14.
+ *
+ * This class is used to store environment used in the app. It consists primarily of different
+ * environment variables, name, hint etc. Database helper functions and static functions to read
+ * environment details from the database, are also provided.
  */
 public class Environment {
     private static final String LOG_TAG = Environment.class.getSimpleName();
@@ -30,18 +34,38 @@ public class Environment {
     private boolean isEnabled;
 
     public boolean hasLocation, hasBluetoothDevices, hasWiFiNetwork, hasNoiseLevel;
+
+    /**
+     * Defaut constructor. Sets the boolean values.
+     */
     public Environment(){
         hasLocation = hasNoiseLevel = hasWiFiNetwork = hasBluetoothDevices = false;
         bluetoothAllOrAny = false;
         isEnabled = true;
     }
 
+    /**
+     * Constructor which sets environment name and environment variables.
+     * @param name name of the environment
+     * @param variables environment variables corresponding to the environment.
+     *                  Note that only bluetooth environment variables can be multiple in number
+     *                  for an environment, For other kinds of variables, the last variable of that
+     *                  type which was passed is taken
+     */
     public Environment(String name, EnvironmentVariable... variables){
         this();
         setName(name);
         addEnvironmentVariables(variables);
     }
 
+    /**
+     * Similar to previous constructor, but this accepts a List of environment variables.
+     * @param name name of the environment
+     * @param variables environment variables corresponding to the environment.
+     *                  Note that only bluetooth environment variables can be multiple in number
+     *                  for an environment, For other kinds of variables, the last variable of that
+     *                  type which was passed is taken
+     */
     public Environment(String name, List<EnvironmentVariable> variables){
         this();
         EnvironmentVariable[] variableArray = new EnvironmentVariable[variables.size()];
@@ -50,6 +74,10 @@ public class Environment {
         addEnvironmentVariables(variableArray);
     }
 
+    /**
+     * Set the name of the environment
+     * @param name Environment name
+     */
     public void setName(String name){
         if(name != null) {
             this.name = name;
@@ -58,10 +86,19 @@ public class Environment {
         }
     }
 
+    /**Sets whether the environment should check for all the bluetooth devices specified, or the
+     * environment is active when any of the specified bluetooth devices are connected.
+     * @param b true: all, false: any
+     */
     public void setBluetoothAllOrAny(boolean b){
         bluetoothAllOrAny = b;
     }
 
+    /**
+     * Adds the passed environment variables to the environment. If an environment variable of type
+     * other than BluetoothEnvironmentVariable is passed, it'll reset the current value.
+     * @param variables variables to be added.
+     */
     public void addEnvironmentVariables(EnvironmentVariable... variables){
         for(EnvironmentVariable variable: variables){
             if(variable.getVariableType().equals(EnvironmentVariable.TYPE_LOCATION)){
@@ -79,11 +116,21 @@ public class Environment {
         }
     }
 
+    /**
+     * Sets the LocationEnvironmentVariable of the environment.
+     * @param variable new environment variable. pass null to indicate environment does not have
+     *                 a location associated with it
+     */
     public void addLocationVariable(LocationEnvironmentVariable variable){
         locationEnvironmentVariable = variable;
         hasLocation = variable != null;
     }
 
+    /**
+     * Adds BluetoothEnvironmentVariable to the environment.
+     * @param variable new environment variable. pass null to indicate environment does not have
+     *                 bluetoothDevices associated with it
+     */
     public void addBluetoothDevicesEnvironmentVariable(BluetoothEnvironmentVariable variable){
         if(variable != null) {
             if (bluetoothEnvironmentVariables == null) {
@@ -97,11 +144,21 @@ public class Environment {
         }
     }
 
+    /**
+     * Sets the WifiEnvironmentVariable of the environment.
+     * @param variable new environment variable. pass null to indicate environment does not have
+     *                 a wifi network associated with it
+     */
     public void addWiFiEnvironmentVariable(WiFiEnvironmentVariable variable){
         wiFiEnvironmentVariable = variable;
         hasWiFiNetwork = variable != null;
     }
 
+    /**
+     * Sets the NoiseLevelEnvironmentVariable of the environment.
+     * @param variable new environment variable. pass null to indicate environment does not have
+     *                 noise level associated with it
+     */
     public void addNoiseLevelEnvironmentVariable(NoiseLevelEnvironmentVariable variable){
         noiseLevelEnvironmentVariable = variable;
         hasNoiseLevel = variable != null;
@@ -147,6 +204,10 @@ public class Environment {
         this.hint = hint;
     }
 
+    /**
+     * Inserts the environment into the database
+     * @param context Activity/ service context
+     */
     public void insertIntoDatabase(Context context){
         Environment e = this;
         ContentValues environmentValues = new ContentValues();
