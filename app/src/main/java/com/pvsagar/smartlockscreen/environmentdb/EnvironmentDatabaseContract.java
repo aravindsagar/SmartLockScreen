@@ -87,7 +87,6 @@ public class EnvironmentDatabaseContract {
     }
 
     public static final class EnvironmentEntry implements BaseColumns {
-        //TODO hint and isEnabled flag
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_ENVIRONMENTS).build();
 

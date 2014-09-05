@@ -183,6 +183,7 @@ public class TestEnvironmentDb extends AndroidTestCase {
         final String testEnvironmentName = "home";
         final double testMaxNoiseLevel = 30.2;
         final double testMinNoiseLevel = 11.1;
+        final String testHint = "Hint";
         values.put(EnvironmentEntry.COLUMN_NAME, testEnvironmentName);
         values.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, testEnbled);
         values.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
@@ -194,6 +195,8 @@ public class TestEnvironmentDb extends AndroidTestCase {
         values.put(EnvironmentEntry.COLUMN_MAX_NOISE_LEVEL, testMaxNoiseLevel);
         values.put(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED, testEnbled);
         values.put(EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL,testMinNoiseLevel);
+        values.put(EnvironmentEntry.COLUMN_IS_ENABLED, testEnbled);
+        values.put(EnvironmentEntry.COLUMN_ENVIRONMENT_HINT, testHint);
         return values;
     }
 

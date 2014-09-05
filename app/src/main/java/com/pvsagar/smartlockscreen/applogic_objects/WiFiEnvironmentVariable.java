@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -7,6 +8,7 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 
 import java.util.ArrayList;
 
@@ -71,6 +73,14 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
 
     public void setEncryptionType(String encryptionType){
         setStringValue(encryptionType, INDEX_ENCRYPTION_TYPE);
+    }
+
+    @Override
+    public ContentValues getContentValues() {
+        ContentValues wifiValues = new ContentValues();
+        wifiValues.put(WiFiNetworksEntry.COLUMN_SSID, getSSID());
+        wifiValues.put(WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE, getEncryptionType());
+        return wifiValues;
     }
 
     public static boolean enableWifi(Context context){

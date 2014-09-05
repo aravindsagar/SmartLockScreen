@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
@@ -54,10 +53,9 @@ public class GeoFenceIntentService extends IntentService {
                             || (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT)) {
                 List <Geofence> triggerList = LocationClient.getTriggeringGeofences(intent);
                 Location triggerLocation = LocationClient.getTriggeringLocation(intent);
-                Intent intentToBaseService = new Intent(this, BaseService.class);
-                intentToBaseService.setData(Uri.parse("Geofence transition at " +
+
+                startService(BaseService.getServiceIntent(this, "Geofence transition at " +
                         triggerLocation.getLatitude() + ", " + triggerLocation.getLongitude()));
-                startService(intentToBaseService);
             } else {
                 // An invalid transition was reported
                 Log.e("ReceiveTransitionsIntentService",

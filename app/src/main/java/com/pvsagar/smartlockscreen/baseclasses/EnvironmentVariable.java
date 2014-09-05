@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 /**
@@ -170,5 +171,30 @@ public abstract class EnvironmentVariable {
         else{
             throw new Exception("No String values associated with " + variableType) ;
         }
+    }
+
+    public abstract ContentValues getContentValues();
+
+    @Override
+    public boolean equals(Object o) {
+        EnvironmentVariable e = (EnvironmentVariable) o;
+        if(stringValues.length != e.stringValues.length) return false;
+        if(floatValues.length != e.floatValues.length) return false;
+
+        if(isStringValuesSupported()){
+            for (int i = 0; i < stringValues.length; i++) {
+                if(!stringValues[i].equals(e.stringValues[i])) {
+                    return false;
+                }
+            }
+        }
+        if(isFloatValuesSupported()){
+            for (int i = 0; i < floatValues.length; i++) {
+                if(!(floatValues[i] == e.floatValues[i])){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

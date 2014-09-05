@@ -2,11 +2,15 @@ package com.pvsagar.smartlockscreen.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,10 +19,14 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class BaseService extends Service implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -28,6 +36,9 @@ public class BaseService extends Service implements
 
     public static final int ONGOING_NOTIFICATION_ID = 1;
     public static final int GEOFENCE_SERVICE_REQUEST_CODE = 2;
+
+    public static List<BluetoothEnvironmentVariable> currentlyConnectedBluetoothDevices =
+            new ArrayList<BluetoothEnvironmentVariable>();
 
     private LocationClient mLocationClient;
     // Defines the allowable request types.
@@ -54,6 +65,26 @@ public class BaseService extends Service implements
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
+
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(mBluetoothAdapter.isEnabled()){
+            Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+            for(BluetoothDevice device: bondedDevices){
+                try {
+                    Method method = device.getClass().getMethod("getUuids"); /// get all services
+                    ParcelUuid[] parcelUuids = (ParcelUuid[]) method.invoke(device); /// get all services
+
+                    BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(parcelUuids[0].getUuid()); ///pick one at random
+                    socket.connect();
+                    socket.close();
+                    currentlyConnectedBluetoothDevices.add(new BluetoothEnvironmentVariable(
+                            device.getName(),device.getAddress()));
+                    Log.d(LOG_TAG, device.getName() + " added.");
+                } catch (Exception e) {
+                    Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
+                }
+            }
+        }
         super.onCreate();
     }
 
