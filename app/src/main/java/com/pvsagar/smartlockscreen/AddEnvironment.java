@@ -440,7 +440,16 @@ public class AddEnvironment extends ActionBarActivity {
                 builder.create().show();
                 return;
             } else{
-                //Todo: check for unique environment name
+                for (String s : Environment.getAllEnvironments(getActivity())) {
+                    if (s.equals(environmentName)){
+                        //Error
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle(R.string.alert_environment_name_unique_title).setMessage(R.string.alert_environment_name_unique_message);
+                        builder.setPositiveButton(R.string.ok,null);
+                        builder.create().show();
+                        return;
+                    }
+                }
             }
 
             if(environmentHint.equals("")){

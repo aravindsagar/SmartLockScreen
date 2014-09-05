@@ -4,14 +4,19 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+
+import java.util.List;
 
 public class ManageEnvironment extends ActionBarActivity {
 
@@ -57,7 +62,7 @@ public class ManageEnvironment extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
-        String[] environmentNames;
+        List<String> environmentNames;
         ListView environmentsListView;
 
         public PlaceholderFragment() {
@@ -74,10 +79,71 @@ public class ManageEnvironment extends ActionBarActivity {
         }
 
         private void init(){
-            environmentNames = Environment.getAllEnvironments(getActivity()).toArray(new String[0]);    //Getting environment list
+            environmentNames = Environment.getAllEnvironments(getActivity());    //Getting environment list
             /* Creating the adapter */
-            EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),environmentNames);
+            final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),environmentNames);
             environmentsListView.setAdapter(listAdapter);
+            environmentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent intent = new Intent(getActivity(),EditEnvironment.class);
+                    intent.putExtra(EditEnvironment.INTENT_EXTRA_ENVIRONMENT,listAdapter.getItem(position));
+                    getActivity().startActivity(intent);
+                }
+            });
+            environmentsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+            environmentsListView.setMultiChoiceModeListener(new ListView.MultiChoiceModeListener() {
+                @Override
+                public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                    // Capture total checked items
+                    final int checkedCount = environmentsListView.getCheckedItemCount();
+                    // Set the CAB title according to total checked items
+                    mode.setTitle(checkedCount + " Selected");
+                    // Calls toggleSelection method from ListViewAdapter Class
+                    listAdapter.toggleSelection(position);
+
+                }
+                @Override
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                    mode.getMenuInflater().inflate(R.menu.multi_select_cab_menu,menu);
+                    return true;
+                }
+
+                @Override
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                    return false;
+                }
+
+                @Override
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.delete:
+                            // Calls getSelectedIds method from ListViewAdapter Class
+                            SparseBooleanArray selected = listAdapter
+                                    .getSelectedIds();
+                            // Captures all selected ids with a loop
+                            for (int i = (selected.size() - 1); i >= 0; i--) {
+                                if (selected.valueAt(i)) {
+                                    String selectedItem = listAdapter
+                                            .getItem(selected.keyAt(i));
+                                    //Todo: Delete the environment
+                                    // Remove selected items following the ids
+                                    listAdapter.remove(selectedItem);
+                                }
+                            }
+                            // Close CAB
+                            mode.finish();
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+
+                @Override
+                public void onDestroyActionMode(ActionMode mode) {
+                    listAdapter.removeSelection();
+                }
+            });
             /* End of adapter code */
         }
 

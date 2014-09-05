@@ -503,7 +503,6 @@ public class EditEnvironment extends ActionBarActivity {
                     String ssid = mSelectedWifiConfiguration.SSID;
                     String encryptionType = WiFiEnvironmentVariable.getSecurity(mSelectedWifiConfiguration);
                     environmentVariables.add(new WiFiEnvironmentVariable(ssid,encryptionType));
-
                 }
                 else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

@@ -1,39 +1,48 @@
 package com.pvsagar.smartlockscreen;
 
 import android.content.Context;
-import android.content.Intent;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 
+import java.util.List;
+
 /**
  * Created by PV on 9/2/2014.
  */
 public class EnvironmentListAdapter extends ArrayAdapter<String> {
     private Context context;
-    private String[] environmentNames;
+    private List<String> environmentNames;
+    private SparseBooleanArray mSelectedItemsIds;
 
-    public EnvironmentListAdapter(Context context, String[] values){
+    public EnvironmentListAdapter(Context context, List<String> values){
         super(context, R.layout.list_view_environments,values);
         this.context = context;
         this.environmentNames = values;
+        this.mSelectedItemsIds = new SparseBooleanArray();
     }
 
     @Override
     public View getView(final int position, final View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
+        LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.linear_layout_list_items);
         Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
-        textView.setText(environmentNames[position]);
-        mSwitch.setChecked(Environment.getEnvironmentEnabled(context,environmentNames[position]));
+        textView.setText(environmentNames.get(position));
+        if(mSelectedItemsIds.get(position)){
+            linearLayout.setBackgroundColor(context.getResources().getColor(R.color.wallet_holo_blue_light));
+        }
+        mSwitch.setChecked(Environment.getEnvironmentEnabled(context,environmentNames.get(position)));
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -41,16 +50,45 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
                 //Todo: Update the database, if failed set the check back
             }
         });
-
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Todo: Start EditEnvironment Activity
-                Intent intent = new Intent(context,EditEnvironment.class);
-                intent.putExtra(EditEnvironment.INTENT_EXTRA_ENVIRONMENT,environmentNames[position]);
-                context.startActivity(intent);
-            }
-        });
         return rootView;
     }
+
+    @Override
+    public void remove(String object) {
+        environmentNames.remove(object);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public String getItem(int position) {
+        return environmentNames.get(position);
+    }
+
+    public void toggleSelection(int position){
+        selectView(position,!mSelectedItemsIds.get(position));
+    }
+
+    public void removeSelection() {
+        mSelectedItemsIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public void selectView(int position, boolean value){
+        if(value){
+            mSelectedItemsIds.put(position,value);
+        }
+        else{
+            mSelectedItemsIds.delete(position);
+        }
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount(){
+        return mSelectedItemsIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds(){
+        return mSelectedItemsIds;
+    }
+
 }
