@@ -6,12 +6,14 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by aravind on 10/8/14.
@@ -31,7 +33,6 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
     public BluetoothEnvironmentVariable(String deviceName, String deviceAddress){
         super(EnvironmentVariable.TYPE_BLUETOOTH_DEVICES, null,
                 new String[]{deviceName, deviceAddress});
-        Log.d(LOG_TAG, deviceName + ": " + deviceAddress);
     }
 
     @Override
@@ -126,5 +127,31 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS,
                 getDeviceAddress());
         return bluetoothValues;
+    }
+
+    /**
+     * Converts cursor containing data from bluetooth_devices table, to objects of
+     * BluetoothEnvironmentVariable
+     * @param bluetoothCursor
+     * @return List of BluetoothEnvironmentVariables
+     */
+    public static List<EnvironmentVariable> getBluetoothEnvironmentVariablesFromCursor
+    (Cursor bluetoothCursor){
+        ArrayList<EnvironmentVariable> environmentVariables =
+                new ArrayList<EnvironmentVariable>();
+        try {
+            if (bluetoothCursor.moveToFirst()) {
+                for (; !bluetoothCursor.isAfterLast(); bluetoothCursor.moveToNext()) {
+                    environmentVariables.add(new BluetoothEnvironmentVariable(
+                            bluetoothCursor.getString(bluetoothCursor.getColumnIndex(
+                                    EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_NAME)),
+                            bluetoothCursor.getString(bluetoothCursor.getColumnIndex(
+                                    EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS))));
+                }
+            }
+        } catch (Exception e){
+            Log.w(LOG_TAG, e + ": " + e.getMessage());
+        }
+        return environmentVariables;
     }
 }

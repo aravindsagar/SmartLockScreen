@@ -8,8 +8,11 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
+import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -20,12 +23,22 @@ import java.util.List;
 public class GeoFenceIntentService extends IntentService {
     private static final String LOG_TAG = GeoFenceIntentService.class.getSimpleName();
 
+    private static final Semaphore manageCurrentGeofencesCriticalSection = new Semaphore(1);
+    private static ArrayList<LocationEnvironmentVariable> currentGeofences;
+
     public static Intent getIntent(Context context){
         return new Intent(context, GeoFenceIntentService.class);
     }
 
     public GeoFenceIntentService() {
         super("GeoFenceIntentService");
+        if(currentGeofences == null){
+            currentGeofences = new ArrayList<LocationEnvironmentVariable>();
+        }
+    }
+
+    public static ArrayList<LocationEnvironmentVariable> getCurrentGeofences() {
+        return currentGeofences;
     }
 
     /**
@@ -39,8 +52,7 @@ public class GeoFenceIntentService extends IntentService {
             // Get the error code with a static method
             int errorCode = LocationClient.getErrorCode(intent);
             // Log the error
-            Log.e("ReceiveTransitionsIntentService",
-                    "Location Services error: " +
+            Log.e("ReceiveTransitionsIntentService", "Location Services error: " +
                             Integer.toString(errorCode));
 
         /*
@@ -48,27 +60,50 @@ public class GeoFenceIntentService extends IntentService {
          * of the geofence or geofences that triggered the transition
          */
         } else {
+            manageCurrentGeofencesCriticalSection.acquireUninterruptibly();
             // Get the type of transition (entry or exit)
-            int transitionType =
-                    LocationClient.getGeofenceTransition(intent);
+            int transitionType = LocationClient.getGeofenceTransition(intent);
             // Test that a valid transition was reported
             if ((transitionType == Geofence.GEOFENCE_TRANSITION_ENTER)
                             || (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT)) {
                 List <Geofence> triggerList = LocationClient.getTriggeringGeofences(intent);
                 Location triggerLocation = LocationClient.getTriggeringLocation(intent);
 
-                startService(BaseService.getServiceIntent(this, "Geofence transition at " +
-                        triggerLocation.getLatitude() + ", " + triggerLocation.getLongitude()));
+                if(transitionType == Geofence.GEOFENCE_TRANSITION_ENTER){
+                    addToCurrentGeofences(triggerList);
+                } else {
+                    removeFromCurrentGeofences(triggerList);
+                }
+                String currentGeofenceNames = "Current Geofences:";
+                for(LocationEnvironmentVariable v: currentGeofences)
+                    currentGeofenceNames += v.getLocationName() + "; ";
+                manageCurrentGeofencesCriticalSection.release();
+                startService(BaseService.getServiceIntent(this, currentGeofenceNames));
             } else {
                 // An invalid transition was reported
-                Log.e("ReceiveTransitionsIntentService",
-                        "Geofence transition error: " +
+                Log.e("ReceiveTransitionsIntentService", "Geofence transition error: " +
                                 Integer.toString(transitionType));
             }
         }
     }
 
+    private void addToCurrentGeofences(List<Geofence> triggerList){
+        for(Geofence geofence: triggerList){
+            LocationEnvironmentVariable variable = LocationEnvironmentVariable.
+                    getLocationEnvironmentVariableFromAndroidGeofence(this, geofence);
+            if(!currentGeofences.contains(variable)){
+                currentGeofences.add(variable);
+            }
+        }
+    }
 
+    private void removeFromCurrentGeofences(List<Geofence> triggerList){
+        for (Geofence geofence: triggerList){
+            LocationEnvironmentVariable variable = LocationEnvironmentVariable.
+                    getLocationEnvironmentVariableFromAndroidGeofence(this, geofence);
+            currentGeofences.remove(variable);
+        }
+    }
 
     @Override
     public void onDestroy() {

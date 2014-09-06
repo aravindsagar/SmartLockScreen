@@ -8,7 +8,6 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
-import com.pvsagar.smartlockscreen.environmentdb.mappers.DatabaseToObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,9 +110,7 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
             (Context context){
         Cursor cursor = context.getContentResolver().query(
                         GeoFenceEntry.CONTENT_URI, null, null, null, null);
-        List<EnvironmentVariable> locationEnvironmentVariables =
-                DatabaseToObjectMapper.getLocationEnvironmentVariablesFromCursor(cursor);
-        return locationEnvironmentVariables;
+        return getLocationEnvironmentVariablesFromCursor(cursor);
     }
 
     public static List<Geofence> getAndroidGeofences(Context context) {
@@ -143,5 +140,35 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         locationValues.put(GeoFenceEntry.COLUMN_RADIUS, getRadius());
         locationValues.put(GeoFenceEntry.COLUMN_LOCATION_NAME, getLocationName());
         return locationValues;
+    }
+
+    public static LocationEnvironmentVariable getLocationEnvironmentVariableFromAndroidGeofence
+            (Context context, Geofence geofence){
+        Cursor locationCursor = context.getContentResolver().query(GeoFenceEntry.
+                buildGeofenceUriWithId(Long.parseLong(geofence.getRequestId())), null, null,
+                null, null);
+        List<EnvironmentVariable> locationVariables = getLocationEnvironmentVariablesFromCursor(
+                locationCursor);
+        if(locationVariables == null || locationVariables.isEmpty()){
+            throw new IllegalArgumentException("Invalid geofence passed. Id not found in database");
+        }
+        return (LocationEnvironmentVariable) locationVariables.get(0);
+    }
+
+    public static List<EnvironmentVariable> getLocationEnvironmentVariablesFromCursor
+            (Cursor cursor){
+        ArrayList<EnvironmentVariable> locationEnvironmentVariables =
+                new ArrayList<EnvironmentVariable>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            LocationEnvironmentVariable variable = new LocationEnvironmentVariable(
+                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LAT)),
+                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LONG)),
+                    (int) cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_RADIUS)),
+                    cursor.getString(cursor.getColumnIndex(GeoFenceEntry.COLUMN_LOCATION_NAME))
+            );
+            variable.id = cursor.getLong(cursor.getColumnIndex(GeoFenceEntry._ID));
+            locationEnvironmentVariables.add(variable);
+        }
+        return locationEnvironmentVariables;
     }
 }

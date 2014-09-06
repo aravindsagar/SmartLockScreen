@@ -7,7 +7,6 @@ import android.net.Uri;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
-import com.pvsagar.smartlockscreen.environmentdb.mappers.DatabaseToObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -442,13 +441,13 @@ public class Environment {
                     locationCursor = context.getContentResolver().query(
                             EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(environmentId),
                             null, null, null, null);
-            List<EnvironmentVariable> environmentVariables = DatabaseToObjectMapper.
+            List<EnvironmentVariable> environmentVariables = BluetoothEnvironmentVariable.
                     getBluetoothEnvironmentVariablesFromCursor(bluetoothCursor);
-            environmentVariables.addAll(DatabaseToObjectMapper.
+            environmentVariables.addAll(LocationEnvironmentVariable.
                     getLocationEnvironmentVariablesFromCursor(locationCursor));
-            environmentVariables.addAll(DatabaseToObjectMapper.
+            environmentVariables.addAll(WiFiEnvironmentVariable.
                     getWiFiEnvironmentVariablesFromCursor(wifiCursor));
-            environmentVariables.addAll(DatabaseToObjectMapper.
+            environmentVariables.addAll(NoiseLevelEnvironmentVariable.
                     getNoiseLevelEnvironmentVariablesFromCursor(envCursor));
             e = new Environment(environmentName, environmentVariables);
 

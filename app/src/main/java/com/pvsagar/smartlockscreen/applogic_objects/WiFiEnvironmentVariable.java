@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiManager;
@@ -11,6 +12,7 @@ import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiFiNetworksEntry;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by aravind on 10/8/14.
@@ -125,4 +127,25 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
         }
         return (config.wepKeys[0] != null) ? SECURITY_WEP : SECURITY_NONE;
     }
+
+    public static List<EnvironmentVariable> getWiFiEnvironmentVariablesFromCursor
+            (Cursor wifiCursor){
+        ArrayList<EnvironmentVariable> environmentVariables =
+                new ArrayList<EnvironmentVariable>();
+        try {
+            if (wifiCursor.moveToFirst()) {
+                for (; !wifiCursor.isAfterLast(); wifiCursor.moveToNext()) {
+                    environmentVariables.add(new WiFiEnvironmentVariable(
+                            wifiCursor.getString(wifiCursor.getColumnIndex(
+                                    WiFiNetworksEntry.COLUMN_SSID)),
+                            wifiCursor.getString(wifiCursor.getColumnIndex(
+                                    WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE))));
+                }
+            }
+        } catch (Exception e){
+            Log.w(LOG_TAG, e + ": " + e.getMessage());
+        }
+        return environmentVariables;
+    }
+
 }

@@ -5,8 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-
-import com.pvsagar.smartlockscreen.services.BaseService;
+import android.widget.Toast;
 
 /**
  * Created by aravind on 4/9/14.
@@ -20,6 +19,7 @@ public class WifiReceiver extends BroadcastReceiver {
         if(wifiInfo != null) {
             notificationText += "WiFi info: " + wifiInfo;
         }
-        context.startService(BaseService.getServiceIntent(context, notificationText));
+        //context.startService(BaseService.getServiceIntent(context, notificationText));
+        Toast.makeText(context, notificationText, Toast.LENGTH_SHORT).show();
     }
 }

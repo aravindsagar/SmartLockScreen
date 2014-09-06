@@ -1,9 +1,14 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by aravind on 8/8/14.
@@ -68,4 +73,31 @@ public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
     public void setLowerLimit(float lowerLimit){
         setFloatValue(lowerLimit, INDEX_LOWER_LIMIT);
     }
+
+    public static List<EnvironmentVariable> getNoiseLevelEnvironmentVariablesFromCursor
+            (Cursor environmentCursor){
+        int initialCursorPosition = environmentCursor.getPosition();
+        ArrayList<EnvironmentVariable> environmentVariables =
+                new ArrayList<EnvironmentVariable>();
+        try {
+            if (environmentCursor.moveToFirst()) {
+                for (; !environmentCursor.isAfterLast(); environmentCursor.moveToNext()) {
+                    boolean minNoiseEnabled = environmentCursor.getInt(environmentCursor.
+                            getColumnIndex(EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED)) == 1,
+                            maxNoiseEnabled = environmentCursor.getInt(environmentCursor.
+                                    getColumnIndex(EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED)) == 1;
+                    if(minNoiseEnabled || maxNoiseEnabled){
+                        environmentVariables.add(new NoiseLevelEnvironmentVariable
+                                (minNoiseEnabled, maxNoiseEnabled));
+                    }
+                }
+            }
+        } catch (Exception e){
+            Log.w(LOG_TAG, e + ": " + e.getMessage());
+        }
+        environmentCursor.moveToFirst();
+        environmentCursor.move(initialCursorPosition);
+        return environmentVariables;
+    }
+
 }
