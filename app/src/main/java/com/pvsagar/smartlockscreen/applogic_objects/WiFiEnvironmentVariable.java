@@ -135,11 +135,14 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
         try {
             if (wifiCursor.moveToFirst()) {
                 for (; !wifiCursor.isAfterLast(); wifiCursor.moveToNext()) {
-                    environmentVariables.add(new WiFiEnvironmentVariable(
+                    WiFiEnvironmentVariable variable = new WiFiEnvironmentVariable(
                             wifiCursor.getString(wifiCursor.getColumnIndex(
                                     WiFiNetworksEntry.COLUMN_SSID)),
                             wifiCursor.getString(wifiCursor.getColumnIndex(
-                                    WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE))));
+                                    WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE)));
+                    variable.id = wifiCursor.getLong(wifiCursor.getColumnIndex(
+                            WiFiNetworksEntry._ID));
+                    environmentVariables.add(variable);
                 }
             }
         } catch (Exception e){
@@ -148,4 +151,15 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
         return environmentVariables;
     }
 
+    public static WiFiEnvironmentVariable getWifiEnvironmentVariableFromDatabase(Context context,
+            String SSID, String encryptionType){
+        String selection = WiFiNetworksEntry.COLUMN_SSID + " = ? AND " + WiFiNetworksEntry
+                .COLUMN_ENCRYPTION_TYPE + " = ? ";
+        String[] selectionArgs = new String[]{SSID, encryptionType};
+        List<EnvironmentVariable> queryResult = (getWiFiEnvironmentVariablesFromCursor(
+                context.getContentResolver().query(WiFiNetworksEntry.CONTENT_URI, null, selection,
+                        selectionArgs, null)));
+        if(queryResult == null || queryResult.isEmpty()) return null;
+        return (WiFiEnvironmentVariable) queryResult.get(0);
+    }
 }

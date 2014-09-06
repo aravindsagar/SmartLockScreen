@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
-import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,9 +83,10 @@ public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
             if (environmentCursor.moveToFirst()) {
                 for (; !environmentCursor.isAfterLast(); environmentCursor.moveToNext()) {
                     boolean minNoiseEnabled = environmentCursor.getInt(environmentCursor.
-                            getColumnIndex(EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED)) == 1,
+                            getColumnIndex(EnvironmentEntry.COLUMN_IS_MIN_NOISE_ENABLED)) == 1,
                             maxNoiseEnabled = environmentCursor.getInt(environmentCursor.
-                                    getColumnIndex(EnvironmentDatabaseContract.EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED)) == 1;
+                                    getColumnIndex(EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED))
+                                    == 1;
                     if(minNoiseEnabled || maxNoiseEnabled){
                         environmentVariables.add(new NoiseLevelEnvironmentVariable
                                 (minNoiseEnabled, maxNoiseEnabled));

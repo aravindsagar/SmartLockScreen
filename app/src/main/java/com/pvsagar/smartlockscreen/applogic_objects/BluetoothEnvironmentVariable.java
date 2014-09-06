@@ -10,7 +10,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
-import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +86,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         }
         Log.v(LOG_TAG,"enabling bluetooth");
         Intent startBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        ((Activity)context).startActivityForResult(startBluetoothIntent,REQUEST_BLUETOOTH_ENABLE);
+        ((Activity)context).startActivityForResult(startBluetoothIntent, REQUEST_BLUETOOTH_ENABLE);
     }
 
     /**
@@ -122,10 +122,8 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
     @Override
     public ContentValues getContentValues() {
         ContentValues bluetoothValues = new ContentValues();
-        bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_NAME,
-                getDeviceName());
-        bluetoothValues.put(EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS,
-                getDeviceAddress());
+        bluetoothValues.put(BluetoothDevicesEntry.COLUMN_DEVICE_NAME, getDeviceName());
+        bluetoothValues.put(BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS, getDeviceAddress());
         return bluetoothValues;
     }
 
@@ -142,16 +140,48 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         try {
             if (bluetoothCursor.moveToFirst()) {
                 for (; !bluetoothCursor.isAfterLast(); bluetoothCursor.moveToNext()) {
-                    environmentVariables.add(new BluetoothEnvironmentVariable(
+                    BluetoothEnvironmentVariable variable = new BluetoothEnvironmentVariable(
                             bluetoothCursor.getString(bluetoothCursor.getColumnIndex(
-                                    EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_NAME)),
+                                    BluetoothDevicesEntry.COLUMN_DEVICE_NAME)),
                             bluetoothCursor.getString(bluetoothCursor.getColumnIndex(
-                                    EnvironmentDatabaseContract.BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS))));
+                                    BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS)));
+                    variable.id = bluetoothCursor.getLong(bluetoothCursor.getColumnIndex(
+                            BluetoothDevicesEntry._ID));
+                    environmentVariables.add(variable);
                 }
             }
         } catch (Exception e){
             Log.w(LOG_TAG, e + ": " + e.getMessage());
         }
         return environmentVariables;
+    }
+
+    /**
+     * Gets the bluetoothEnvironmentVariable from the database, having a particular device name and
+     * address. Returns null if its not found
+     * @param context Context of the calling activity
+     * @param deviceName Name of the device
+     * @param deviceAddress Address of the device
+     * @return Device with given name and address
+     */
+    public static BluetoothEnvironmentVariable getBluetoothEnvironmentVariableFromDatabase(
+            Context context, String deviceName, String deviceAddress){
+
+        List<EnvironmentVariable> variables;
+        if(deviceName != null && deviceAddress != null && context != null &&
+                !deviceName.isEmpty() && !deviceAddress.isEmpty()) {
+            String selection, selectionArgs[];
+            selection = BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS + " = ? AND " +
+                    BluetoothDevicesEntry.COLUMN_DEVICE_NAME + " = ? ";
+            selectionArgs = new String[]{deviceAddress, deviceName};
+            variables = getBluetoothEnvironmentVariablesFromCursor(
+                    context.getContentResolver().query(BluetoothDevicesEntry.CONTENT_URI, null,
+                            selection, selectionArgs, null));
+            if(variables != null && !variables.isEmpty()){
+                return (BluetoothEnvironmentVariable) variables.get(0);
+            }
+            return null;
+        }
+        throw new IllegalArgumentException("All arguments are mandatory, cannot be null.");
     }
 }

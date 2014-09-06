@@ -21,7 +21,7 @@ public abstract class EnvironmentVariable {
             "com.pvsagar.applogic_objects.TYPE_WIFI_NETWORKS";
     public static final String TYPE_NOISE_LEVEL = "com.pvsagar.applogic_objects.TYPE_NOISE_LEVEL";
 
-    protected long id;
+    protected long id = -1;
     //Stores the numeric values associated with the variable
     private float[] floatValues;
 
@@ -199,5 +199,9 @@ public abstract class EnvironmentVariable {
             }
         }
         return true;
+    }
+
+    public long getId(){
+        return id;
     }
 }

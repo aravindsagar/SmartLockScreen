@@ -399,19 +399,7 @@ public class Environment {
         ArrayList<Environment> environments = new ArrayList<Environment>();
 
         for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
-            String envName = envCursor.getString(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_NAME));
-            String envHint = envCursor.getString(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT));
-            long id = envCursor.getLong(envCursor.getColumnIndex(
-                    EnvironmentEntry._ID));
-            boolean enabled = envCursor.getInt(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1;
-            Environment e = new Environment();
-            e.setName(envName);
-            e.setHint(envHint);
-            e.setEnabled(enabled);
-            e.id = id;
+            Environment e = buildEnvironmentBareboneFromCursor(envCursor);
             environments.add(e);
         }
         envCursor.close();
@@ -449,15 +437,11 @@ public class Environment {
                     getWiFiEnvironmentVariablesFromCursor(wifiCursor));
             environmentVariables.addAll(NoiseLevelEnvironmentVariable.
                     getNoiseLevelEnvironmentVariablesFromCursor(envCursor));
-            e = new Environment(environmentName, environmentVariables);
-
-            e.setBluetoothAllOrAny(envCursor.getInt(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY)) == 1);
-            e.setHint(envCursor.getString(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT)));
-            e.setEnabled(envCursor.getInt(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1);
-            e.id = environmentId;
+            e = buildEnvironmentBareboneFromCursor(envCursor);
+            EnvironmentVariable[] environmentVariableArray =
+                    new EnvironmentVariable[environmentVariables.size()];
+            environmentVariables.toArray(environmentVariableArray);
+            e.addEnvironmentVariables(environmentVariableArray);
             envCursor.close();
             bluetoothCursor.close();
             wifiCursor.close();
@@ -480,22 +464,34 @@ public class Environment {
         String[] selectionArgs = new String[]{environmentName};
         Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
                 selection, selectionArgs, null);
-        Environment e = new Environment();
-        if(envCursor.moveToFirst()){
-            String envName = envCursor.getString(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_NAME));
-            String envHint = envCursor.getString(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT));
-            long id = envCursor.getLong(envCursor.getColumnIndex(
-                    EnvironmentEntry._ID));
-            boolean enabled = envCursor.getInt(envCursor.getColumnIndex(
-                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1;
-            e.setName(envName);
-            e.setHint(envHint);
-            e.setEnabled(enabled);
-            e.id = id;
+        envCursor.moveToFirst();
+        return buildEnvironmentBareboneFromCursor(envCursor);
+    }
+
+    /**
+     * Gets all the environment barebones for given location
+     * @param context Activity/ service context
+     * @param location Environments having this location will be returned. id of the location should
+     *                 be populated
+     * @return List of Environments that match the criteria
+     */
+    public static List<Environment> getAllEnvironmentBarebonesForLocation(
+            Context context, LocationEnvironmentVariable location){
+        if(location.getId() < 0){
+            throw new IllegalArgumentException("Location should have a valid id.");
         }
-        return e;
+        String selection = EnvironmentEntry.COLUMN_GEOFENCE_ID + " = ? ";
+        String[] selectionArgs = new String[]{String.valueOf(location.getId())};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        ArrayList<Environment> environments = new ArrayList<Environment>();
+
+        for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
+            Environment e = buildEnvironmentBareboneFromCursor(envCursor);
+            environments.add(e);
+        }
+        envCursor.close();
+        return environments;
     }
 
     /**
@@ -514,6 +510,29 @@ public class Environment {
                     buildEnvironmentUriWithIdAndLocation(e.id), null, null);
             context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
                     e.id), null, null);
+        }
+    }
+
+    private static Environment buildEnvironmentBareboneFromCursor(Cursor envCursor){
+        Environment e = new Environment();
+        try {
+            String envName = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_NAME));
+            String envHint = envCursor.getString(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_ENVIRONMENT_HINT));
+            long id = envCursor.getLong(envCursor.getColumnIndex(
+                    EnvironmentEntry._ID));
+            boolean enabled = envCursor.getInt(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_IS_ENABLED)) == 1;
+            e.setName(envName);
+            e.setHint(envHint);
+            e.setEnabled(enabled);
+            e.id = id;
+
+            return e;
+        } catch (Exception ex){
+            ex.printStackTrace();
+            throw new IllegalArgumentException("Cursor should be populated with Environment table data.");
         }
     }
 }

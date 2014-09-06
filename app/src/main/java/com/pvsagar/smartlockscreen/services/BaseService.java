@@ -23,9 +23,9 @@ import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListen
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
+import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -37,9 +37,6 @@ public class BaseService extends Service implements
 
     public static final int ONGOING_NOTIFICATION_ID = 1;
     public static final int GEOFENCE_SERVICE_REQUEST_CODE = 2;
-
-    public static List<BluetoothEnvironmentVariable> currentlyConnectedBluetoothDevices =
-            new ArrayList<BluetoothEnvironmentVariable>();
 
     private LocationClient mLocationClient;
     // Defines the allowable request types.
@@ -131,21 +128,7 @@ public class BaseService extends Service implements
         }
     }
 
-    public static void addBluetoothDeviceToConnectedDevices(BluetoothEnvironmentVariable newVariable){
-        for(BluetoothEnvironmentVariable variable:currentlyConnectedBluetoothDevices){
-            if(newVariable.equals(variable))
-                return;
-        }
-        currentlyConnectedBluetoothDevices.add(newVariable);
-    }
 
-    public static void removeBluetoothDeviceFromConnectedDevices(BluetoothEnvironmentVariable variable){
-        for(int i=0; i<currentlyConnectedBluetoothDevices.size(); i++){
-            BluetoothEnvironmentVariable v = currentlyConnectedBluetoothDevices.get(i);
-            if(variable.equals(v))
-                currentlyConnectedBluetoothDevices.remove(i);
-        }
-    }
 
     private class BluetoothDeviceSearch extends AsyncTask<Void, Void, Void>{
         @Override
@@ -158,12 +141,13 @@ public class BaseService extends Service implements
                         Method method = device.getClass().getMethod("getUuids"); /// get all services
                         ParcelUuid[] parcelUuids = (ParcelUuid[]) method.invoke(device); /// get all services
 
-                        BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(parcelUuids[0].getUuid()); ///pick one at random
+                        BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord
+                                (parcelUuids[0].getUuid()); ///pick one at random
 
                         socket.connect();
                         socket.close();
-                        currentlyConnectedBluetoothDevices.add(new BluetoothEnvironmentVariable(
-                                device.getName(),device.getAddress()));
+                        BluetoothReceiver.addBluetoothDeviceToConnectedDevices(new
+                                BluetoothEnvironmentVariable(device.getName(), device.getAddress()));
                         Log.d(LOG_TAG, device.getName() + " added.");
                     } catch (Exception e) {
                         Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
