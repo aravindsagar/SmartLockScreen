@@ -502,6 +502,8 @@ public class EditEnvironment extends ActionBarActivity {
                 if(mSelectedWifiConfiguration != null){
                     String ssid = mSelectedWifiConfiguration.SSID;
                     String encryptionType = WiFiEnvironmentVariable.getSecurity(mSelectedWifiConfiguration);
+                    Log.v(LOG_TAG,ssid);
+                    //Toast.makeText(getActivity(),ssid,Toast.LENGTH_SHORT).show();
                     environmentVariables.add(new WiFiEnvironmentVariable(ssid,encryptionType));
                 }
                 else {
@@ -569,8 +571,8 @@ public class EditEnvironment extends ActionBarActivity {
                 newEnvironment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
             newEnvironment.setHint(environmentHint);
-            //Todo: Update the database
-
+            //Todo: Update the database : debug the code.
+            newEnvironment.updateInDatabase(getActivity(),environmentName);
             //environment.insertIntoDatabase(getActivity());
             getActivity().finish();
 
