@@ -24,7 +24,8 @@ public class GeoFenceIntentService extends IntentService {
     private static final String LOG_TAG = GeoFenceIntentService.class.getSimpleName();
 
     private static final Semaphore manageCurrentGeofencesCriticalSection = new Semaphore(1);
-    private static ArrayList<LocationEnvironmentVariable> currentGeofences;
+    private static ArrayList<LocationEnvironmentVariable> currentGeofences =
+            new ArrayList<LocationEnvironmentVariable>();
 
     public static Intent getIntent(Context context){
         return new Intent(context, GeoFenceIntentService.class);
@@ -32,9 +33,6 @@ public class GeoFenceIntentService extends IntentService {
 
     public GeoFenceIntentService() {
         super("GeoFenceIntentService");
-        if(currentGeofences == null){
-            currentGeofences = new ArrayList<LocationEnvironmentVariable>();
-        }
     }
 
     public static ArrayList<LocationEnvironmentVariable> getCurrentGeofences() {
@@ -78,7 +76,8 @@ public class GeoFenceIntentService extends IntentService {
                 for(LocationEnvironmentVariable v: currentGeofences)
                     currentGeofenceNames += v.getLocationName() + "; ";
                 manageCurrentGeofencesCriticalSection.release();
-                startService(BaseService.getServiceIntent(this, currentGeofenceNames));
+                startService(BaseService.getServiceIntent(this, null,
+                        BaseService.ACTION_DETECT_ENVIRONMENT));
             } else {
                 // An invalid transition was reported
                 Log.e("ReceiveTransitionsIntentService", "Geofence transition error: " +

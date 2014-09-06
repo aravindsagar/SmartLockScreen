@@ -506,6 +506,7 @@ public class EnvironmentProvider extends ContentProvider {
             deletePasswordWithEnvironmentId(envId, db);
         }
 
+        envCursor.close();
         return db.delete(EnvironmentEntry.TABLE_NAME,
                 selection, selectionArgs);
     }
@@ -527,6 +528,7 @@ public class EnvironmentProvider extends ContentProvider {
             String[] userSelectionArgs = new String[]{String.valueOf(userId)};
             db.delete(AppWhitelistEntry.TABLE_NAME, userSelection, userSelectionArgs);
         }
+        userCursor.close();
         return db.delete(UsersEntry.TABLE_NAME, selection, selectionArgs);
     }
 
@@ -544,6 +546,7 @@ public class EnvironmentProvider extends ContentProvider {
                     passwordIds.getColumnIndex(UserPasswordsEntry.COLUMN_PASSWORD_ID)))};
             db.delete(PasswordEntry.TABLE_NAME, passwordSelection, passwordSelectionArgs);
         }
+        passwordIds.close();
         db.delete(UserPasswordsEntry.TABLE_NAME, passwordIdsSelection, passwordIdsSelectionArgs);
     }
 
@@ -561,6 +564,7 @@ public class EnvironmentProvider extends ContentProvider {
                     passwordIds.getColumnIndex(UserPasswordsEntry.COLUMN_PASSWORD_ID)))};
             db.delete(PasswordEntry.TABLE_NAME, passwordSelection, passwordSelectionArgs);
         }
+        passwordIds.close();
         db.delete(UserPasswordsEntry.TABLE_NAME, passwordIdsSelection, passwordIdsSelectionArgs);
     }
 
@@ -612,6 +616,7 @@ public class EnvironmentProvider extends ContentProvider {
                 bluetoothDeviceId);
         environmentBluetoothContentValues.put(EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID,
                 environmentId);
+        bluetoothCursor.close();
         return db.insert(EnvironmentBluetoothEntry.TABLE_NAME, null,
                 environmentBluetoothContentValues);
     }
@@ -642,6 +647,7 @@ public class EnvironmentProvider extends ContentProvider {
         ContentValues environmentContentValues = new ContentValues();
         environmentContentValues.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1);
         environmentContentValues.put(EnvironmentEntry.COLUMN_WIFI_ID, wifiId);
+        wifiCursor.close();
         return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
                 EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
     }
@@ -673,6 +679,7 @@ public class EnvironmentProvider extends ContentProvider {
         ContentValues environmentContentValues = new ContentValues();
         environmentContentValues.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 1);
         environmentContentValues.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
+        geofenceCursor.close();
         return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
                 EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
     }
@@ -712,6 +719,7 @@ public class EnvironmentProvider extends ContentProvider {
             throw new IllegalArgumentException(
                     "Invalid environment id passed: " + environmentId);
         }
+        environmentCursor.close();
         return variableId;
     }
 
@@ -746,9 +754,12 @@ public class EnvironmentProvider extends ContentProvider {
             if(environmentCursor.getCount() > 0){
                 Log.w(LOG_TAG, "Environment variable in use, cannot delete. id: " + variableId +
                         ". Table: " + tableName);
+                environmentCursor.close();
                 return 0;
             }
+            environmentCursor.close();
         }
+        variableCursor.close();
         return db.delete(tableName, selection,selectionArgs);
     }
 
@@ -771,8 +782,10 @@ public class EnvironmentProvider extends ContentProvider {
                     returnValue += db.delete(BluetoothDevicesEntry.TABLE_NAME, bluetoothSelection,
                             selectionArgs);
                 }
+                bluetoothCursor.close();
             }
         }
+        oldBluetoothEntries.close();
         return returnValue;
     }
 
@@ -795,8 +808,10 @@ public class EnvironmentProvider extends ContentProvider {
                     returnValue += db.delete(BluetoothDevicesEntry.TABLE_NAME, bluetoothSelection,
                             selectionArgs);
                 }
+                bluetoothCursor.close();
             }
         }
+        oldBluetoothEntries.close();
         return returnValue;
     }
 }

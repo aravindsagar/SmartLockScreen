@@ -110,7 +110,9 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
             (Context context){
         Cursor cursor = context.getContentResolver().query(
                         GeoFenceEntry.CONTENT_URI, null, null, null, null);
-        return getLocationEnvironmentVariablesFromCursor(cursor);
+        List<EnvironmentVariable> returnValues = getLocationEnvironmentVariablesFromCursor(cursor);
+        cursor.close();
+        return returnValues;
     }
 
     public static List<Geofence> getAndroidGeofences(Context context) {
@@ -149,6 +151,7 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
                 null, null);
         List<EnvironmentVariable> locationVariables = getLocationEnvironmentVariablesFromCursor(
                 locationCursor);
+        locationCursor.close();
         if(locationVariables == null || locationVariables.isEmpty()){
             throw new IllegalArgumentException("Invalid geofence passed. Id not found in database");
         }

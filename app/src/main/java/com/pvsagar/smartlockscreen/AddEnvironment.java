@@ -28,6 +28,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
 
@@ -550,6 +551,8 @@ public class AddEnvironment extends ActionBarActivity {
             environment.setHint(environmentHint);
 
             environment.insertIntoDatabase(getActivity());
+            getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
+                    BaseService.ACTION_ADD_GEOFENCES));
             getActivity().finish();
 
         }

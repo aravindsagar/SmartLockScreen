@@ -465,7 +465,9 @@ public class Environment {
         Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
                 selection, selectionArgs, null);
         envCursor.moveToFirst();
-        return buildEnvironmentBareboneFromCursor(envCursor);
+        Environment returnEnvironment = buildEnvironmentBareboneFromCursor(envCursor);
+        envCursor.close();
+        return returnEnvironment;
     }
 
     /**

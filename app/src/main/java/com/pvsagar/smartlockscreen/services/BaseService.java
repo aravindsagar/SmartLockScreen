@@ -20,7 +20,9 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
@@ -38,6 +40,10 @@ public class BaseService extends Service implements
     public static final int ONGOING_NOTIFICATION_ID = 1;
     public static final int GEOFENCE_SERVICE_REQUEST_CODE = 2;
 
+    private static final String PACKAGE_NAME = "com.pvsagar.smartlockscreen.services";
+    public static final String ACTION_DETECT_ENVIRONMENT = PACKAGE_NAME + ".DETECT_ENVIRONMENT";
+    public static final String ACTION_ADD_GEOFENCES = PACKAGE_NAME + ".ADD_GEOFENCES";
+
     private LocationClient mLocationClient;
     // Defines the allowable request types.
     public enum REQUEST_TYPE {ADD_GEOFENCES}
@@ -45,12 +51,13 @@ public class BaseService extends Service implements
     // Flag that indicates if a request is underway.
     private boolean mInProgress;
 
-    public static Intent getServiceIntent(Context context, String extraText){
+    public static Intent getServiceIntent(Context context, String extraText, String action){
         Intent serviceIntent  = new Intent();
         serviceIntent.setClass(context, com.pvsagar.smartlockscreen.services.BaseService.class);
         if(extraText != null && !extraText.isEmpty()){
             serviceIntent.setData(Uri.parse(extraText));
         }
+        serviceIntent.setAction(action);
         return serviceIntent;
     }
 
@@ -64,6 +71,7 @@ public class BaseService extends Service implements
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
         (new BluetoothDeviceSearch()).execute();
+        //TODO: populate current wifi network in WifiReceiver
         super.onCreate();
     }
 
@@ -74,6 +82,7 @@ public class BaseService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String action;
         if(intent != null) {
             Uri uri = intent.getData();
 
@@ -82,7 +91,24 @@ public class BaseService extends Service implements
                 startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                         uri.toString()));
             }
+            action = intent.getAction();
+            if(action != null && !action.isEmpty()) {
+                if (action.equals(ACTION_DETECT_ENVIRONMENT)) {
+                    Environment current = EnvironmentDetector.detectCurrentEnvironment(this);
+                    if (current == null) {
+                        startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                                "Unknown Environment"));
+                    } else {
+                        startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                                "Environment: " + current.getName()));
+                    }
+                } else if(action.equals(ACTION_ADD_GEOFENCES)) {
+                    requestAddGeofences();
+                }
+                //Additional action handling to be done here when more actions are added
+            }
         }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -125,10 +151,10 @@ public class BaseService extends Service implements
         if(!mInProgress){
             mInProgress = true;
             mLocationClient.connect();
+        } else {
+            Log.w(LOG_TAG, "A request already in progress.");
         }
     }
-
-
 
     private class BluetoothDeviceSearch extends AsyncTask<Void, Void, Void>{
         @Override

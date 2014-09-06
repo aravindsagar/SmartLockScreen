@@ -4,9 +4,11 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
  * required actions
  */
 public class BluetoothReceiver extends BroadcastReceiver {
+    private static final String LOG_TAG = BluetoothReceiver.class.getSimpleName();
 
     private static List<BluetoothEnvironmentVariable> currentlyConnectedBluetoothDevices =
             new ArrayList<BluetoothEnvironmentVariable>();
@@ -37,10 +40,16 @@ public class BluetoothReceiver extends BroadcastReceiver {
                             device.getAddress()));
         } else return;
         Toast.makeText(context, device.getName() + " connected.", Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG, "Currently connected device count: " + currentlyConnectedBluetoothDevices.size());
+        context.startService(BaseService.getServiceIntent(context, null,
+                BaseService.ACTION_DETECT_ENVIRONMENT));
     }
 
     public static void addBluetoothDeviceToConnectedDevices(BluetoothEnvironmentVariable newVariable){
-        if(newVariable == null) return;
+        if(newVariable == null){
+            Log.w(LOG_TAG, "Null pointer passed to addBluetoothDeviceToConnectedDevices.");
+            return;
+        }
         for(BluetoothEnvironmentVariable variable:currentlyConnectedBluetoothDevices){
             if(newVariable.equals(variable))
                 return;
@@ -49,7 +58,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
     }
 
     public static void removeBluetoothDeviceFromConnectedDevices(BluetoothEnvironmentVariable variable){
-        if (variable == null) return;
+        if (variable == null){
+            Log.w(LOG_TAG, "Null pointer passed to addBluetoothDeviceToConnectedDevices.");
+            return;
+        }
         for(int i=0; i<currentlyConnectedBluetoothDevices.size(); i++){
             BluetoothEnvironmentVariable v = currentlyConnectedBluetoothDevices.get(i);
             if(variable.equals(v))

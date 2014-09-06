@@ -156,9 +156,10 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
         String selection = WiFiNetworksEntry.COLUMN_SSID + " = ? AND " + WiFiNetworksEntry
                 .COLUMN_ENCRYPTION_TYPE + " = ? ";
         String[] selectionArgs = new String[]{SSID, encryptionType};
-        List<EnvironmentVariable> queryResult = (getWiFiEnvironmentVariablesFromCursor(
-                context.getContentResolver().query(WiFiNetworksEntry.CONTENT_URI, null, selection,
-                        selectionArgs, null)));
+        Cursor wifiCursor = context.getContentResolver().query(WiFiNetworksEntry.CONTENT_URI, null, selection,
+                selectionArgs, null);
+        List<EnvironmentVariable> queryResult = (getWiFiEnvironmentVariablesFromCursor(wifiCursor));
+        wifiCursor.close();
         if(queryResult == null || queryResult.isEmpty()) return null;
         return (WiFiEnvironmentVariable) queryResult.get(0);
     }

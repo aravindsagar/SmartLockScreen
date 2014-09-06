@@ -130,7 +130,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
     /**
      * Converts cursor containing data from bluetooth_devices table, to objects of
      * BluetoothEnvironmentVariable
-     * @param bluetoothCursor
+     * @param bluetoothCursor cursor containing data from bluetooth_devices table
      * @return List of BluetoothEnvironmentVariables
      */
     public static List<EnvironmentVariable> getBluetoothEnvironmentVariablesFromCursor
@@ -174,9 +174,10 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
             selection = BluetoothDevicesEntry.COLUMN_DEVICE_ADDRESS + " = ? AND " +
                     BluetoothDevicesEntry.COLUMN_DEVICE_NAME + " = ? ";
             selectionArgs = new String[]{deviceAddress, deviceName};
-            variables = getBluetoothEnvironmentVariablesFromCursor(
-                    context.getContentResolver().query(BluetoothDevicesEntry.CONTENT_URI, null,
-                            selection, selectionArgs, null));
+            Cursor bluetoothCursor = context.getContentResolver().query(
+                    BluetoothDevicesEntry.CONTENT_URI, null, selection, selectionArgs, null);
+            variables = getBluetoothEnvironmentVariablesFromCursor(bluetoothCursor);
+            bluetoothCursor.close();
             if(variables != null && !variables.isEmpty()){
                 return (BluetoothEnvironmentVariable) variables.get(0);
             }

@@ -8,6 +8,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.List;
 
@@ -22,23 +23,25 @@ public class WifiReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         WifiInfo wifiInfo = (WifiInfo) intent.getExtras().get(WifiManager.EXTRA_WIFI_INFO);
-        String wifiEncryptionType = new String();
+        String wifiEncryptionType;
         if(wifiInfo != null) {
             List<WifiConfiguration> wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(context);
             for(WifiConfiguration configuration: wifiConfigurations){
                 if(configuration.SSID.equals(wifiInfo.getSSID())) {
                     wifiEncryptionType = WiFiEnvironmentVariable.getSecurity(configuration);
+                    currentWifiNetwork = WiFiEnvironmentVariable.getWifiEnvironmentVariableFromDatabase(
+                            context, wifiInfo.getSSID(), wifiEncryptionType);
                     break;
                 }
             }
-            currentWifiNetwork = WiFiEnvironmentVariable.getWifiEnvironmentVariableFromDatabase(
-                    context, wifiInfo.getSSID(), wifiEncryptionType);
         } else {
             currentWifiNetwork = null;
         }
+        context.startService(BaseService.getServiceIntent(context, null,
+                BaseService.ACTION_DETECT_ENVIRONMENT));
     }
 
-    public WiFiEnvironmentVariable getCurrentWifiNetwork(){
+    public static WiFiEnvironmentVariable getCurrentWifiNetwork(){
         return currentWifiNetwork;
     }
 }

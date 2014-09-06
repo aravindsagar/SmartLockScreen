@@ -31,7 +31,7 @@ public class LockScreenActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
-        startService(BaseService.getServiceIntent(this, null));
+        startService(BaseService.getServiceIntent(this, null, null));
     }
 
 
