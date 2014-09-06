@@ -128,17 +128,19 @@ public class BaseService extends Service implements
                     mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
                 }
         }
-
     }
 
     @Override
     public void onDisconnected() {
-        mInProgress = false;
+
     }
 
     @Override
     public void onAddGeofencesResult(int i, String[] strings) {
         Toast.makeText(this, "Geofence added: " + strings[0], Toast.LENGTH_SHORT).show();
+        mInProgress = false;
+        mLocationClient.disconnect();
+
     }
 
     @Override
