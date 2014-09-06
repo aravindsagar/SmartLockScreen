@@ -178,10 +178,10 @@ public abstract class EnvironmentVariable {
     @Override
     public boolean equals(Object o) {
         EnvironmentVariable e = (EnvironmentVariable) o;
-        if(stringValues.length != e.stringValues.length) return false;
-        if(floatValues.length != e.floatValues.length) return false;
-
+        if(!getVariableType().equals(e.getVariableType())) return false;
         if(isStringValuesSupported()){
+            if(!e.isStringValuesSupported() || stringValues.length != e.stringValues.length)
+                return false;
             for (int i = 0; i < stringValues.length; i++) {
                 if(!stringValues[i].equals(e.stringValues[i])) {
                     return false;
@@ -189,6 +189,8 @@ public abstract class EnvironmentVariable {
             }
         }
         if(isFloatValuesSupported()){
+            if(!e.isFloatValuesSupported() || floatValues.length != e.floatValues.length)
+                return false;
             for (int i = 0; i < floatValues.length; i++) {
                 if(!(floatValues[i] == e.floatValues[i])){
                     return false;
