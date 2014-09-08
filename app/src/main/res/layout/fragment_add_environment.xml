@@ -131,6 +131,17 @@
                 android:gravity="center_vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium"/>
 
+            <TextView
+                android:id="@+id/text_view_select_stored_location"
+                android:text="@string/text_view__select_stored_location"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/abc_action_bar_default_height"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:gravity="center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
             <EditText
                 android:id="@+id/edit_text_location_name"
                 android:layout_width="match_parent"

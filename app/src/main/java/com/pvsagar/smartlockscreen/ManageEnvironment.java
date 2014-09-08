@@ -140,7 +140,7 @@ public class ManageEnvironment extends ActionBarActivity {
                                 if (selected.valueAt(i)) {
                                     String selectedItem = listAdapter
                                             .getItem(selected.keyAt(i));
-                                    //Todo: Delete the environment
+                                    Environment.deleteEnvironmentFromDatabase(getActivity(),selectedItem);
                                     // Remove selected items following the ids
                                     listAdapter.remove(selectedItem);
                                 }

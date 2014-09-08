@@ -654,22 +654,21 @@ public class EnvironmentProvider extends ContentProvider {
 
     private long insertEnvironmentLocation(Uri uri, SQLiteDatabase db, ContentValues values){
         long environmentId = Long.parseLong(uri.getPathSegments().get(1));
-        String geofenceSelection = GeoFenceEntry.COLUMN_COORD_LAT + " = ? AND " +
-                GeoFenceEntry.COLUMN_COORD_LONG + " = ? AND " +
-                GeoFenceEntry.COLUMN_RADIUS + " = ? ";
+        String geofenceSelection = GeoFenceEntry.COLUMN_LOCATION_NAME + " = ? ";
         String[] geofenceSelectionArgs = new String[]{
-                values.getAsString(GeoFenceEntry.COLUMN_COORD_LAT),
-                values.getAsString(GeoFenceEntry.COLUMN_COORD_LONG),
-                values.getAsString(GeoFenceEntry.COLUMN_RADIUS)
+                values.getAsString(GeoFenceEntry.COLUMN_LOCATION_NAME)
         };
-        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME, new String[]{GeoFenceEntry._ID},
+        Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME, null,
                 geofenceSelection, geofenceSelectionArgs, null, null, null);
-
+        //TODO check based on a range
         long geofenceId;
-        if(geofenceCursor.getCount() == 0){
+        if(!geofenceCursor.moveToFirst()){
+            String receivedValues = values.getAsString(GeoFenceEntry.COLUMN_COORD_LAT) + " " +
+                    values.getAsString(GeoFenceEntry.COLUMN_COORD_LONG) + " " +
+                    values.getAsString(GeoFenceEntry.COLUMN_RADIUS);
+            Log.d(LOG_TAG, "Location values received: " + receivedValues);
             geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
         } else {
-            geofenceCursor.moveToFirst();
             geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
         }
         if(geofenceId == -1){

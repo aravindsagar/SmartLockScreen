@@ -59,5 +59,7 @@
     <string name="checkbox_bluetooth_all">Check for all bluetooth connection</string>
     <string name="intent_extra_selected_location">selectedLocation</string>
     <string name="title_activity_edit_environment">EditEnvironment</string>
+    <string name="text_view__select_stored_location">Select stored location</string>
+    <string name="dialog_pick_stored_location">Stored Location</string>
 
 </resources>
