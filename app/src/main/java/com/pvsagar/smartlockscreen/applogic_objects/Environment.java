@@ -496,6 +496,21 @@ public class Environment {
         return environments;
     }
 
+    public static List<Environment> getAllnvironmentBarebonesWithoutLocation(Context context){
+        String selection = EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED + " = ? ";
+        String[] selectionArgs = new String[]{String.valueOf(0)};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        ArrayList<Environment> environments = new ArrayList<Environment>();
+
+        for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
+            Environment e = buildEnvironmentBareboneFromCursor(envCursor);
+            environments.add(e);
+        }
+        envCursor.close();
+        return environments;
+    }
+
     /**
      * Function to delete an environment from the database
      * @param context Activity/ service context
