@@ -2,20 +2,8 @@ package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.ContentValues;
 
+import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
-
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by aravind on 10/8/14.
@@ -28,7 +16,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
     private PassphraseRepresentation passphraseRepresentation;
     private String passphraseType;
 
-    private static final String KEY = "OJNBWer8074OUHWEF9u";
+    private static final String KEY = "000102030405060708090A0B0C0D0E0F";
 
     private static final String PACKAGE_PREFIX = "com.pvsagar.smartlockscreen.applogic_objects" +
             ".passphrases";
@@ -48,18 +36,14 @@ public abstract class Passphrase<PassphraseRepresentation> {
         setPasswordRepresentation(passphrase);
     }
 
-    protected String getPassphraseStringFromPassphraseRepresentation(PassphraseRepresentation passphrase){
-        return passphrase.toString();
-    }
+    protected abstract String getPassphraseStringFromPassphraseRepresentation(PassphraseRepresentation passphrase);
 
-    protected String getPassphraseRepresentationFromPassphraseString(String passphrase){
-        return passphrase.toString();
-    }
+    protected abstract PassphraseRepresentation getPassphraseRepresentationFromPassphraseString(String passphrase);
 
     public void setPasswordRepresentation(PassphraseRepresentation passphrase){
         passphraseRepresentation = passphrase;
         this.passwordString = getPassphraseStringFromPassphraseRepresentation(passphrase);
-        encryptedPasswordString = encryptPassword(passwordString);
+        encryptPassword();
     }
 
     public PassphraseRepresentation getPassphraseRepresentation(){
@@ -74,81 +58,14 @@ public abstract class Passphrase<PassphraseRepresentation> {
         return false;
     }
 
-    private String encryptPassword(String passwordString){
-        try {
-            Cipher passwordCipher = Cipher.getInstance("AES");
-            passwordCipher.init(Cipher.ENCRYPT_MODE, getKey());
-            return toHex(passwordCipher.doFinal(passwordString.getBytes()));
-        } catch (NoSuchAlgorithmException e){
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e){
-            e.printStackTrace();
-        } catch (InvalidKeyException e){
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e){
-            e.printStackTrace();
-        } catch (BadPaddingException e){
-            e.printStackTrace();
-        }
-        return null;
+    private void encryptPassword(){
+        encryptedPasswordString = EncryptorDecryptor.encrypt(passwordString, KEY);
     }
 
-    private String decryptPassword(String encryptedPasswordString){
-        try{
-            Cipher passwordCipher = Cipher.getInstance("AES");
-            passwordCipher.init(Cipher.DECRYPT_MODE, getKey());
-            return new String(passwordCipher.doFinal(toByte(encryptedPasswordString)));
-        } catch (NoSuchAlgorithmException e){
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e){
-            e.printStackTrace();
-        } catch (InvalidKeyException e){
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e){
-            e.printStackTrace();
-        } catch (BadPaddingException e){
-            e.printStackTrace();
-        }
-        return null;
+    private void decryptPassword(){
+        passwordString = EncryptorDecryptor.decrypt(encryptedPasswordString, KEY);
     }
 
-    private Key getKey() throws NoSuchAlgorithmException{
-        SecretKeySpec keySpec = new SecretKeySpec(getRawKey(KEY.getBytes()), "AES");
-        return keySpec;
-        //TODO should change KEY
-    }
-
-    private static byte[] getRawKey(byte[] seed) throws NoSuchAlgorithmException{
-        KeyGenerator generator = KeyGenerator.getInstance("AES");
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-        sr.setSeed(seed);
-        generator.init(128, sr);
-        SecretKey skey = generator.generateKey();
-        byte[] raw = skey.getEncoded();
-        return raw;
-    }
-
-    private static byte[] toByte(String hexString) {
-        int len = hexString.length()/2;
-        byte[] result = new byte[len];
-        for (int i = 0; i < len; i++)
-            result[i] = Integer.valueOf(hexString.substring(2*i, 2*i+2), 16).byteValue();
-        return result;
-    }
-
-    private static String toHex(byte[] buf) {
-        if (buf == null)
-            return "";
-        StringBuffer result = new StringBuffer(2*buf.length);
-        for (int i = 0; i < buf.length; i++) {
-            appendHex(result, buf[i]);
-        }
-        return result.toString();
-    }
-    private final static String HEX = "0123456789ABCDEF";
-    private static void appendHex(StringBuffer sb, byte b) {
-        sb.append(HEX.charAt((b>>4)&0x0f)).append(HEX.charAt(b&0x0f));
-    }
 
     private ContentValues getContentValues(){
         ContentValues passwordValues = new ContentValues();
