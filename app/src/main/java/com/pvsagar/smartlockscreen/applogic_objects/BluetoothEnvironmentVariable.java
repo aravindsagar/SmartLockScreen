@@ -96,7 +96,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
      * @param context Context of the calling activity
      * @return Returns the list of paired bluetooth devices
      */
-    public ArrayList<BluetoothDevice> getPairedBluetoothDevices(Context context){
+    public static ArrayList<BluetoothDevice> getPairedBluetoothDevices(Context context){
 
         Log.v(LOG_TAG, "getBluetoothDevices Entered");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
