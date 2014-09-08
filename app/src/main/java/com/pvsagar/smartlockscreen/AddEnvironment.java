@@ -93,7 +93,7 @@ public class AddEnvironment extends ActionBarActivity {
                 //Get the list of paired devices, populate the list, set the adapter
                 Toast.makeText(getBaseContext(),"Bluetooth switched on",Toast.LENGTH_SHORT).show();
                 enableBluetoothCheckBox.setChecked(true);
-                ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(this);
+                ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(this);
                 ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
                 if(bluetoothDevices != null) {
                     //Populate the String list and Set the adapter for the list view
@@ -103,7 +103,6 @@ public class AddEnvironment extends ActionBarActivity {
                     AddEnvironment.bluetoothDevices = bluetoothDevices;
                     placeholderFragment.setBluetoothItemsEnabled(true);
                 }
-
             }
             else{
                 //Bluetooth not enabled
@@ -247,7 +246,7 @@ public class AddEnvironment extends ActionBarActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(getActivity());
+                        ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
                         ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
                         if (bluetoothDevices != null) {
                             //Populate the String list and Set the adapter for the list view
