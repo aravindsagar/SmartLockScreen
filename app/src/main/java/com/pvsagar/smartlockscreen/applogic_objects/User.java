@@ -82,4 +82,17 @@ public class User {
             setPassphraseForEnvironment(context, passphrase, environment);
         }
     }
+
+    public Passphrase getPassphraseForEnvironment(Context context, Environment environment){
+        if(id>0) {
+            Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
+                    buildUserUriWithIdEnvironmentAndPassword(id, environment.getId()),
+                    null, null, null, null);
+            if(passwordCursor.moveToFirst()){
+                return Passphrase.getPassphraseFromCursor(passwordCursor);
+            }
+            return null;
+        }
+        return null;
+    }
 }

@@ -13,13 +13,14 @@ import com.pvsagar.smartlockscreen.R;
  * Created by aravind on 25/8/14.
  */
 public class NotificationHelper {
+    private static final String NOTIFICATION_TITLE = "Smart Lockscreen";
     public static Notification getAppNotification(Context context, String text){
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setPriority(Notification.PRIORITY_MIN);
         Intent notificationIntent = new Intent(context, LockScreenActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
         notificationBuilder.setContentIntent(pendingIntent);
-        notificationBuilder.setContentTitle("Smart Lockscreen.");
+        notificationBuilder.setContentTitle(NOTIFICATION_TITLE);
         if(text == null || text.isEmpty()){
             text = "Service Started.";
         }

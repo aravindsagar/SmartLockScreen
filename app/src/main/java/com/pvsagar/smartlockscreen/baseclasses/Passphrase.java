@@ -1,7 +1,10 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
 
@@ -76,5 +79,29 @@ public abstract class Passphrase<PassphraseRepresentation> {
         passwordValues.put(PasswordEntry.COLUMN_PASSWORD_TYPE, passphraseType);
         passwordValues.put(PasswordEntry.COLUMN_PASSWORD_STRING, encryptedPasswordString);
         return passwordValues;
+    }
+
+    public static Passphrase getPassphraseFromCursor(Cursor cursor){
+        try{
+            String type = cursor.getString(cursor.getColumnIndex(PasswordEntry.COLUMN_PASSWORD_TYPE));
+            Passphrase returnPassphrase;
+            if(type.equals(TYPE_PASSWORD)){
+                returnPassphrase = new Password();
+            } else if(type.equals(TYPE_PIN)){
+                returnPassphrase = new Pin();
+            } else {
+                throw new TypeNotPresentException("The type read from database is not a valid type."
+                        , new Exception());
+            }
+            returnPassphrase.encryptedPasswordString = cursor.getString(cursor.getColumnIndex
+                    (PasswordEntry.COLUMN_PASSWORD_STRING));
+            returnPassphrase.decryptPassword();
+            returnPassphrase.setPasswordRepresentation(returnPassphrase.
+                    getPassphraseRepresentationFromPassphraseString(returnPassphrase.passwordString));
+            return returnPassphrase;
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new IllegalArgumentException("Cursor should have values from passwords table");
+        }
     }
 }
