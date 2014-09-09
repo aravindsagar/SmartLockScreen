@@ -10,7 +10,8 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 
 import java.util.List;
 
@@ -51,8 +52,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Toast.makeText(context,"Checked changed",Toast.LENGTH_SHORT).show();
-                //Todo: Update the database, if failed set the check back
+                Environment.setEnabledInDatabase(context,environmentNames.get(position),
+                        isChecked);
             }
         });
         return rootView;

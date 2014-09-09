@@ -84,9 +84,11 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         if(mBluetoothAdapter == null){
             Log.e(LOG_TAG,"Bluetooth Hardware Not Found");
         }
-        Log.v(LOG_TAG,"enabling bluetooth");
-        Intent startBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        ((Activity)context).startActivityForResult(startBluetoothIntent, REQUEST_BLUETOOTH_ENABLE);
+        if(!mBluetoothAdapter.isEnabled()) {
+            Log.v(LOG_TAG,"enabling bluetooth");
+            Intent startBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            ((Activity) context).startActivityForResult(startBluetoothIntent, REQUEST_BLUETOOTH_ENABLE);
+        }
     }
 
     /**
@@ -94,7 +96,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
      * @param context Context of the calling activity
      * @return Returns the list of paired bluetooth devices
      */
-    public ArrayList<BluetoothDevice> getPairedBluetoothDevices(Context context){
+    public static ArrayList<BluetoothDevice> getPairedBluetoothDevices(Context context){
 
         Log.v(LOG_TAG, "getBluetoothDevices Entered");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

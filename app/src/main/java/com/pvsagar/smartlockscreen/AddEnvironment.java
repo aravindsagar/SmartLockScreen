@@ -31,6 +31,7 @@ import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class AddEnvironment extends ActionBarActivity {
@@ -53,7 +54,9 @@ public class AddEnvironment extends ActionBarActivity {
     private static double latLocation;
     private static double lonLocation;
     private static double radLocation;
-
+    private static List<EnvironmentVariable> storedLocations;
+    private static int mSelectedLocationItem;
+    private static LocationEnvironmentVariable mSelectedLocation;
 
     private PlaceholderFragment placeholderFragment;
 
@@ -91,7 +94,7 @@ public class AddEnvironment extends ActionBarActivity {
                 //Get the list of paired devices, populate the list, set the adapter
                 Toast.makeText(getBaseContext(),"Bluetooth switched on",Toast.LENGTH_SHORT).show();
                 enableBluetoothCheckBox.setChecked(true);
-                ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(this);
+                ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(this);
                 ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
                 if(bluetoothDevices != null) {
                     //Populate the String list and Set the adapter for the list view
@@ -101,7 +104,6 @@ public class AddEnvironment extends ActionBarActivity {
                     AddEnvironment.bluetoothDevices = bluetoothDevices;
                     placeholderFragment.setBluetoothItemsEnabled(true);
                 }
-
             }
             else{
                 //Bluetooth not enabled
@@ -159,6 +161,7 @@ public class AddEnvironment extends ActionBarActivity {
         private EditText lonLocationEditText;
         private EditText radLocationEditText;
         private TextView selectLocationTextView;
+        private TextView selectStoredLocationTextView;
 
         public PlaceholderFragment() {
         }
@@ -186,6 +189,7 @@ public class AddEnvironment extends ActionBarActivity {
             lonLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lon);
             radLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_rad);
             selectLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_location);
+            selectStoredLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_stored_location);
 
             /* Initialization */
             setUpBluetoothElements();
@@ -243,7 +247,7 @@ public class AddEnvironment extends ActionBarActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(getActivity());
+                        ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
                         ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
                         if (bluetoothDevices != null) {
                             //Populate the String list and Set the adapter for the list view
@@ -379,6 +383,8 @@ public class AddEnvironment extends ActionBarActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if(isChecked){
                         setLocationItemsEnabled(true);
+                        storedLocations = LocationEnvironmentVariable.getLocationEnvironmentVariables(getActivity());
+                        mSelectedLocationItem = -1;
                     }
                     else {
                         setLocationItemsEnabled(false);
@@ -386,12 +392,47 @@ public class AddEnvironment extends ActionBarActivity {
                 }
             });
 
+            /* Select location form Map */
             selectLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.v(LOG_TAG,"Starting select location");
                     Intent intent = new Intent(getActivity(),SelectLocation.class);
                     getActivity().startActivityForResult(intent,REQUEST_LOCATION_SELECT);
+                }
+            });
+            /* Select stored location */
+            selectStoredLocationTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String[] locationNames = new String[storedLocations.size()];
+                    for (int i=0; i<storedLocations.size();i++) {
+                        locationNames[i] = ((LocationEnvironmentVariable)storedLocations.get(i)).getLocationName();
+                    }
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.dialog_pick_wifi_connection);
+                    builder.setSingleChoiceItems(locationNames,mSelectedLocationItem,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mSelectedLocationItem = which;
+                            mSelectedLocation = (LocationEnvironmentVariable)storedLocations.get(which);
+                        }
+                    });
+                    builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if(mSelectedLocationItem!= -1){
+                                nameLocationEditText.setText(mSelectedLocation.getLocationName());
+                                latLocationEditText.setText(""+mSelectedLocation.getLatitude());
+                                lonLocationEditText.setText(""+mSelectedLocation.getLongitude());
+                                radLocationEditText.setText(""+mSelectedLocation.getRadius());
+                            }
+                        }
+                    });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+
                 }
             });
         }
@@ -411,6 +452,7 @@ public class AddEnvironment extends ActionBarActivity {
             lonLocationEditText.setEnabled(flag);
             radLocationEditText.setEnabled(flag);
             selectLocationTextView.setEnabled(flag);
+            selectStoredLocationTextView.setEnabled(flag);
         }
 
         public void onDoneButtonClick(){
@@ -431,7 +473,6 @@ public class AddEnvironment extends ActionBarActivity {
 
             //List to store all the environment variables
             ArrayList<EnvironmentVariable> environmentVariables = new ArrayList<EnvironmentVariable>();
-
 
             /* Parsing the Data */
             if(environmentName.equals("")){
