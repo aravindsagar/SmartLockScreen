@@ -31,7 +31,10 @@ import android.widget.Toast;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -46,6 +49,7 @@ public class AddEnvironment extends ActionBarActivity {
     public static final int REQUEST_LOCATION_SELECT = 31;
     public static final String INTENT_EXTRA_SELECTED_LOCATION = "selectedLocation";
 
+    /* These variables hold the data of the present environment being added */
     /* Bluetooth */
     private static ArrayList<BluetoothDevice> bluetoothDevices;
     private static ArrayList<BluetoothDevice> mSelectedBluetoothDevices;
@@ -66,6 +70,7 @@ public class AddEnvironment extends ActionBarActivity {
 
     /* Passphrase */
     private static ArrayAdapter<String> passphraseAdapter;
+    private static int selectedPassphrasetype;
 
     private PlaceholderFragment placeholderFragment;
 
@@ -87,19 +92,22 @@ public class AddEnvironment extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
+        // Confirm the user about exiting
         placeholderFragment.onCancelButtonClick();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if(requestCode == BluetoothEnvironmentVariable.REQUEST_BLUETOOTH_ENABLE){
             /* Bluetooth request */
             CheckBox enableBluetoothCheckBox = (CheckBox)findViewById(R.id.checkbox_enable_bluetooth);
 
             // Checking whether bluetooth is enabled or not
             if(resultCode == RESULT_OK){
-                //Bluetooth Enabled
+                //Bluetooth enable request success: the following piece of code will find the list
+                //of paired devices and populate the list
                 //Get the list of paired devices, populate the list, set the adapter
                 Toast.makeText(getBaseContext(),"Bluetooth switched on",Toast.LENGTH_SHORT).show();
                 enableBluetoothCheckBox.setChecked(true);
@@ -115,7 +123,8 @@ public class AddEnvironment extends ActionBarActivity {
                 }
             }
             else{
-                //Bluetooth not enabled
+                //Bluetooth enable request failed: the following peice of code will disable the
+                // bluetooth items in the UI
                 //Un check the checkbox, disable the list
                 Toast.makeText(getBaseContext(),"Unable to switch on Bluetooth",Toast.LENGTH_SHORT).show();
                 enableBluetoothCheckBox.setChecked(false);
@@ -126,6 +135,7 @@ public class AddEnvironment extends ActionBarActivity {
         }
         else if(requestCode == REQUEST_LOCATION_SELECT){
             if(resultCode == RESULT_OK){
+                // The select location request is success: will update the location UI elements.
                 Bundle bundle = data.getExtras();
                 Location location = (Location)bundle.get(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION);
                 placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
@@ -153,6 +163,7 @@ public class AddEnvironment extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
+        /* Variables containing the UI elements */
         /* Environment Details */
         private EditText environmentNameEditText;
         private EditText environmentHintEditText;
@@ -213,12 +224,15 @@ public class AddEnvironment extends ActionBarActivity {
             setUpWiFiElements();
             setUpLocationElements();
             setUpPassphraseElements();
-
             setUpActionBar();
 
             return rootView;
         }
 
+        /**
+         * Sets up the contextual action bar containing Done and cance button.
+         * This will populate a custom made action bar from @layout/actionbar_custom_view_done_cancel.xml
+         */
         private void setUpActionBar(){
             /* Adding Contextual Action Bar with Done and Cancel Button */
             final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getActionBar().getThemedContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -251,6 +265,9 @@ public class AddEnvironment extends ActionBarActivity {
             /* End of Action Bar Code */
         }
 
+        /**
+         * Sets up the bluetooth UI elements including action listeners.
+         */
         public void setUpBluetoothElements(){
 
             /* Initialization */
@@ -311,13 +328,12 @@ public class AddEnvironment extends ActionBarActivity {
                         checkedItems[mSelectedItem] = true;
                     }
 
-                    builder.setMultiChoiceItems(bluetoothDevicesName,checkedItems,new DialogInterface.OnMultiChoiceClickListener() {
+                    builder.setMultiChoiceItems(bluetoothDevicesName, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                            if(isChecked){
+                            if (isChecked) {
                                 mSelectedBluetoothItems.add(which);
-                            }
-                            else{
+                            } else {
                                 mSelectedBluetoothItems.remove(Integer.valueOf(which));
                             }
                         }
@@ -337,6 +353,9 @@ public class AddEnvironment extends ActionBarActivity {
             });
         }
 
+        /**
+         * Sets up the WifI UI elements including action listeners.
+         */
         public void setUpWiFiElements(){
             wifiConfigurations = new ArrayList<WifiConfiguration>();
             mSelectedWiFiItem = -1;
@@ -366,19 +385,19 @@ public class AddEnvironment extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     String[] wifiConnectionNames = new String[wifiConfigurations.size()];
-                    for(int i=0; i<wifiConfigurations.size();i++){
+                    for (int i = 0; i < wifiConfigurations.size(); i++) {
                         wifiConnectionNames[i] = wifiConfigurations.get(i).SSID;
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.dialog_pick_wifi_connection);
-                    builder.setSingleChoiceItems(wifiConnectionNames,mSelectedWiFiItem,new DialogInterface.OnClickListener() {
+                    builder.setSingleChoiceItems(wifiConnectionNames, mSelectedWiFiItem, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mSelectedWiFiItem = which;
                             mSelectedWifiConfiguration = wifiConfigurations.get(which);
                         }
                     });
-                    builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                         }
@@ -391,6 +410,9 @@ public class AddEnvironment extends ActionBarActivity {
             });
         }
 
+        /**
+         * Sets up the location UI elements including action listeners.
+         */
         public void setUpLocationElements(){
 
             setLocationItemsEnabled(false);
@@ -424,26 +446,26 @@ public class AddEnvironment extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     String[] locationNames = new String[storedLocations.size()];
-                    for (int i=0; i<storedLocations.size();i++) {
-                        locationNames[i] = ((LocationEnvironmentVariable)storedLocations.get(i)).getLocationName();
+                    for (int i = 0; i < storedLocations.size(); i++) {
+                        locationNames[i] = ((LocationEnvironmentVariable) storedLocations.get(i)).getLocationName();
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.dialog_pick_wifi_connection);
-                    builder.setSingleChoiceItems(locationNames,mSelectedLocationItem,new DialogInterface.OnClickListener() {
+                    builder.setSingleChoiceItems(locationNames, mSelectedLocationItem, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mSelectedLocationItem = which;
-                            mSelectedLocation = (LocationEnvironmentVariable)storedLocations.get(which);
+                            mSelectedLocation = (LocationEnvironmentVariable) storedLocations.get(which);
                         }
                     });
-                    builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if(mSelectedLocationItem!= -1){
+                            if (mSelectedLocationItem != -1) {
                                 nameLocationEditText.setText(mSelectedLocation.getLocationName());
-                                latLocationEditText.setText(""+mSelectedLocation.getLatitude());
-                                lonLocationEditText.setText(""+mSelectedLocation.getLongitude());
-                                radLocationEditText.setText(""+mSelectedLocation.getRadius());
+                                latLocationEditText.setText("" + mSelectedLocation.getLatitude());
+                                lonLocationEditText.setText("" + mSelectedLocation.getLongitude());
+                                radLocationEditText.setText("" + mSelectedLocation.getRadius());
                             }
                         }
                     });
@@ -455,16 +477,21 @@ public class AddEnvironment extends ActionBarActivity {
             });
         }
 
+        /**
+         * Sets up the passphrase UI elements including action listeners.
+         */
         public void setUpPassphraseElements(){
             //Adapter for spinner
             passphraseAdapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_spinner_dropdown_item, Passphrase.passphraseTypes);
             passphraseTypeSpinner.setAdapter(passphraseAdapter);
             passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
             passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
+                    selectedPassphrasetype = position;
                     if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
                         passphraseEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -481,19 +508,32 @@ public class AddEnvironment extends ActionBarActivity {
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
                     passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                    selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
                 }
             });
         }
 
+        /**
+         * Enables or disables the bluetooth UI elements
+         * @param flag true: enable | false: disable
+         */
         public void setBluetoothItemsEnabled(boolean flag){
             selectBluetoothDevicesTextView.setEnabled(flag);
             bluetoothAllCheckbox.setEnabled(flag);
         }
 
+        /**
+         * Enables or disables the WiFi UI elements
+         * @param flag true: enable | false: disable
+         */
         public void setWiFiItemsEnabled(boolean flag){
             selectWiFiConnectionTextView.setEnabled(flag);
         }
 
+        /**
+         * Enables or disables the location UI elements
+         * @param flag true: enable | false: disable
+         */
         public void setLocationItemsEnabled(boolean flag){
             nameLocationEditText.setEnabled(flag);
             latLocationEditText.setEnabled(flag);
@@ -503,6 +543,10 @@ public class AddEnvironment extends ActionBarActivity {
             selectStoredLocationTextView.setEnabled(flag);
         }
 
+        /**
+         * When the done button is clicked in contextual action bar, the following function is called.
+         * The function parses the data for adding an environment, and updates it to the database.
+         */
         public void onDoneButtonClick(){
             //Environment Details
             String environmentName = environmentNameEditText.getText().toString();
@@ -630,6 +674,16 @@ public class AddEnvironment extends ActionBarActivity {
                 builder.create().show();
                 return;
             }
+
+            /* Passphrase */
+
+            if(passphraseEditText.getText().toString().equals("")){
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.alert_no_passphrase_title).setMessage(R.string.alert_no_passphrase_message);
+                builder.setPositiveButton(R.string.ok,null);
+                builder.create().show();
+                return;
+            }
             /* Data Parsed */
 
             /* Creating Environment */
@@ -638,14 +692,26 @@ public class AddEnvironment extends ActionBarActivity {
                 environment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
             environment.setHint(environmentHint);
-
             environment.insertIntoDatabase(getActivity());
+            /* Setting passphrase */
+            if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                Password password = new Password(passphraseEditText.getText().toString());
+                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,environment);
+            } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                Pin pin = new Pin(Integer.parseInt(passphraseEditText.getText().toString()));
+                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,environment);
+            }
+            /* done with setting passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_ADD_GEOFENCES));
             getActivity().finish();
 
         }
 
+        /**
+         * When the cancel button is clicked in contextual action bar, the following function is called.
+         * The function confirms the cancelling of adding environment and quits the activity, if confirmed.
+         */
         public void onCancelButtonClick(){
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_add_environment_message);

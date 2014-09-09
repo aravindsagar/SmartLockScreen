@@ -21,10 +21,6 @@ public abstract class Passphrase<PassphraseRepresentation> {
     public static final int INDEX_PASSPHRASE_TYPE_PASSWORD = 0;
     public static final int INDEX_PASSPHRASE_TYPE_PIN = 1;
 
-    public void setPasswordString(String passwordString){
-        this.passwordString = passwordString;
-        //TODO add encryption
-        encryptedPasswordString = passwordString;
     private static final String KEY = "000102030405060708090A0B0C0D0E0F";
 
     private static final String PACKAGE_PREFIX = "com.pvsagar.smartlockscreen.applogic_objects" +

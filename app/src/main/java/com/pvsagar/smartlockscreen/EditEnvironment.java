@@ -28,7 +28,10 @@ import android.widget.Toast;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 
@@ -43,6 +46,7 @@ public class EditEnvironment extends ActionBarActivity {
     public static final int REQUEST_LOCATION_SELECT = 31;
     public static final String INTENT_EXTRA_ENVIRONMENT = "environmentName";
 
+    /* These variables hold the data of the present environment being edited */
     /* Bluetooth */
     private static ArrayList<BluetoothDevice> bluetoothDevices;
     private static ArrayList<BluetoothDevice> mSelectedBluetoothDevices;
@@ -63,6 +67,7 @@ public class EditEnvironment extends ActionBarActivity {
 
     /* Passphrase */
     private static ArrayAdapter<String> passphraseAdapter;
+    private static int selectedPassphrasetype;
 
     PlaceholderFragment placeholderFragment;
 
@@ -312,14 +317,16 @@ public class EditEnvironment extends ActionBarActivity {
             //setting current location
             LocationEnvironmentVariable locationVariable = environment.getLocationEnvironmentVariable();
             nameLocationEditText.setText(locationVariable.getLocationName());
-            latLocationEditText.setText(""+locationVariable.getLatitude());
+            latLocationEditText.setText("" + locationVariable.getLatitude());
             lonLocationEditText.setText(""+locationVariable.getLongitude());
             radLocationEditText.setText(""+locationVariable.getRadius());
         }
 
         private void initPassphraseElements(){
             // Todo: do initialization form database
+            passphraseEditText.setHint("(Unchanged)");
             passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
         }
 
         private void setUpBluetoothElements(){
@@ -361,18 +368,18 @@ public class EditEnvironment extends ActionBarActivity {
             selectBluetoothDevicesTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(bluetoothDevices == null){
+                    if (bluetoothDevices == null) {
                         bluetoothDevices = new ArrayList<BluetoothDevice>();
                     }
                     String[] bluetoothDevicesName = new String[bluetoothDevices.size()];
-                    for(int i=0;i<bluetoothDevices.size();i++){
+                    for (int i = 0; i < bluetoothDevices.size(); i++) {
                         bluetoothDevicesName[i] = bluetoothDevices.get(i).getName();
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.dialog_pick_bluetooth_devices);
                     //Set boolean array for previously checked items
                     boolean[] checkedItems = new boolean[bluetoothDevices.size()];
-                    if(mSelectedBluetoothDevices == null || mSelectedBluetoothItems == null){
+                    if (mSelectedBluetoothDevices == null || mSelectedBluetoothItems == null) {
                         mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
                         mSelectedBluetoothItems = new ArrayList<Integer>();
                     }
@@ -380,18 +387,17 @@ public class EditEnvironment extends ActionBarActivity {
                         checkedItems[mSelectedItem] = true;
                     }
 
-                    builder.setMultiChoiceItems(bluetoothDevicesName,checkedItems,new DialogInterface.OnMultiChoiceClickListener() {
+                    builder.setMultiChoiceItems(bluetoothDevicesName, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                            if(isChecked){
+                            if (isChecked) {
                                 mSelectedBluetoothItems.add(which);
-                            }
-                            else{
+                            } else {
                                 mSelectedBluetoothItems.remove(Integer.valueOf(which));
                             }
                         }
                     });
-                    builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             for (Integer mSelectedItem : mSelectedBluetoothItems) {
@@ -535,14 +541,13 @@ public class EditEnvironment extends ActionBarActivity {
             passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
-                    if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                    selectedPassphrasetype = position;
+                    if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
                         passphraseEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
-                    }
-                    else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
                         passphraseEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
@@ -552,6 +557,7 @@ public class EditEnvironment extends ActionBarActivity {
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
                     passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                    selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
                 }
             });
         }
@@ -715,9 +721,24 @@ public class EditEnvironment extends ActionBarActivity {
                 newEnvironment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
             newEnvironment.setHint(environmentHint);
-            //Todo: Update the database : debug the code.
             newEnvironment.updateInDatabase(getActivity(),environmentName);
-            //environment.insertIntoDatabase(getActivity());
+
+            /* Updating passphrase */
+            if(passphraseEditText.getText().toString().equals("")){
+                if(!passphraseEditText.getText().toString().equals("")){
+                    //Password changed
+                    if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                        Password password = new Password(passphraseEditText.getText().toString());
+                        User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,newEnvironment);
+                    }
+                    else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                        Pin pin = new Pin(Integer.parseInt(passphraseEditText.getText().toString()));
+                        User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
+                    }
+                }
+            }
+            /* done with updating passphrase */
+
             getActivity().finish();
 
         }
