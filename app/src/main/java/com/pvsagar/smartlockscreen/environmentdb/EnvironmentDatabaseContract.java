@@ -186,6 +186,8 @@ public class EnvironmentDatabaseContract {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(userId)).
                     appendPath(AppWhitelistEntry.TABLE_NAME).build();
         }
+
+        public static final String DEFAULT_USER_NAME = "device_owner";
     }
 
     public static final class PasswordEntry implements BaseColumns {
