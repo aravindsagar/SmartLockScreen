@@ -23,7 +23,7 @@ public abstract class EnvironmentVariable {
 
     protected long id = -1;
     //Stores the numeric values associated with the variable
-    private float[] floatValues;
+    private double[] floatValues;
 
     //Stores the String values associated with the variable
     private String[] stringValues;
@@ -47,15 +47,20 @@ public abstract class EnvironmentVariable {
         if(isValid){
             isInitialized = true;
             this.variableType = variableType;
-            setFloatValues(new float[numberOfFloatValues]);
+            setFloatValues(new double[numberOfFloatValues]);
             setStringValues(stringValues = new String[numberOfStringValues]);
+        } else {
+            throw new IllegalArgumentException("Cannot initialize EnvironmentVariable with type "
+                    + variableType);
         }
     }
 
-    public EnvironmentVariable(String variableType, float[] floatValues, String[] stringValues){
+    public EnvironmentVariable(String variableType, double[] floatValues, String[] stringValues){
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(!isValid) {
-            Log.w(LOG_TAG, "Initialization of environment variable not valid. Type: " + variableType);
+            Log.e(LOG_TAG, "Initialization of environment variable not valid. Type: " + variableType);
+            throw new IllegalArgumentException("Cannot initialize EnvironmentVariable with type "
+                    + variableType);
         }
         if(isValid){
             isInitialized = true;
@@ -70,7 +75,7 @@ public abstract class EnvironmentVariable {
      * @param floatValues The values to be set
      * @return true if values have been set, false if it cannot be set.
      */
-    protected boolean setFloatValues(float[] floatValues){
+    protected boolean setFloatValues(double[] floatValues){
         if(isFloatValuesSupported() && isInitialized) {
             this.floatValues = floatValues;
             return true;
@@ -79,12 +84,12 @@ public abstract class EnvironmentVariable {
     }
 
     /**
-     * Set a single float value at the specified index, in the floatValues array
+     * Set a single double value at the specified index, in the floatValues array
      * @param floatValue
      * @param index
      * @return true if value has been set, false if it cannot be set.
      */
-    protected boolean setFloatValue(float floatValue, int index){
+    protected boolean setFloatValue(double floatValue, int index){
         if(isFloatValuesSupported() && isInitialized) {
             this.floatValues[index] = floatValue;
             return true;
@@ -138,7 +143,7 @@ public abstract class EnvironmentVariable {
 
     public abstract boolean isFloatValuesSupported();
 
-    protected float[] getFloatValues(){
+    protected double[] getFloatValues(){
         if(isFloatValuesSupported() && isInitialized){
             return floatValues;
         }
@@ -147,12 +152,12 @@ public abstract class EnvironmentVariable {
         }
     }
 
-    public float getFloatValue(int index) throws Exception{
+    public double getFloatValue(int index) throws Exception{
         if(isFloatValuesSupported() && isInitialized){
             return floatValues[index];
         }
         else{
-            throw new Exception("No float values associated with " + variableType) ;
+            throw new Exception("No double values associated with " + variableType) ;
         }
     }
 

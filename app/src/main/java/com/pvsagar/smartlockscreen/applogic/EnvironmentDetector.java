@@ -18,6 +18,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Created by aravind on 6/9/14.
+ * Contains static functions related to detecting the current environment
  */
 public class EnvironmentDetector {
     private static final String LOG_TAG = EnvironmentDetector.class.getSimpleName();

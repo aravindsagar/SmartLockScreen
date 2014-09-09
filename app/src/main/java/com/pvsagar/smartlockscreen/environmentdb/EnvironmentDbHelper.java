@@ -1,6 +1,8 @@
 package com.pvsagar.smartlockscreen.environmentdb;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -144,10 +146,28 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_PASSWORDS);
         db.execSQL(SQL_CREATE_USER_PASSWORDS);
         db.execSQL(SQL_CREATE_APP_WHITELIST);
+
+        insertDefaultUser(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public static void insertDefaultUser(SQLiteDatabase db){
+        //Checking whether the default user is present
+        Cursor userCursor = db.query(UsersEntry.TABLE_NAME, null, UsersEntry.COLUMN_USER_NAME + " = ? ",
+                new String[]{UsersEntry.DEFAULT_USER_NAME}, null, null, null);
+        if(userCursor.getCount() > 0){
+            return;
+        }
+        ContentValues userValues = new ContentValues();
+        userValues.put(UsersEntry.COLUMN_USER_NAME, UsersEntry.DEFAULT_USER_NAME);
+        db.insert(UsersEntry.TABLE_NAME, null, userValues);
+    }
+
+    public static void insertDefaultUser(Context context){
+        insertDefaultUser(new EnvironmentDbHelper(context).getWritableDatabase());
     }
 }

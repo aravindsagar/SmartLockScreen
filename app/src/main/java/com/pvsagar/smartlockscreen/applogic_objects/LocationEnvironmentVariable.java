@@ -21,7 +21,7 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
 
     private static final int NUMBER_OF_FLOAT_VALUES = 3;
     private static final int NUMBER_OF_STRING_VALUES = 1;
-    //float value indices
+    //double value indices
     private static final int INDEX_LATITUDE = 0;
     private static final int INDEX_LONGITUDE = 1;
     private static final int INDEX_RADIUS = 2;
@@ -34,8 +34,8 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
     }
 
     public LocationEnvironmentVariable
-            (float latitude, float longitude, int radius, String locationName){
-        super(TYPE_LOCATION, new float[]{latitude,longitude,radius}, new String[]{locationName});
+            (double latitude, double longitude, int radius, String locationName){
+        super(TYPE_LOCATION, new double[]{latitude,longitude,radius}, new String[]{locationName});
     }
 
     @Override
@@ -48,23 +48,23 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         return true;
     }
 
-    public float getLatitude(){
+    public double getLatitude(){
         try {
             return getFloatValue(INDEX_LATITUDE);
         } catch (Exception e){
             Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
                     + e.getMessage());
-            return (float) 0.0; //Should think of a better way, though it should never come to this.
+            return (double) 0.0; //Should think of a better way, though it should never come to this.
         }
     }
 
-    public float getLongitude(){
+    public double getLongitude(){
         try {
             return getFloatValue(INDEX_LONGITUDE);
         } catch (Exception e){
             Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
                     + e.getMessage());
-            return (float) 0.0; //Should think of a better way, though it should never come to this.
+            return (double) 0.0; //Should think of a better way, though it should never come to this.
         }
     }
 
@@ -88,11 +88,11 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         }
     }
 
-    public void setLatitude(float latitude){
+    public void setLatitude(double latitude){
         setFloatValue(latitude, INDEX_LATITUDE);
     }
 
-    public void setLongitude(float longitude){
+    public void setLongitude(double longitude){
         setFloatValue(longitude, INDEX_LONGITUDE);
     }
 
@@ -121,9 +121,9 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         ArrayList<Geofence> geofences = new ArrayList<Geofence>();
         for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
             geofences.add((new Geofence.Builder()).setCircularRegion(
-                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LAT)),
-                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LONG)),
-                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_RADIUS))).
+                    cursor.getDouble(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LAT)),
+                    cursor.getDouble(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LONG)),
+                    (float) cursor.getDouble(cursor.getColumnIndex(GeoFenceEntry.COLUMN_RADIUS))).
                     setTransitionTypes(
                             Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT).
                     setExpirationDuration(Geofence.NEVER_EXPIRE).
@@ -164,9 +164,9 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
                 new ArrayList<EnvironmentVariable>();
         for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
             LocationEnvironmentVariable variable = new LocationEnvironmentVariable(
-                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LAT)),
-                    cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LONG)),
-                    (int) cursor.getFloat(cursor.getColumnIndex(GeoFenceEntry.COLUMN_RADIUS)),
+                    cursor.getDouble(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LAT)),
+                    cursor.getDouble(cursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LONG)),
+                    (int) cursor.getDouble(cursor.getColumnIndex(GeoFenceEntry.COLUMN_RADIUS)),
                     cursor.getString(cursor.getColumnIndex(GeoFenceEntry.COLUMN_LOCATION_NAME))
             );
             variable.id = cursor.getLong(cursor.getColumnIndex(GeoFenceEntry._ID));

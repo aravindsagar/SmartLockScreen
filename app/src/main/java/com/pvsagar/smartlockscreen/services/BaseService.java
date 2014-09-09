@@ -24,6 +24,7 @@ import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 
@@ -66,11 +67,12 @@ public class BaseService extends Service implements
 
     @Override
     public void onCreate() {
+        EnvironmentDbHelper.insertDefaultUser(this);
         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
-        (new BluetoothDeviceSearch()).execute();
+        new BluetoothDeviceSearch().execute();
         //TODO: populate current wifi network in WifiReceiver
         super.onCreate();
     }
