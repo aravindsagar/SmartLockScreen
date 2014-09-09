@@ -69,6 +69,7 @@ public class BaseService extends Service implements
     public void onCreate() {
         EnvironmentDbHelper.insertDefaultUser(this);
         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
+
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();

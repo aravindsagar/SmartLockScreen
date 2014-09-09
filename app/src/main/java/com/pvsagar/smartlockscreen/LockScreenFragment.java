@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ViewAnimator;
 
+import com.pvsagar.smartlockscreen.receivers.AdminActions;
+
 /**
  * Created by aravind on 6/8/14.
  */
@@ -42,6 +44,7 @@ public class LockScreenFragment extends Fragment {
                 //startActivity(intent);
             }
         });
+        AdminActions.initAdmin(getActivity());
 
         return rootView;
     }

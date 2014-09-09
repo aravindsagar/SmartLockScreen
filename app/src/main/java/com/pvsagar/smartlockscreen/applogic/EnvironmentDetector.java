@@ -45,6 +45,29 @@ public class EnvironmentDetector {
                         ("The current activity/service context should be passed as argument.");
             }
             Context context = params[0];
+            String logText = "Current Location: ";
+            if(GeoFenceIntentService.getCurrentGeofences() != null && !GeoFenceIntentService.getCurrentGeofences().isEmpty()){
+                for (LocationEnvironmentVariable variable : GeoFenceIntentService.getCurrentGeofences()) {
+                    logText += variable.getLocationName() + ", ";
+                }
+            } else {
+                logText += "Unknown; ";
+            }
+            logText += "Current Bluetooth Devices: ";
+            if(BluetoothReceiver.getCurrentlyConnectedBluetoothDevices() != null && !BluetoothReceiver.getCurrentlyConnectedBluetoothDevices().isEmpty()){
+                for (BluetoothEnvironmentVariable variable : BluetoothReceiver.getCurrentlyConnectedBluetoothDevices()) {
+                    logText += variable.getDeviceName() + ", ";
+                }
+            } else {
+                logText += "Unknown; ";
+            }
+            logText += "Current Wifi Network: ";
+            if(WifiReceiver.getCurrentWifiNetwork() != null){
+                logText += WifiReceiver.getCurrentWifiNetwork().getSSID();
+            } else {
+                logText += "Unknown";
+            }
+            Log.d(LOG_TAG, logText);
             List<Environment> currentEnvironments = new ArrayList<Environment>();
             manageEnvironmentDetectionCriticalSection.acquireUninterruptibly();
             for(LocationEnvironmentVariable location: GeoFenceIntentService.getCurrentGeofences()){
@@ -52,8 +75,6 @@ public class EnvironmentDetector {
                         getAllEnvironmentBarebonesForLocation(context, location);
                 currentEnvironments.addAll(checkWifiAndBluetoothOfPotentialEnvironments(context,
                         potentialEnvironments));
-                Log.d(LOG_TAG, potentialEnvironments.size() + " potential environments.");
-
             }
             //Now checking for environments without geofence
             List<Environment> potentialEnvironments = Environment.
@@ -81,13 +102,11 @@ public class EnvironmentDetector {
                     if(environment.isBluetoothAllOrAny()){
                         if(!checkForAllBluetoothDevices(
                                 environment.getBluetoothEnvironmentVariables())){
-                            Log.d(LOG_TAG, "All Bluetooth match didn't happen for " + e.getName());
                             continue;
                         }
                     } else {
                         if(!checkForAnyBluetoothDevices(
                                 environment.getBluetoothEnvironmentVariables())){
-                            Log.d(LOG_TAG, "Any Bluetooth match didn't happen for " + e.getName());
                             continue;
                         }
                     }
@@ -96,14 +115,6 @@ public class EnvironmentDetector {
                     if(WifiReceiver.getCurrentWifiNetwork() == null ||
                             !WifiReceiver.getCurrentWifiNetwork().
                                     equals(environment.getWiFiEnvironmentVariable())){
-                        Log.d(LOG_TAG, "Wifi matching didn't happen for " + e.getName());
-                        if(WifiReceiver.getCurrentWifiNetwork() != null)
-                            Log.d(LOG_TAG,
-                                    "Current: " + WifiReceiver.getCurrentWifiNetwork().getSSID() +
-                                            ":" + WifiReceiver.getCurrentWifiNetwork().getEncryptionType());
-                        Log.d(LOG_TAG, "Needed: " + environment.getWiFiEnvironmentVariable().getSSID() + ":"
-                                + environment.getWiFiEnvironmentVariable().getEncryptionType());
-
                         continue;
                     }
                 }
@@ -124,17 +135,10 @@ public class EnvironmentDetector {
 
         private boolean checkForAnyBluetoothDevices(List<BluetoothEnvironmentVariable> variables){
             for (BluetoothEnvironmentVariable variable : variables) {
-                Log.d(LOG_TAG, "Checking for variable " + variable.getDeviceName() + ":" + variable.getDeviceAddress());
                 if(BluetoothReceiver.getCurrentlyConnectedBluetoothDevices().contains(variable)){
                     return true;
                 }
             }
-            String logMessage = "Currently connected devices: ";
-            for (BluetoothEnvironmentVariable variable : BluetoothReceiver.getCurrentlyConnectedBluetoothDevices()) {
-                logMessage += variable.getDeviceAddress() + ":" + variable.getDeviceName() + "; ";
-            }
-            Log.d(LOG_TAG, logMessage);
-
             return false;
         }
     }

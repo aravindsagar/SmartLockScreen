@@ -2,11 +2,13 @@ package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
+import com.pvsagar.smartlockscreen.receivers.AdminActions;
 
 /**
  * Created by aravind on 10/8/14.
@@ -15,6 +17,8 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.Pas
  * to a set of unique Strings.
  */
 public abstract class Passphrase<PassphraseRepresentation> {
+    private static final String LOG_TAG = Passphrase.class.getSimpleName();
+
     private String passwordString, encryptedPasswordString;
     private PassphraseRepresentation passphraseRepresentation;
     private String passphraseType;
@@ -103,5 +107,13 @@ public abstract class Passphrase<PassphraseRepresentation> {
             e.printStackTrace();
             throw new IllegalArgumentException("Cursor should have values from passwords table");
         }
+    }
+
+    public void setAsCurrentPassword(){
+        if(!AdminActions.isAdminEnabled()){
+            Log.e(LOG_TAG, "Cannot change password, admin not enabled.");
+            return;
+        }
+        AdminActions.changePassword(passwordString);
     }
 }
