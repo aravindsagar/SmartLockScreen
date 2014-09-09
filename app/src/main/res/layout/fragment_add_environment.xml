@@ -173,5 +173,30 @@
                 android:inputType="number"
                 android:hint="@string/edit_text_location_rad"
                 android:layout_marginTop="10dp"/>
+
+            <!-- Passphrase -->
+            <TextView
+                android:id="@+id/text_view_passphrase"
+                android:text="@string/text_view_passphrase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <View
+                android:id="@+id/line_passphrase"
+                android:layout_width="match_parent"
+                android:layout_height="2dip"
+                android:background="#2B497B"/>
+
+            <Spinner
+                android:id="@+id/spinner_passphrase_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"/>
+            <EditText
+                android:id="@+id/edit_text_passphrase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:password="true"
+                android:layout_marginTop="10dp"/>
+
         </LinearLayout>
 </ScrollView>

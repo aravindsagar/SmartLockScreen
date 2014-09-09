@@ -12,14 +12,19 @@ import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +33,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
+import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
@@ -57,6 +63,9 @@ public class AddEnvironment extends ActionBarActivity {
     private static List<EnvironmentVariable> storedLocations;
     private static int mSelectedLocationItem;
     private static LocationEnvironmentVariable mSelectedLocation;
+
+    /* Passphrase */
+    private static ArrayAdapter<String> passphraseAdapter;
 
     private PlaceholderFragment placeholderFragment;
 
@@ -163,6 +172,10 @@ public class AddEnvironment extends ActionBarActivity {
         private TextView selectLocationTextView;
         private TextView selectStoredLocationTextView;
 
+        /* Passphrase */
+        private Spinner passphraseTypeSpinner;
+        private EditText passphraseEditText;
+
         public PlaceholderFragment() {
         }
 
@@ -191,10 +204,15 @@ public class AddEnvironment extends ActionBarActivity {
             selectLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_location);
             selectStoredLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_stored_location);
 
+            //Passphrase
+            passphraseTypeSpinner = (Spinner) rootView.findViewById(R.id.spinner_passphrase_type);
+            passphraseEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase);
+
             /* Initialization */
             setUpBluetoothElements();
             setUpWiFiElements();
             setUpLocationElements();
+            setUpPassphraseElements();
 
             setUpActionBar();
 
@@ -437,6 +455,36 @@ public class AddEnvironment extends ActionBarActivity {
             });
         }
 
+        public void setUpPassphraseElements(){
+            //Adapter for spinner
+            passphraseAdapter = new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_spinner_dropdown_item, Passphrase.passphraseTypes);
+            passphraseTypeSpinner.setAdapter(passphraseAdapter);
+            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+            passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
+                    if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                        passphraseEditText.setText("");
+                        passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+
+                    }
+                    else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                        passphraseEditText.setText("");
+                        passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
+                        passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                }
+            });
+        }
+
         public void setBluetoothItemsEnabled(boolean flag){
             selectBluetoothDevicesTextView.setEnabled(flag);
             bluetoothAllCheckbox.setEnabled(flag);
@@ -597,6 +645,7 @@ public class AddEnvironment extends ActionBarActivity {
             getActivity().finish();
 
         }
+
         public void onCancelButtonClick(){
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_add_environment_message);
