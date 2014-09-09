@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
@@ -13,6 +14,8 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
  * Created by aravind on 8/9/14.
  */
 public class User {
+    private static final String LOG_TAG = User.class.getSimpleName();
+
     private String userName;
     private long id;
 
@@ -85,14 +88,28 @@ public class User {
 
     public Passphrase getPassphraseForEnvironment(Context context, Environment environment){
         if(id>0) {
+            if(environment.getId() <= 0){
+                environment = Environment.getBareboneEnvironment(context, environment.getName());
+            }
             Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
                     buildUserUriWithIdEnvironmentAndPassword(id, environment.getId()),
                     null, null, null, null);
             if(passwordCursor.moveToFirst()){
                 return Passphrase.getPassphraseFromCursor(passwordCursor);
             }
+            Log.w(LOG_TAG, "Empty cursor returned for password query.");
             return null;
         }
+        Log.w(LOG_TAG, "User has id 0.");
         return null;
+    }
+
+    private static User currentUser;
+
+    public static User getCurrentUser(Context context) {
+        if(currentUser == null){
+            return getDefaultUser(context);
+        }
+        return currentUser;
     }
 }

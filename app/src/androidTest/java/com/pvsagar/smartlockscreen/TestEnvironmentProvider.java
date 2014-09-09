@@ -71,7 +71,7 @@ public class TestEnvironmentProvider extends AndroidTestCase {
         deleteAllRecords(GeoFenceEntry.CONTENT_URI, WiFiNetworksEntry.CONTENT_URI,
                 BluetoothDevicesEntry.CONTENT_URI, EnvironmentEntry.CONTENT_URI,
                 UsersEntry.CONTENT_URI);
-        SQLiteDatabase db = new EnvironmentDbHelper(mContext).getReadableDatabase();
+        SQLiteDatabase db = EnvironmentDbHelper.getInstance(mContext).getReadableDatabase();
         Cursor geofenceCursor = db.query(GeoFenceEntry.TABLE_NAME,
                 null, null, null, null, null, null);
         assertEquals(0, geofenceCursor.getCount());

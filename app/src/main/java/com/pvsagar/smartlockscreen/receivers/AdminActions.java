@@ -5,6 +5,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -13,6 +14,7 @@ import android.widget.Toast;
  * change password and lock screen automatically
  */
 public class AdminActions extends DeviceAdminReceiver {
+    private static final String LOG_TAG = AdminActions.class.getSimpleName();
 
     private static DevicePolicyManager mDPM;
     private static ComponentName mDeviceAdmin;
@@ -65,6 +67,9 @@ public class AdminActions extends DeviceAdminReceiver {
             throw new UnsupportedOperationException("Device admin not initialized. Please call" +
                     "AdminActions.initAdmin() first.");
         }
-        mDPM.resetPassword(password, 0);
+        if(isAdminEnabled())
+            mDPM.resetPassword(password, 0);
+        else
+            Log.e(LOG_TAG, "No admin privileges, cannot change password.");
     }
 }

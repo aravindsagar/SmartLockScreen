@@ -41,6 +41,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
             throw new IllegalArgumentException("Cannot initialize passphrase with type " +
                     type);
         }
+        passphraseType = type;
     }
 
     public Passphrase(String type, PassphraseRepresentation passphrase){

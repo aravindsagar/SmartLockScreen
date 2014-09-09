@@ -24,8 +24,11 @@ import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.User;
+import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
+import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 
 import java.lang.reflect.Method;
@@ -101,7 +104,19 @@ public class BaseService extends Service implements
                     if (current == null) {
                         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                                 "Unknown Environment"));
+                        AdminActions.changePassword(""); //TODO: change this to master password
                     } else {
+                        User user = User.getCurrentUser(this);
+                        if(user != null) {
+                            Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
+                            if(passphrase != null){
+                                passphrase.setAsCurrentPassword();
+                            } else {
+                                Log.w(LOG_TAG, "Passphrase null for current user in current environment.");
+                            }
+                        } else {
+                            Log.e(LOG_TAG, "Current user null!");
+                        }
                         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                                 "Environment: " + current.getName()));
                     }
@@ -129,6 +144,9 @@ public class BaseService extends Service implements
                 List<Geofence> geofenceList = LocationEnvironmentVariable.getAndroidGeofences(this);
                 if(geofenceList != null && !geofenceList.isEmpty()) {
                     mLocationClient.addGeofences(geofenceList, geofenceIntent, this);
+                } else {
+                    mInProgress = false;
+                    mLocationClient.disconnect();
                 }
         }
     }
