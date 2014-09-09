@@ -1,6 +1,8 @@
 package com.pvsagar.smartlockscreen.environmentdb;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -22,10 +24,6 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "environment.db";
-
-    public EnvironmentDbHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
 
     /**
      * Called when the database is created for the first time.
@@ -144,10 +142,49 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_PASSWORDS);
         db.execSQL(SQL_CREATE_USER_PASSWORDS);
         db.execSQL(SQL_CREATE_APP_WHITELIST);
+
+        insertDefaultUser(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
     }
+
+    public static void insertDefaultUser(SQLiteDatabase db){
+        //Checking whether the default user is present
+        Cursor userCursor = db.query(UsersEntry.TABLE_NAME, null, UsersEntry.COLUMN_USER_NAME + " = ? ",
+                new String[]{UsersEntry.DEFAULT_USER_NAME}, null, null, null);
+        if(userCursor.getCount() > 0){
+            return;
+        }
+        ContentValues userValues = new ContentValues();
+        userValues.put(UsersEntry.COLUMN_USER_NAME, UsersEntry.DEFAULT_USER_NAME);
+        db.insert(UsersEntry.TABLE_NAME, null, userValues);
+    }
+
+    public static void insertDefaultUser(Context context){
+        insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase());
+    }
+
+    private static EnvironmentDbHelper mInstance = null;
+
+    public static EnvironmentDbHelper getInstance(Context ctx) {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        if (mInstance == null) {
+            mInstance = new EnvironmentDbHelper(ctx.getApplicationContext());
+        }
+        return mInstance;
+    }
+
+    /**
+     * Constructor should be private to prevent direct instantiation.
+     * make call to static factory method "getInstance()" instead.
+     */
+    private EnvironmentDbHelper(Context ctx) {
+        super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
+    }
 }
+

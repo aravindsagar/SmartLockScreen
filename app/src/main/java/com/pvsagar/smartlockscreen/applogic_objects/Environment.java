@@ -203,6 +203,10 @@ public class Environment {
         this.hint = hint;
     }
 
+    public long getId(){
+        return id;
+    }
+
     /**
      * Inserts the environment into the database
      * @param context Activity/ service context
@@ -484,6 +488,21 @@ public class Environment {
         }
         String selection = EnvironmentEntry.COLUMN_GEOFENCE_ID + " = ? ";
         String[] selectionArgs = new String[]{String.valueOf(location.getId())};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        ArrayList<Environment> environments = new ArrayList<Environment>();
+
+        for(envCursor.moveToFirst(); !envCursor.isAfterLast(); envCursor.moveToNext()){
+            Environment e = buildEnvironmentBareboneFromCursor(envCursor);
+            environments.add(e);
+        }
+        envCursor.close();
+        return environments;
+    }
+
+    public static List<Environment> getAllnvironmentBarebonesWithoutLocation(Context context){
+        String selection = EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED + " = ? ";
+        String[] selectionArgs = new String[]{String.valueOf(0)};
         Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
                 selection, selectionArgs, null);
         ArrayList<Environment> environments = new ArrayList<Environment>();

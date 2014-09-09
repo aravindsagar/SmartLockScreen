@@ -22,8 +22,8 @@ public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
     private static final int INDEX_LOWER_LIMIT = 0;
     private static final int INDEX_UPPER_LIMIT = 1;
 
-    public static final float MAX_NOISE_LEVEL = (float) 100.0;
-    public static final float MIN_NOISE_LEVEL = (float) 0.0;
+    public static final double MAX_NOISE_LEVEL = (double) 100.0;
+    public static final double MIN_NOISE_LEVEL = (double) 0.0;
 
     public NoiseLevelEnvironmentVariable(boolean hasLowerLimit, boolean hasUpperLimit){
         super(TYPE_NOISE_LEVEL, NUMBER_OF_FLOAT_VALUES, 0);
@@ -46,31 +46,31 @@ public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
         return null;
     }
 
-    public float getUpperLimit(){
+    public double getUpperLimit(){
         try {
             return getFloatValue(INDEX_UPPER_LIMIT);
         } catch (Exception e){
             Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
                     + e.getMessage());
-            return (float) 0.0; //Should think of a better way, though it should never come to this.
+            return (double) 0.0; //Should think of a better way, though it should never come to this.
         }
     }
 
-    public float getLowerLimit(){
+    public double getLowerLimit(){
         try {
             return getFloatValue(INDEX_LOWER_LIMIT);
         } catch (Exception e){
             Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
                     + e.getMessage());
-            return (float) 0.0; //Should think of a better way, though it should never come to this.
+            return (double) 0.0; //Should think of a better way, though it should never come to this.
         }
     }
 
-    public void setUpperLimit(float upperLimit){
+    public void setUpperLimit(double upperLimit){
         setFloatValue(upperLimit, INDEX_UPPER_LIMIT);
     }
 
-    public void setLowerLimit(float lowerLimit){
+    public void setLowerLimit(double lowerLimit){
         setFloatValue(lowerLimit, INDEX_LOWER_LIMIT);
     }
 

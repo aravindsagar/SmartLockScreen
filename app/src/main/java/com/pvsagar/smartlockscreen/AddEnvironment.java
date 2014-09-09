@@ -620,7 +620,7 @@ public class AddEnvironment extends ActionBarActivity {
                     return;
                 }
 
-                environmentVariables.add(new LocationEnvironmentVariable((float)latLocation,(float)lonLocation,(int)radLocation,locationName));
+                environmentVariables.add(new LocationEnvironmentVariable(latLocation,lonLocation,(int)radLocation,locationName));
             }
 
             if(!bluetoothFlag && !wifiFlag && !locationFlag){
