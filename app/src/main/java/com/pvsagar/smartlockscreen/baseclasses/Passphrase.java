@@ -66,7 +66,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
         passwordString = EncryptorDecryptor.decrypt(encryptedPasswordString, KEY);
     }
 
-    private ContentValues getContentValues(){
+    public ContentValues getContentValues(){
         ContentValues passwordValues = new ContentValues();
         passwordValues.put(PasswordEntry.COLUMN_PASSWORD_TYPE, passphraseType);
         passwordValues.put(PasswordEntry.COLUMN_PASSWORD_STRING, encryptedPasswordString);

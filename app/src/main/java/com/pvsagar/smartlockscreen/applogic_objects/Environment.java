@@ -203,6 +203,10 @@ public class Environment {
         this.hint = hint;
     }
 
+    public long getId(){
+        return id;
+    }
+
     /**
      * Inserts the environment into the database
      * @param context Activity/ service context

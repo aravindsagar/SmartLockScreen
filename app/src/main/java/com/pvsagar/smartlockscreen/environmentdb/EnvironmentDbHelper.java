@@ -25,10 +25,6 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "environment.db";
 
-    public EnvironmentDbHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
-
     /**
      * Called when the database is created for the first time.
      * This is where the creation of tables and the initial population of the tables should happen.
@@ -168,6 +164,27 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
     }
 
     public static void insertDefaultUser(Context context){
-        insertDefaultUser(new EnvironmentDbHelper(context).getWritableDatabase());
+        insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase());
+    }
+
+    private static EnvironmentDbHelper mInstance = null;
+
+    public static EnvironmentDbHelper getInstance(Context ctx) {
+
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        if (mInstance == null) {
+            mInstance = new EnvironmentDbHelper(ctx.getApplicationContext());
+        }
+        return mInstance;
+    }
+
+    /**
+     * Constructor should be private to prevent direct instantiation.
+     * make call to static factory method "getInstance()" instead.
+     */
+    private EnvironmentDbHelper(Context ctx) {
+        super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
     }
 }
+

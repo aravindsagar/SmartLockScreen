@@ -84,7 +84,7 @@ public class EnvironmentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mEnvironmentDbHelper = new EnvironmentDbHelper(getContext());
+        mEnvironmentDbHelper = EnvironmentDbHelper.getInstance(getContext());
         return true;
     }
 
