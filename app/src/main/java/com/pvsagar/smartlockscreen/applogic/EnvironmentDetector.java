@@ -21,7 +21,6 @@ import java.util.concurrent.Semaphore;
  * Contains static functions related to detecting the current environment
  */
 public class EnvironmentDetector {
-    //todo after addition/editing/deleting, detect environment should be called
     private static final String LOG_TAG = EnvironmentDetector.class.getSimpleName();
     private static final Semaphore manageEnvironmentDetectionCriticalSection = new Semaphore(1);
 

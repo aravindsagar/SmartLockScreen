@@ -1,6 +1,5 @@
 package com.pvsagar.smartlockscreen;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
@@ -11,6 +10,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
@@ -235,7 +235,7 @@ public class AddEnvironment extends ActionBarActivity {
          */
         private void setUpActionBar(){
             /* Adding Contextual Action Bar with Done and Cancel Button */
-            final LayoutInflater layoutInflater = (LayoutInflater) getActivity().getActionBar().getThemedContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final LayoutInflater layoutInflater = (LayoutInflater) ((ActionBarActivity)getActivity()).getSupportActionBar().getThemedContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final View customActionBarView = layoutInflater.inflate(R.layout.actionbar_custom_view_done_cancel, null);
             customActionBarView.findViewById(R.id.actionbar_done).setOnClickListener(
                     new View.OnClickListener() {
@@ -253,7 +253,8 @@ public class AddEnvironment extends ActionBarActivity {
                 }
             });
 
-            final ActionBar actionBar = getActivity().getActionBar();
+            final ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+
             actionBar.setDisplayOptions(
                     ActionBar.DISPLAY_SHOW_CUSTOM,
                     ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
@@ -704,6 +705,8 @@ public class AddEnvironment extends ActionBarActivity {
             /* done with setting passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_ADD_GEOFENCES));
+            getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
+                    BaseService.ACTION_DETECT_ENVIRONMENT));
             getActivity().finish();
 
         }

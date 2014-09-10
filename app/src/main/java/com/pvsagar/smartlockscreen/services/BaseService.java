@@ -39,7 +39,8 @@ import java.util.Set;
 public class BaseService extends Service implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
-        OnAddGeofencesResultListener{
+        OnAddGeofencesResultListener,
+        LocationClient.OnRemoveGeofencesResultListener{
     private static final String LOG_TAG = BaseService.class.getSimpleName();
 
     public static final int ONGOING_NOTIFICATION_ID = 1;
@@ -48,13 +49,18 @@ public class BaseService extends Service implements
     private static final String PACKAGE_NAME = "com.pvsagar.smartlockscreen.services";
     public static final String ACTION_DETECT_ENVIRONMENT = PACKAGE_NAME + ".DETECT_ENVIRONMENT";
     public static final String ACTION_ADD_GEOFENCES = PACKAGE_NAME + ".ADD_GEOFENCES";
+    public static final String ACTION_REMOVE_GEOFENCES = PACKAGE_NAME + ".REMOVE_GEOFENCES";
+
+    public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
     private LocationClient mLocationClient;
     // Defines the allowable request types.
-    public enum REQUEST_TYPE {ADD_GEOFENCES}
+    public enum REQUEST_TYPE {ADD_GEOFENCES, REMOVE_GEOFENCES}
     private REQUEST_TYPE mRequestType;
     // Flag that indicates if a request is underway.
     private boolean mInProgress;
+    //List of geofence ids to delete when calling removeGeofences
+    private List<String> mGeofencesToRemove;
 
     public static Intent getServiceIntent(Context context, String extraText, String action){
         Intent serviceIntent  = new Intent();
@@ -123,6 +129,19 @@ public class BaseService extends Service implements
                     }
                 } else if(action.equals(ACTION_ADD_GEOFENCES)) {
                     requestAddGeofences();
+                } else if(action.equals(ACTION_REMOVE_GEOFENCES)){
+                    try {
+                        mGeofencesToRemove = (List<String>) intent.
+                                getSerializableExtra(EXTRA_GEOFENCE_IDS_TO_REMOVE);
+                        if(mGeofencesToRemove == null || mGeofencesToRemove.isEmpty()){
+                            throw new IllegalArgumentException();
+                        }
+                        requestRemoveGeofences();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new IllegalArgumentException("Intent should specify geofences to remove," +
+                                "if action is ACTION_REMOVE_GEOFENCES.");
+                    }
                 }
                 //Additional action handling to be done here when more actions are added
             }
@@ -149,6 +168,10 @@ public class BaseService extends Service implements
                     mInProgress = false;
                     mLocationClient.disconnect();
                 }
+                break;
+
+            case REMOVE_GEOFENCES:
+                mLocationClient.removeGeofences(mGeofencesToRemove, this);
         }
     }
 
@@ -178,12 +201,43 @@ public class BaseService extends Service implements
     }
 
     @Override
+    public void onRemoveGeofencesByRequestIdsResult(int i, String[] strings) {
+        switch (i){
+            case LocationStatusCodes.SUCCESS:
+                String geofences = "";
+                for (String string : strings) {
+                    geofences += string + ",";
+                }
+                Toast.makeText(this, "Geofences removed: " + geofences, Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Log.e(LOG_TAG, "Error removing Geofences. Status code: " + i);
+                Toast.makeText(this, "Error removing geofences.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRemoveGeofencesByPendingIntentResult(int i, PendingIntent pendingIntent) {
+        return;
+    }
+
+    @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
 
     private void requestAddGeofences(){
         mRequestType = REQUEST_TYPE.ADD_GEOFENCES;
+        if(!mInProgress){
+            mInProgress = true;
+            mLocationClient.connect();
+        } else {
+            Log.w(LOG_TAG, "A request already in progress.");
+        }
+    }
+
+    private void requestRemoveGeofences(){
+        mRequestType = REQUEST_TYPE.REMOVE_GEOFENCES;
         if(!mInProgress){
             mInProgress = true;
             mLocationClient.connect();

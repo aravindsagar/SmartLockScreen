@@ -2,11 +2,13 @@ package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -304,9 +306,19 @@ public class Environment {
         if(oldEnvironment.hasLocation){
             if(hasLocation && !
                     oldEnvironment.locationEnvironmentVariable.equals(locationEnvironmentVariable)){
-                context.getContentResolver().update(
+                int updatedEntries = context.getContentResolver().update(
                         EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(oldEnvironment.id),
                                 locationEnvironmentVariable.getContentValues(), null, null);
+                if(updatedEntries > 1){
+                    Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
+                            null, BaseService.ACTION_REMOVE_GEOFENCES);
+                    ArrayList<String> geofencesToRemove = new ArrayList<String>();
+                    geofencesToRemove.add(String.valueOf(oldEnvironment.
+                            getLocationEnvironmentVariable().getId()));
+                    intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
+                            geofencesToRemove);
+                    context.startService(intentToRemoveOldGeofenceMonitor);
+                }
             }
             else if(!hasLocation){
                 context.getContentResolver().delete(EnvironmentEntry.
@@ -521,16 +533,26 @@ public class Environment {
      * @param environmentName Name of the environment to be deleted
      */
     public static void deleteEnvironmentFromDatabase(Context context, String environmentName){
-        Environment e = getBareboneEnvironment(context, environmentName);
+        Environment e = getFullEnvironment(context, environmentName);
+
         if(e != null){
             context.getContentResolver().delete(EnvironmentEntry.
                     buildEnvironmentUriWithIdAndBluetooth(e.id), null, null);
             context.getContentResolver().delete(EnvironmentEntry.
                     buildEnvironmentUriWithIdAndWifi(e.id), null, null);
-            context.getContentResolver().delete(EnvironmentEntry.
+            int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
                     buildEnvironmentUriWithIdAndLocation(e.id), null, null);
             context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
                     e.id), null, null);
+            if(deletedEntries > 0){
+                Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
+                        null, BaseService.ACTION_REMOVE_GEOFENCES);
+                ArrayList<String> geofencesToRemove = new ArrayList<String>();
+                geofencesToRemove.add(String.valueOf(e.getLocationEnvironmentVariable().getId()));
+                intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
+                        geofencesToRemove);
+                context.startService(intentToRemoveOldGeofenceMonitor);
+            }
         }
     }
 

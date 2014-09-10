@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +142,8 @@ public class ManageEnvironment extends ActionBarActivity {
                                     String selectedItem = listAdapter
                                             .getItem(selected.keyAt(i));
                                     Environment.deleteEnvironmentFromDatabase(getActivity(),selectedItem);
+                                    getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
+                                            BaseService.ACTION_DETECT_ENVIRONMENT));
                                     // Remove selected items following the ids
                                     listAdapter.remove(selectedItem);
                                 }

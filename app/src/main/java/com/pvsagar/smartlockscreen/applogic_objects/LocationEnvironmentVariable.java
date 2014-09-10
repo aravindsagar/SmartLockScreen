@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
+import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.GeoFenceEntry;
 
@@ -104,8 +105,6 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         setStringValue(locationName, INDEX_RADIUS);
     }
 
-    private static final int NOTIFICATION_RESPONSIVENESS = 30000;
-
     public static List<EnvironmentVariable> getLocationEnvironmentVariables
             (Context context){
         Cursor cursor = context.getContentResolver().query(
@@ -127,7 +126,7 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
                     setTransitionTypes(
                             Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT).
                     setExpirationDuration(Geofence.NEVER_EXPIRE).
-                    setNotificationResponsiveness(NOTIFICATION_RESPONSIVENESS).
+                    setNotificationResponsiveness(R.integer.geofence_notification_responsiveness).
                     setRequestId(cursor.getString(cursor.getColumnIndex(GeoFenceEntry._ID))).
                     build());
         }
@@ -153,7 +152,7 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
                 locationCursor);
         locationCursor.close();
         if(locationVariables == null || locationVariables.isEmpty()){
-            throw new IllegalArgumentException("Invalid geofence passed. Id not found in database");
+            Log.e(LOG_TAG, "Invalid geofence passed. Id not found in database");
         }
         return (LocationEnvironmentVariable) locationVariables.get(0);
     }
