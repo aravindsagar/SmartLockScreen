@@ -156,8 +156,10 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         Cursor userCursor = db.query(UsersEntry.TABLE_NAME, null, UsersEntry.COLUMN_USER_NAME + " = ? ",
                 new String[]{UsersEntry.DEFAULT_USER_NAME}, null, null, null);
         if(userCursor.getCount() > 0){
+            userCursor.close();
             return;
         }
+        userCursor.close();
         ContentValues userValues = new ContentValues();
         userValues.put(UsersEntry.COLUMN_USER_NAME, UsersEntry.DEFAULT_USER_NAME);
         db.insert(UsersEntry.TABLE_NAME, null, userValues);

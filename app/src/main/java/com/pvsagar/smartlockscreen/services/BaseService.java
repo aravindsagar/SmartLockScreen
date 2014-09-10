@@ -20,6 +20,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.google.android.gms.location.LocationStatusCodes;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
@@ -158,7 +159,19 @@ public class BaseService extends Service implements
 
     @Override
     public void onAddGeofencesResult(int i, String[] strings) {
-        Toast.makeText(this, "Geofence added: " + strings[0], Toast.LENGTH_SHORT).show();
+        switch (i){
+            case LocationStatusCodes.SUCCESS:
+                String geofences = "";
+                for (String string : strings) {
+                    geofences += string + ",";
+                }
+                Toast.makeText(this, "Geofences added: " + geofences, Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Log.e(LOG_TAG, "Error adding Geofences. Status code: " + i);
+                Toast.makeText(this, "Error adding geofences.", Toast.LENGTH_SHORT).show();
+        }
+
         mInProgress = false;
         mLocationClient.disconnect();
 

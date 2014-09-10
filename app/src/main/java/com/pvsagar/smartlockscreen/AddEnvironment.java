@@ -698,7 +698,7 @@ public class AddEnvironment extends ActionBarActivity {
                 Password password = new Password(passphraseEditText.getText().toString());
                 User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,environment);
             } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                Pin pin = new Pin(Integer.parseInt(passphraseEditText.getText().toString()));
+                Pin pin = new Pin(passphraseEditText.getText().toString());
                 User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,environment);
             }
             /* done with setting passphrase */

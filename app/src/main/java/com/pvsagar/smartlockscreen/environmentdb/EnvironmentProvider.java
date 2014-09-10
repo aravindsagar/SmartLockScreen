@@ -147,8 +147,10 @@ public class EnvironmentProvider extends ContentProvider {
                 } else {
                     Log.i(LOG_TAG, "No wifi entry found for environment id " +
                             uri.getPathSegments().get(1));
+                    envCursor.close();
                     return null;
                 }
+                envCursor.close();
                 selection = WiFiNetworksEntry._ID + " = ? ";
                 selectionArgs = new String[]{String.valueOf(wifiId)};
                 return db.query(WiFiNetworksEntry.TABLE_NAME, projection, selection,
@@ -166,9 +168,10 @@ public class EnvironmentProvider extends ContentProvider {
                 } else {
                     Log.i(LOG_TAG, "No location entry found for environment id " +
                     uri.getPathSegments().get(1));
+                    envCursor.close();
                     return null;
                 }
-
+                envCursor.close();
                 selection = GeoFenceEntry._ID + " = ? ";
                 selectionArgs = new String[]{String.valueOf(geofenceId)};
                 return db.query(GeoFenceEntry.TABLE_NAME, projection, selection, selectionArgs,
@@ -188,9 +191,10 @@ public class EnvironmentProvider extends ContentProvider {
                 } else {
                     Log.w(LOG_TAG, "No passwords found for given user " + uriPathSegments.get(1) +
                     " in Environment " + uriPathSegments.get(2));
+                    userPasswordsCursor.close();
                     return null;
                 }
-
+                userPasswordsCursor.close();
                 selection = PasswordEntry._ID + " = ? ";
                 selectionArgs = new String[]{String.valueOf(passwordId)};
                 return db.query(PasswordEntry.TABLE_NAME, projection, selection, selectionArgs,
@@ -448,6 +452,9 @@ public class EnvironmentProvider extends ContentProvider {
                         EnvironmentEntry.COLUMN_WIFI_ID, WiFiNetworksEntry._ID,
                         WiFiNetworksEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
+            case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
+                returnValue = updatePasswordForUserAndEnvironment(db, uri, values);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -606,6 +613,7 @@ public class EnvironmentProvider extends ContentProvider {
                     bluetoothCursor.getColumnIndex(BluetoothDevicesEntry._ID));
         }
         if(bluetoothDeviceId == -1){
+            bluetoothCursor.close();
             return -1;
         }
 
@@ -644,6 +652,7 @@ public class EnvironmentProvider extends ContentProvider {
             wifiId = wifiCursor.getLong(wifiCursor.getColumnIndex(WiFiNetworksEntry._ID));
         }
         if(wifiId == -1){
+            wifiCursor.close();
             return -1;
         }
 
@@ -675,6 +684,7 @@ public class EnvironmentProvider extends ContentProvider {
             geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
         }
         if(geofenceId == -1){
+            geofenceCursor.close();
             return -1;
         }
 
@@ -718,6 +728,7 @@ public class EnvironmentProvider extends ContentProvider {
                     environmentSelection, environmentSelectionArgs);
         } else {
             Log.e(LOG_TAG, "Invalid environment id passed: " + environmentId);
+            environmentCursor.close();
             throw new IllegalArgumentException(
                     "Invalid environment id passed: " + environmentId);
         }
@@ -757,6 +768,7 @@ public class EnvironmentProvider extends ContentProvider {
                 Log.w(LOG_TAG, "Environment variable in use, cannot delete. id: " + variableId +
                         ". Table: " + tableName);
                 environmentCursor.close();
+                variableCursor.close();
                 return 0;
             }
             environmentCursor.close();
@@ -815,5 +827,31 @@ public class EnvironmentProvider extends ContentProvider {
         }
         oldBluetoothEntries.close();
         return returnValue;
+    }
+
+    private int updatePasswordForUserAndEnvironment(SQLiteDatabase db, Uri uri, ContentValues values){
+        List<String> uriPathSegments = uri.getPathSegments();
+        String environmentId = uriPathSegments.get(2), userId = uriPathSegments.get(1);
+        long newPasswordId = db.insert(PasswordEntry.TABLE_NAME, null, values);
+        ContentValues userPasswordValues = new ContentValues();
+        userPasswordValues.put(UserPasswordsEntry.COLUMN_PASSWORD_ID, newPasswordId);
+        String userPasswordSelection = UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + " = ? AND " +
+                UserPasswordsEntry.COLUMN_USER_ID + " = ? ";
+        String[] userPasswordSelectionArgs = new String[]{environmentId, userId};
+        Cursor userPasswordCursor = db.query(UserPasswordsEntry.TABLE_NAME, null,
+                userPasswordSelection, userPasswordSelectionArgs, null, null, null);
+
+        if(userPasswordCursor.moveToFirst()){
+            int returnValue = db.update(UserPasswordsEntry.TABLE_NAME, userPasswordValues,
+                    userPasswordSelection, userPasswordSelectionArgs);
+            long oldPasswordId = userPasswordCursor.getLong(userPasswordCursor.getColumnIndex
+                    (UserPasswordsEntry.COLUMN_PASSWORD_ID));
+            int deletedEntries = db.delete(PasswordEntry.TABLE_NAME, PasswordEntry._ID + " = ? ",
+                    new String[]{String.valueOf(oldPasswordId)});
+            Log.d(LOG_TAG, "old password id = " + oldPasswordId + ", Deleted entries: " + deletedEntries);
+            return returnValue;
+        }
+        insert(uri, values);
+        return 0;
     }
 }

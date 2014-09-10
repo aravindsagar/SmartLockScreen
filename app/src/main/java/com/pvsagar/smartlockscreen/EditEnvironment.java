@@ -724,19 +724,20 @@ public class EditEnvironment extends ActionBarActivity {
             newEnvironment.updateInDatabase(getActivity(),environmentName);
 
             /* Updating passphrase */
-            if(passphraseEditText.getText().toString().equals("")){
+            //if(passphraseEditText.getText().toString().equals("")){
                 if(!passphraseEditText.getText().toString().equals("")){
                     //Password changed
+                    Log.d(LOG_TAG, "Password changed. Updating in db.");
                     if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
                         Password password = new Password(passphraseEditText.getText().toString());
                         User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,newEnvironment);
                     }
                     else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                        Pin pin = new Pin(Integer.parseInt(passphraseEditText.getText().toString()));
+                        Pin pin = new Pin(passphraseEditText.getText().toString());
                         User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
                     }
                 }
-            }
+            //}
             /* done with updating passphrase */
 
             getActivity().finish();

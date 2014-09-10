@@ -36,7 +36,9 @@ public class User {
                 UsersEntry.COLUMN_USER_NAME + " = ? ", new String[]{UsersEntry.DEFAULT_USER_NAME},
                 null);
         if(userCursor.moveToFirst()){
-            return getUserFromCursor(userCursor);
+            User returnUser = getUserFromCursor(userCursor);
+            userCursor.close();
+            return returnUser;
         } else {
             EnvironmentDbHelper.insertDefaultUser(context);
             return getDefaultUser(context);
@@ -72,14 +74,23 @@ public class User {
             User existingUser = getUserFromCursor(userCursor);
             this.id = existingUser.id;
         }
-
+        userCursor.close();
     }
 
     public void setPassphraseForEnvironment(Context context,
                                             Passphrase passphrase, Environment environment){
         if(id>0) {
-            context.getContentResolver().insert(UsersEntry.buildUserUriWithIdEnvironmentAndPassword
-                    (id, environment.getId()), passphrase.getContentValues());
+            if(environment.getId() <= 0){
+                Log.w(LOG_TAG, "Environment id was invalid; getting from database. Name: " +
+                        environment.getName());
+                environment = Environment.getBareboneEnvironment(context, environment.getName());
+            }
+            if(environment.getId() <= 0){
+                throw new IllegalArgumentException("Environment " + environment.getName() +
+                        " not present in database. Please insert the environment first.");
+            }
+            context.getContentResolver().update(UsersEntry.buildUserUriWithIdEnvironmentAndPassword
+                    (id, environment.getId()), passphrase.getContentValues(), null, null);
         } else {
             insertIntoDatabase(context);
             setPassphraseForEnvironment(context, passphrase, environment);
@@ -95,7 +106,9 @@ public class User {
                     buildUserUriWithIdEnvironmentAndPassword(id, environment.getId()),
                     null, null, null, null);
             if(passwordCursor.moveToFirst()){
-                return Passphrase.getPassphraseFromCursor(passwordCursor);
+                Passphrase returnPassphrase = Passphrase.getPassphraseFromCursor(passwordCursor);
+                passwordCursor.close();
+                return returnPassphrase;
             }
             Log.w(LOG_TAG, "Empty cursor returned for password query.");
             return null;
