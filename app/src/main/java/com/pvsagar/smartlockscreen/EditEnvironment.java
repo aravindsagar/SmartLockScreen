@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+//TODO see whether the location name entered exists for other lat/long/radius entries, and take appropriate actions
 
 public class EditEnvironment extends ActionBarActivity {
 

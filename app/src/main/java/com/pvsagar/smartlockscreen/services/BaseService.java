@@ -20,12 +20,14 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
 import com.google.android.gms.location.LocationStatusCodes;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
@@ -33,6 +35,7 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -40,7 +43,8 @@ public class BaseService extends Service implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
         OnAddGeofencesResultListener,
-        LocationClient.OnRemoveGeofencesResultListener{
+        OnRemoveGeofencesResultListener,
+        EnvironmentDetector.EnvironmentDetectedCallback{
     private static final String LOG_TAG = BaseService.class.getSimpleName();
 
     public static final int ONGOING_NOTIFICATION_ID = 1;
@@ -107,26 +111,7 @@ public class BaseService extends Service implements
             action = intent.getAction();
             if(action != null && !action.isEmpty()) {
                 if (action.equals(ACTION_DETECT_ENVIRONMENT)) {
-                    Environment current = EnvironmentDetector.detectCurrentEnvironment(this);
-                    if (current == null) {
-                        startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
-                                "Unknown Environment"));
-                        AdminActions.changePassword(""); //TODO: change this to master password
-                    } else {
-                        User user = User.getCurrentUser(this);
-                        if(user != null) {
-                            Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
-                            if(passphrase != null){
-                                passphrase.setAsCurrentPassword();
-                            } else {
-                                Log.w(LOG_TAG, "Passphrase null for current user in current environment.");
-                            }
-                        } else {
-                            Log.e(LOG_TAG, "Current user null!");
-                        }
-                        startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
-                                "Environment: " + current.getName()));
-                    }
+                    new EnvironmentDetector().detectCurrentEnvironment(this, this);
                 } else if(action.equals(ACTION_ADD_GEOFENCES)) {
                     requestAddGeofences();
                 } else if(action.equals(ACTION_REMOVE_GEOFENCES)){
@@ -233,6 +218,8 @@ public class BaseService extends Service implements
             mLocationClient.connect();
         } else {
             Log.w(LOG_TAG, "A request already in progress.");
+            startLocationRequestReset();
+            requestAddGeofences();
         }
     }
 
@@ -243,15 +230,18 @@ public class BaseService extends Service implements
             mLocationClient.connect();
         } else {
             Log.w(LOG_TAG, "A request already in progress.");
+            startLocationRequestReset();
+            requestRemoveGeofences();
         }
     }
 
-    private class BluetoothDeviceSearch extends AsyncTask<Void, Void, Void>{
+    private class BluetoothDeviceSearch extends AsyncTask<Void, Void, List<BluetoothEnvironmentVariable>>{
         @Override
-        protected Void doInBackground(Void... params) {
+        protected List<BluetoothEnvironmentVariable> doInBackground(Void... params) {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if(mBluetoothAdapter.isEnabled()){
                 Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+                List<BluetoothEnvironmentVariable> connectedDevices = new ArrayList<BluetoothEnvironmentVariable>();
                 for(BluetoothDevice device: bondedDevices){
                     try {
                         Method method = device.getClass().getMethod("getUuids"); /// get all services
@@ -262,15 +252,54 @@ public class BaseService extends Service implements
 
                         socket.connect();
                         socket.close();
-                        BluetoothReceiver.addBluetoothDeviceToConnectedDevices(new
-                                BluetoothEnvironmentVariable(device.getName(), device.getAddress()));
+                        connectedDevices.add(new BluetoothEnvironmentVariable(device.getName(),
+                                device.getAddress()));
                         Log.d(LOG_TAG, device.getName() + " added.");
                     } catch (Exception e) {
                         Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
                     }
                 }
+                return connectedDevices;
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<BluetoothEnvironmentVariable> variables) {
+            if(Utility.checkForNullAndWarn(variables, LOG_TAG))
+                return;
+            for (BluetoothEnvironmentVariable device : variables) {
+                BluetoothReceiver.addBluetoothDeviceToConnectedDevices(device);
+            }
+            super.onPostExecute(variables);
+        }
+    }
+
+    private void startLocationRequestReset(){
+        mLocationClient.disconnect();
+        mInProgress = false;
+    }
+
+    @Override
+    public void onEnvironmentDetected(Environment current) {
+        if (current == null) {
+            startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                    "Unknown Environment"));
+            AdminActions.changePassword(""); //TODO: change this to master password
+        } else {
+            User user = User.getCurrentUser(this);
+            if(user != null) {
+                Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
+                if(passphrase != null){
+                    passphrase.setAsCurrentPassword();
+                } else {
+                    Log.w(LOG_TAG, "Passphrase null for current user in current environment.");
+                }
+            } else {
+                Log.e(LOG_TAG, "Current user null!");
+            }
+            startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                    "Environment: " + current.getName()));
         }
     }
 }

@@ -9,6 +9,7 @@ import android.net.Uri;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.services.BaseService;
+import com.pvsagar.smartlockscreen.services.GeoFenceIntentService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -310,19 +311,15 @@ public class Environment {
                         EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(oldEnvironment.id),
                                 locationEnvironmentVariable.getContentValues(), null, null);
                 if(updatedEntries > 1){
-                    Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
-                            null, BaseService.ACTION_REMOVE_GEOFENCES);
-                    ArrayList<String> geofencesToRemove = new ArrayList<String>();
-                    geofencesToRemove.add(String.valueOf(oldEnvironment.
-                            getLocationEnvironmentVariable().getId()));
-                    intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
-                            geofencesToRemove);
-                    context.startService(intentToRemoveOldGeofenceMonitor);
+                    removeFromCurrentGeofences(oldEnvironment.getLocationEnvironmentVariable(), context);
                 }
             }
             else if(!hasLocation){
-                context.getContentResolver().delete(EnvironmentEntry.
+                int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
                         buildEnvironmentUriWithIdAndLocation(oldEnvironment.id), null, null);
+                if(deletedEntries > 1){
+                    removeFromCurrentGeofences(oldEnvironment.getLocationEnvironmentVariable(), context);
+                }
             }
         } else if(hasLocation) {
             context.getContentResolver().insert(EnvironmentEntry.
@@ -545,13 +542,7 @@ public class Environment {
             context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
                     e.id), null, null);
             if(deletedEntries > 0){
-                Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
-                        null, BaseService.ACTION_REMOVE_GEOFENCES);
-                ArrayList<String> geofencesToRemove = new ArrayList<String>();
-                geofencesToRemove.add(String.valueOf(e.getLocationEnvironmentVariable().getId()));
-                intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
-                        geofencesToRemove);
-                context.startService(intentToRemoveOldGeofenceMonitor);
+                removeFromCurrentGeofences(e.getLocationEnvironmentVariable(), context);
             }
         }
     }
@@ -577,5 +568,16 @@ public class Environment {
             ex.printStackTrace();
             throw new IllegalArgumentException("Cursor should be populated with Environment table data.");
         }
+    }
+
+    private static void removeFromCurrentGeofences(LocationEnvironmentVariable variable, Context context){
+        Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
+                null, BaseService.ACTION_REMOVE_GEOFENCES);
+        ArrayList<String> geofencesToRemove = new ArrayList<String>();
+        geofencesToRemove.add(String.valueOf(variable.getId()));
+        intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
+                geofencesToRemove);
+        GeoFenceIntentService.removeFromCurrentGeofences(variable);
+        context.startService(intentToRemoveOldGeofenceMonitor);
     }
 }

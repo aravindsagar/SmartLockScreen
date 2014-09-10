@@ -3,6 +3,8 @@ package com.pvsagar.smartlockscreen.baseclasses;
 import android.content.ContentValues;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+
 /**
  * Created by aravind on 5/8/14.
  *
@@ -43,6 +45,7 @@ public abstract class EnvironmentVariable {
      */
     public EnvironmentVariable(String variableType,
                                int numberOfFloatValues, int numberOfStringValues){
+        Utility.checkForNullAndThrowException(variableType);
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(isValid){
             isInitialized = true;
@@ -56,6 +59,7 @@ public abstract class EnvironmentVariable {
     }
 
     public EnvironmentVariable(String variableType, double[] floatValues, String[] stringValues){
+        Utility.checkForNullAndThrowException(variableType);
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(!isValid) {
             Log.e(LOG_TAG, "Initialization of environment variable not valid. Type: " + variableType);
@@ -183,10 +187,19 @@ public abstract class EnvironmentVariable {
 
     @Override
     public boolean equals(Object o) {
+        if(o == null){
+            return false;
+        }
+        Class<?> oClass = o.getClass();
+        if(!oClass.getSuperclass().getSimpleName().equals(EnvironmentVariable.class.getSimpleName())
+                && !oClass.getSimpleName().equals(EnvironmentVariable.class.getSimpleName())){
+            return false;
+        }
         EnvironmentVariable e = (EnvironmentVariable) o;
         if(!getVariableType().equals(e.getVariableType())) return false;
         if(isStringValuesSupported()){
-            if(!e.isStringValuesSupported() || stringValues.length != e.stringValues.length)
+            if(!e.isStringValuesSupported() || stringValues == null || e.stringValues == null
+                    || stringValues.length != e.stringValues.length)
                 return false;
             for (int i = 0; i < stringValues.length; i++) {
                 if(!stringValues[i].equals(e.stringValues[i])) {
@@ -195,7 +208,8 @@ public abstract class EnvironmentVariable {
             }
         }
         if(isFloatValuesSupported()){
-            if(!e.isFloatValuesSupported() || floatValues.length != e.floatValues.length)
+            if(!e.isFloatValuesSupported() || floatValues == null || e.floatValues == null ||
+                    floatValues.length != e.floatValues.length)
                 return false;
             for (int i = 0; i < floatValues.length; i++) {
                 if(!(floatValues[i] == e.floatValues[i])){

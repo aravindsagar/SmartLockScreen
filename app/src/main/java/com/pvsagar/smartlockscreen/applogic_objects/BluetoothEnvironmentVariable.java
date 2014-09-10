@@ -17,6 +17,8 @@ import java.util.List;
 
 /**
  * Created by aravind on 10/8/14.
+ * Class representing a BluetoothEnvironmentVariable. Stores 2 strings: Device name and device address
+ * Type is given by EnvironmentVariable.TYPE_BLUETOOTH_DEVICES
  */
 public class BluetoothEnvironmentVariable extends EnvironmentVariable {
     private static final String LOG_TAG = BluetoothEnvironmentVariable.class.getSimpleName();

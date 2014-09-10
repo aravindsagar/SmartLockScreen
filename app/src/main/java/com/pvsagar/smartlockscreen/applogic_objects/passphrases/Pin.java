@@ -4,6 +4,8 @@ import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 
 /**
  * Created by aravind on 8/9/14.
+ * Pin class which represents a numeric passphrase. String is used as representation to accommodate
+ * potential zeroes in the beginning of the pin
  */
 public class Pin extends Passphrase<String> {
     public Pin(){

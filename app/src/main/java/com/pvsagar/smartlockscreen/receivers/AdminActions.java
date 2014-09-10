@@ -42,7 +42,7 @@ public class AdminActions extends DeviceAdminReceiver {
     public static void initAdmin(Context context){
         if(mDPM == null || mDeviceAdmin == null) {
             mDPM = (DevicePolicyManager) context.
-                    getSystemService(context.getApplicationContext().DEVICE_POLICY_SERVICE);
+                    getSystemService(Context.DEVICE_POLICY_SERVICE);
             mDeviceAdmin = new ComponentName(context, AdminActions.class);
         }
         if(!isAdminEnabled()){
