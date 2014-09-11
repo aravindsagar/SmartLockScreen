@@ -105,7 +105,7 @@ public class User {
             Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
                     buildUserUriWithIdEnvironmentAndPassword(id, environment.getId()),
                     null, null, null, null);
-            if(passwordCursor.moveToFirst()){
+            if(passwordCursor != null && passwordCursor.moveToFirst()){
                 Passphrase returnPassphrase = Passphrase.getPassphraseFromCursor(passwordCursor);
                 passwordCursor.close();
                 return returnPassphrase;

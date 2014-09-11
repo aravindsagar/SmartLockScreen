@@ -23,6 +23,8 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiF
 
 import java.util.List;
 
+import static com.pvsagar.smartlockscreen.backend_helpers.Utility.*;
+
 /**
  * Created by aravind on 17/8/14.
  * base_uri is defined in EnvironmentDatabaseContract.BASE_CONTENT_URI
@@ -270,7 +272,7 @@ public class EnvironmentProvider extends ContentProvider {
                 }
                 break;
             case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
-                _id = insertEnvironmentLocation(uri, db, values);
+                _id = insertEnvironmentLocation(uri, db, values)[1];
                 if(_id > 0){
                     returnUri = EnvironmentEntry.buildEnvironmentUriWithId(
                             Long.parseLong(uri.getPathSegments().get(1)));
@@ -291,7 +293,7 @@ public class EnvironmentProvider extends ContentProvider {
                 }
                 break;
             case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
-                _id = insertEnvironmentWifiNetwork(uri, db, values);
+                _id = insertEnvironmentWifiNetwork(uri, db, values)[1];
                 if(_id > 0){
                     returnUri = EnvironmentEntry.buildEnvironmentUriWithId(
                             Long.parseLong(uri.getPathSegments().get(1)));
@@ -427,11 +429,9 @@ public class EnvironmentProvider extends ContentProvider {
                         selectionArgs);
                 break;
             case ENVIRONMENT_WITH_ID_AND_GEOFENCES:
-                long environmentId = Long.parseLong(uri.getPathSegments().get(1));
-                long newGeofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
-                long oldGeofenceId = changeEnvironmentVariableValue(
-                        EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 1,
-                        EnvironmentEntry.COLUMN_GEOFENCE_ID, newGeofenceId, environmentId, db);
+                long[] geofenceIds = insertEnvironmentLocation(uri, db, values);
+                long newGeofenceId = geofenceIds[1];
+                long oldGeofenceId = geofenceIds[0];
                 selection = GeoFenceEntry._ID + " = ? ";
                 selectionArgs = new String[]{String.valueOf(oldGeofenceId)};
                 returnValue = (newGeofenceId != oldGeofenceId)?1:0;
@@ -440,11 +440,9 @@ public class EnvironmentProvider extends ContentProvider {
                         GeoFenceEntry.TABLE_NAME, selection, selectionArgs, db);
                 break;
             case ENVIRONMENT_WITH_ID_AND_WIFI_NETWORKS:
-                environmentId = Long.parseLong(uri.getPathSegments().get(1));
-                long newWifiId = db.insert(WiFiNetworksEntry.TABLE_NAME, null, values);
-                long oldWifiId = changeEnvironmentVariableValue(
-                        EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1,
-                        EnvironmentEntry.COLUMN_WIFI_ID, newWifiId, environmentId, db);
+                long[] wifiIds = insertEnvironmentWifiNetwork(uri, db, values);
+                long newWifiId = wifiIds[1];
+                long oldWifiId = wifiIds[0];
                 selection = WiFiNetworksEntry._ID + " = ? ";
                 selectionArgs = new String[]{String.valueOf(oldWifiId)};
                 returnValue = (newWifiId != oldWifiId)?1:0;
@@ -632,7 +630,7 @@ public class EnvironmentProvider extends ContentProvider {
                 environmentBluetoothContentValues);
     }
 
-    private long insertEnvironmentWifiNetwork(Uri uri, SQLiteDatabase db, ContentValues values){
+    private long[] insertEnvironmentWifiNetwork(Uri uri, SQLiteDatabase db, ContentValues values){
         long environmentId = Long.parseLong(uri.getPathSegments().get(1));
         String wifiSelection = WiFiNetworksEntry.COLUMN_SSID+ " = ? AND " +
                 WiFiNetworksEntry.COLUMN_ENCRYPTION_TYPE + " = ? ";
@@ -651,20 +649,17 @@ public class EnvironmentProvider extends ContentProvider {
             wifiCursor.moveToFirst();
             wifiId = wifiCursor.getLong(wifiCursor.getColumnIndex(WiFiNetworksEntry._ID));
         }
+        wifiCursor.close();
         if(wifiId == -1){
-            wifiCursor.close();
-            return -1;
+            return new long[]{-1, -1};
         }
 
-        ContentValues environmentContentValues = new ContentValues();
-        environmentContentValues.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1);
-        environmentContentValues.put(EnvironmentEntry.COLUMN_WIFI_ID, wifiId);
-        wifiCursor.close();
-        return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
-                EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
+        long oldWifiId = changeEnvironmentVariableValue(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 1,
+                EnvironmentEntry.COLUMN_WIFI_ID, wifiId, environmentId, db);
+        return new long[]{oldWifiId, wifiId};
     }
 
-    private long insertEnvironmentLocation(Uri uri, SQLiteDatabase db, ContentValues values){
+    private long[] insertEnvironmentLocation(Uri uri, SQLiteDatabase db, ContentValues values){
         long environmentId = Long.parseLong(uri.getPathSegments().get(1));
         String geofenceSelection = GeoFenceEntry.COLUMN_LOCATION_NAME + " = ? ";
         String[] geofenceSelectionArgs = new String[]{
@@ -681,30 +676,47 @@ public class EnvironmentProvider extends ContentProvider {
             Log.d(LOG_TAG, "Location values received: " + receivedValues);
             geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
         } else {
-            geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
+            boolean isLatEqual = isEqual(values.getAsDouble(GeoFenceEntry.COLUMN_COORD_LAT),
+                    geofenceCursor.getDouble(geofenceCursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LAT))),
+                    isLongEqual = isEqual(values.getAsDouble(GeoFenceEntry.COLUMN_COORD_LONG),
+                    geofenceCursor.getDouble(geofenceCursor.getColumnIndex(GeoFenceEntry.COLUMN_COORD_LONG))),
+                    isRadiusEqual = values.getAsInteger(GeoFenceEntry.COLUMN_RADIUS) ==
+                            geofenceCursor.getInt(geofenceCursor.getColumnIndex(GeoFenceEntry.COLUMN_RADIUS));
+            if(isLatEqual && isLongEqual && isRadiusEqual){
+                geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
+            } else {
+                Cursor environmentCursor = query(EnvironmentEntry.buildEnvironmentUriWithId(environmentId),
+                        null, null, null, null);
+                if(!environmentCursor.moveToFirst()){
+                    throw new IllegalArgumentException("Invalid environmentId passed.");
+                }
+                String newLocationName = geofenceSelectionArgs[0] + ":" + environmentCursor.getString(
+                        environmentCursor.getColumnIndex(EnvironmentEntry.COLUMN_NAME));
+                values.remove(GeoFenceEntry.COLUMN_LOCATION_NAME);
+                values.put(GeoFenceEntry.COLUMN_LOCATION_NAME, newLocationName);
+                geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
+                environmentCursor.close();
+            }
         }
+        geofenceCursor.close();
         if(geofenceId == -1){
-            geofenceCursor.close();
-            return -1;
+            return new long[]{-1, -1};
         }
 
-        ContentValues environmentContentValues = new ContentValues();
-        environmentContentValues.put(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 1);
-        environmentContentValues.put(EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId);
-        geofenceCursor.close();
-        return db.update(EnvironmentEntry.TABLE_NAME, environmentContentValues,
-                EnvironmentEntry._ID + " = ? ", new String[]{String.valueOf(environmentId)});
+        Long oldGeofenceId = changeEnvironmentVariableValue(EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED, 1,
+                EnvironmentEntry.COLUMN_GEOFENCE_ID, geofenceId, environmentId, db);
+        return new long[]{oldGeofenceId, geofenceId};
     }
 
     /**
      * Changes the environment variable values (id, enabled) of an environment to new specified
      * values, updates in the db.
-     * @param enabledColumnName
-     * @param newEnabledValue
-     * @param idColumnName
-     * @param newId
-     * @param environmentId
-     * @param db
+     * @param enabledColumnName Name of column which stores whether the Environment Variable is enabled.
+     * @param newEnabledValue Current enabled status
+     * @param idColumnName Name of column which stores the environment variable id.
+     * @param newId New id of the environment variable. Pass anything if its not enabled
+     * @param environmentId Id of the environment to be modified
+     * @param db An instance of the SQLiteDatabase representing environment.db
      * @return The id of the variable before the environment was updated
      */
     private long changeEnvironmentVariableValue(String enabledColumnName, int newEnabledValue,
@@ -713,8 +725,12 @@ public class EnvironmentProvider extends ContentProvider {
         Cursor environmentCursor = query(EnvironmentEntry.
                 buildEnvironmentUriWithId(environmentId), null, null, null, null);
         if(environmentCursor.moveToFirst()){
-            variableId = environmentCursor.getLong(environmentCursor.getColumnIndex
-                    (idColumnName));
+            try {
+                variableId = environmentCursor.getLong(environmentCursor.getColumnIndex
+                        (idColumnName));
+            } catch (Exception e){
+                variableId = -1;
+            }
             ContentValues environmentUpdateValues = new ContentValues();
             environmentUpdateValues.put(enabledColumnName, newEnabledValue);
             if(newEnabledValue == 1){
