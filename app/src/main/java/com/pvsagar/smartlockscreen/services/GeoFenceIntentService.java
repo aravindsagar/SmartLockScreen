@@ -90,7 +90,7 @@ public class GeoFenceIntentService extends IntentService {
         for(Geofence geofence: triggerList){
             LocationEnvironmentVariable variable = LocationEnvironmentVariable.
                     getLocationEnvironmentVariableFromAndroidGeofence(this, geofence);
-            if(!currentGeofences.contains(variable)){
+            if(variable != null && !currentGeofences.contains(variable)){
                 currentGeofences.add(variable);
             }
         }
@@ -100,8 +100,15 @@ public class GeoFenceIntentService extends IntentService {
         for (Geofence geofence: triggerList){
             LocationEnvironmentVariable variable = LocationEnvironmentVariable.
                     getLocationEnvironmentVariableFromAndroidGeofence(this, geofence);
-            currentGeofences.remove(variable);
+            if(variable != null)
+                currentGeofences.remove(variable);
         }
+    }
+
+    public static void removeFromCurrentGeofences(LocationEnvironmentVariable variable){
+        manageCurrentGeofencesCriticalSection.acquireUninterruptibly();
+        currentGeofences.remove(variable);
+        manageCurrentGeofencesCriticalSection.release();
     }
 
     @Override

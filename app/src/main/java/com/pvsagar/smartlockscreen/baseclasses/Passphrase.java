@@ -7,6 +7,7 @@ import android.util.Log;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 
@@ -37,6 +38,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
     public static final String TYPE_NONE = PACKAGE_PREFIX + ".TYPE_NONE";
 
     public Passphrase(String type){
+        Utility.checkForNullAndThrowException(type);
         if(!checkTypeValidity(type)){
             throw new IllegalArgumentException("Cannot initialize passphrase with type " +
                     type);

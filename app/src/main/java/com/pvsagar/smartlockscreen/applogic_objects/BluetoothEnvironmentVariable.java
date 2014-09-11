@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 
@@ -17,19 +18,33 @@ import java.util.List;
 
 /**
  * Created by aravind on 10/8/14.
+ * Class representing a BluetoothEnvironmentVariable. Stores 2 strings: Device name and device address
+ * Type is given by EnvironmentVariable.TYPE_BLUETOOTH_DEVICES
  */
 public class BluetoothEnvironmentVariable extends EnvironmentVariable {
     private static final String LOG_TAG = BluetoothEnvironmentVariable.class.getSimpleName();
 
+    /**
+    * Some constant values for use. INDEX_* values represent the index of the fields in the string
+    * array inherited from EnvironmentVariable base class.
+    */
     public static final int REQUEST_BLUETOOTH_ENABLE = 20;
     private static final int NUMBER_OF_STRING_VALUES = 2;
     private static final int INDEX_DEVICE_NAME = 0;
     private static final int INDEX_DEVICE_ADDRESS = 1;
 
+    /**
+     * Get an empty BluetoothEnvironmentVariable
+     */
     public BluetoothEnvironmentVariable() {
         super(EnvironmentVariable.TYPE_BLUETOOTH_DEVICES, 0 , NUMBER_OF_STRING_VALUES);
     }
 
+    /**
+     * Get a BluetoothEnvironmentVariable with the values specified.
+     * @param deviceName Visible name of the Bluetooth device
+     * @param deviceAddress MAC address of the bluetooth adapter of the device
+     */
     public BluetoothEnvironmentVariable(String deviceName, String deviceAddress){
         super(EnvironmentVariable.TYPE_BLUETOOTH_DEVICES, null,
                 new String[]{deviceName, deviceAddress});
@@ -51,6 +66,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         } catch (Exception e){
             Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
                     + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
@@ -78,11 +94,14 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
      * @param context Context of the calling activity
      */
     public static void enableBluetooth(Context context){
+        Utility.checkForNullAndThrowException(context);
+
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //Checking for Bluetooth Hardware
         if(mBluetoothAdapter == null){
             Log.e(LOG_TAG,"Bluetooth Hardware Not Found");
+            return;
         }
         if(!mBluetoothAdapter.isEnabled()) {
             Log.v(LOG_TAG,"enabling bluetooth");
@@ -93,12 +112,12 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
 
     /**
      * This function returns the list of paired bluetooth devices.
-     * @param context Context of the calling activity
+     * @param context Context of the calling activity/service
      * @return Returns the list of paired bluetooth devices
      */
     public static ArrayList<BluetoothDevice> getPairedBluetoothDevices(Context context){
+        Utility.checkForNullAndThrowException(context);
 
-        Log.v(LOG_TAG, "getBluetoothDevices Entered");
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //Checking for Bluetooth Hardware
@@ -121,6 +140,12 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
         return bluetoothDevices;
     }
 
+    /**
+     * Gets a ContentValues instance populated with calling bluetoothDevice's data. Useful for
+     * providing data to the database.
+     * @return The ContentValues instance with device data. Keys are taken from
+     *         EnvironmentDatabaseContract.BluetoothDevicesEntry
+     */
     @Override
     public ContentValues getContentValues() {
         ContentValues bluetoothValues = new ContentValues();
@@ -133,10 +158,10 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
      * Converts cursor containing data from bluetooth_devices table, to objects of
      * BluetoothEnvironmentVariable
      * @param bluetoothCursor cursor containing data from bluetooth_devices table
-     * @return List of BluetoothEnvironmentVariables
+     * @return List of BluetoothEnvironmentVariables obtained from the cursor
      */
-    public static List<EnvironmentVariable> getBluetoothEnvironmentVariablesFromCursor
-    (Cursor bluetoothCursor){
+    public static List<EnvironmentVariable> getBluetoothEnvironmentVariablesFromCursor(
+            Cursor bluetoothCursor){
         ArrayList<EnvironmentVariable> environmentVariables =
                 new ArrayList<EnvironmentVariable>();
         try {
@@ -185,6 +210,7 @@ public class BluetoothEnvironmentVariable extends EnvironmentVariable {
             }
             return null;
         }
-        throw new IllegalArgumentException("All arguments are mandatory, cannot be null.");
+        Log.e(LOG_TAG, "Null or empty values passed for getting data from database.");
+        return null;
     }
 }

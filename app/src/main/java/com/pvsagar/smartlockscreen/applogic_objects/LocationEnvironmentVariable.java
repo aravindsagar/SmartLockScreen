@@ -152,7 +152,8 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
                 locationCursor);
         locationCursor.close();
         if(locationVariables == null || locationVariables.isEmpty()){
-            Log.e(LOG_TAG, "Invalid geofence passed. Id not found in database");
+            Log.e(LOG_TAG, "Invalid geofence passed. Id not found in database: " + geofence.getRequestId());
+            return null;
         }
         return (LocationEnvironmentVariable) locationVariables.get(0);
     }

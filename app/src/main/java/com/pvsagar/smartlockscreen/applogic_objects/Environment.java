@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
 import com.pvsagar.smartlockscreen.services.BaseService;
+import com.pvsagar.smartlockscreen.services.GeoFenceIntentService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +26,19 @@ import java.util.Vector;
 public class Environment {
     private static final String LOG_TAG = Environment.class.getSimpleName();
 
+    ///The id of the environment, as stored in the database
     private long id;
+
+    ///The EnvironmentVariables associated with the environment
     private LocationEnvironmentVariable locationEnvironmentVariable;
     private Vector<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables;
-    //true for all, false for any
-    private boolean bluetoothAllOrAny;
     private WiFiEnvironmentVariable wiFiEnvironmentVariable;
     private NoiseLevelEnvironmentVariable noiseLevelEnvironmentVariable;
+
+    //true for all, false for any
+    private boolean bluetoothAllOrAny;
+
+    ///Other data about the environment
     private String name, hint;
     private boolean isEnabled;
 
@@ -101,6 +109,9 @@ public class Environment {
      * @param variables variables to be added.
      */
     public void addEnvironmentVariables(EnvironmentVariable... variables){
+        if(Utility.checkForNullAndWarn(variables, LOG_TAG)){
+            return;
+        }
         for(EnvironmentVariable variable: variables){
             if(variable.getVariableType().equals(EnvironmentVariable.TYPE_LOCATION)){
                 addLocationVariable((LocationEnvironmentVariable) variable);
@@ -214,7 +225,11 @@ public class Environment {
      * @param context Activity/ service context
      */
     public void insertIntoDatabase(Context context){
+        Utility.checkForNullAndThrowException(context);
+
         Environment e = this;
+        Utility.checkForNullAndThrowException(e.getName());
+        Utility.checkForNullAndThrowException(e.getHint());
         ContentValues environmentValues = new ContentValues();
         environmentValues.put(EnvironmentEntry.COLUMN_NAME, e.getName());
         environmentValues.put(EnvironmentEntry.COLUMN_IS_WIFI_ENABLED, 0);
@@ -310,19 +325,15 @@ public class Environment {
                         EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(oldEnvironment.id),
                                 locationEnvironmentVariable.getContentValues(), null, null);
                 if(updatedEntries > 1){
-                    Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
-                            null, BaseService.ACTION_REMOVE_GEOFENCES);
-                    ArrayList<String> geofencesToRemove = new ArrayList<String>();
-                    geofencesToRemove.add(String.valueOf(oldEnvironment.
-                            getLocationEnvironmentVariable().getId()));
-                    intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
-                            geofencesToRemove);
-                    context.startService(intentToRemoveOldGeofenceMonitor);
+                    removeFromCurrentGeofences(oldEnvironment.getLocationEnvironmentVariable(), context);
                 }
             }
             else if(!hasLocation){
-                context.getContentResolver().delete(EnvironmentEntry.
+                int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
                         buildEnvironmentUriWithIdAndLocation(oldEnvironment.id), null, null);
+                if(deletedEntries > 1){
+                    removeFromCurrentGeofences(oldEnvironment.getLocationEnvironmentVariable(), context);
+                }
             }
         } else if(hasLocation) {
             context.getContentResolver().insert(EnvironmentEntry.
@@ -371,6 +382,9 @@ public class Environment {
      */
     public static void setEnabledInDatabase(Context context, String environmentName,
                                                boolean enabled){
+        if(Utility.checkForNullAndWarn(environmentName, LOG_TAG)){
+            return;
+        }
         ContentValues environmentValues = new ContentValues();
         environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, enabled);
         Environment e = getBareboneEnvironment(context, environmentName);
@@ -469,7 +483,7 @@ public class Environment {
     }
 
     /**
-     * Returns an environemt instance of the environment specified by its name. Only name, hint, id
+     * Returns an environment instance of the environment specified by its name. Only name, hint, id
      * and enabled flag are populated. The environment variables are not populated
      * @param context Activity/ service context
      * @param environmentName Name of the environment whose details are required
@@ -512,7 +526,12 @@ public class Environment {
         return environments;
     }
 
-    public static List<Environment> getAllnvironmentBarebonesWithoutLocation(Context context){
+    /**
+     * Gets barebone of all environments which do not have location associated with it
+     * @param context Activity/ service context
+     * @return List of all environment (barebones) which does not have location
+     */
+    public static List<Environment> getAllEnvironmentBarebonesWithoutLocation(Context context){
         String selection = EnvironmentEntry.COLUMN_IS_LOCATION_ENABLED + " = ? ";
         String[] selectionArgs = new String[]{String.valueOf(0)};
         Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
@@ -528,34 +547,11 @@ public class Environment {
     }
 
     /**
-     * Function to delete an environment from the database
-     * @param context Activity/ service context
-     * @param environmentName Name of the environment to be deleted
+     * Builds an Environment object from a cursor containing values from environments table.
+     * Only the barebone environment is build; the environment variables are not populated.
+     * @param envCursor cursor containing data from environments table
+     * @return Environment instance populated with data from the cursor
      */
-    public static void deleteEnvironmentFromDatabase(Context context, String environmentName){
-        Environment e = getFullEnvironment(context, environmentName);
-
-        if(e != null){
-            context.getContentResolver().delete(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndBluetooth(e.id), null, null);
-            context.getContentResolver().delete(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndWifi(e.id), null, null);
-            int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndLocation(e.id), null, null);
-            context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
-                    e.id), null, null);
-            if(deletedEntries > 0){
-                Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
-                        null, BaseService.ACTION_REMOVE_GEOFENCES);
-                ArrayList<String> geofencesToRemove = new ArrayList<String>();
-                geofencesToRemove.add(String.valueOf(e.getLocationEnvironmentVariable().getId()));
-                intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
-                        geofencesToRemove);
-                context.startService(intentToRemoveOldGeofenceMonitor);
-            }
-        }
-    }
-
     private static Environment buildEnvironmentBareboneFromCursor(Cursor envCursor){
         Environment e = new Environment();
         try {
@@ -577,5 +573,39 @@ public class Environment {
             ex.printStackTrace();
             throw new IllegalArgumentException("Cursor should be populated with Environment table data.");
         }
+    }
+
+    /**
+     * Function to delete an environment from the database
+     * @param context Activity/ service context
+     * @param environmentName Name of the environment to be deleted
+     */
+    public static void deleteEnvironmentFromDatabase(Context context, String environmentName){
+        Environment e = getFullEnvironment(context, environmentName);
+
+        if(e != null){
+            context.getContentResolver().delete(EnvironmentEntry.
+                    buildEnvironmentUriWithIdAndBluetooth(e.id), null, null);
+            context.getContentResolver().delete(EnvironmentEntry.
+                    buildEnvironmentUriWithIdAndWifi(e.id), null, null);
+            int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
+                    buildEnvironmentUriWithIdAndLocation(e.id), null, null);
+            context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
+                    e.id), null, null);
+            if(deletedEntries > 0){
+                removeFromCurrentGeofences(e.getLocationEnvironmentVariable(), context);
+            }
+        }
+    }
+
+    private static void removeFromCurrentGeofences(LocationEnvironmentVariable variable, Context context){
+        Intent intentToRemoveOldGeofenceMonitor = BaseService.getServiceIntent(context,
+                null, BaseService.ACTION_REMOVE_GEOFENCES);
+        ArrayList<String> geofencesToRemove = new ArrayList<String>();
+        geofencesToRemove.add(String.valueOf(variable.getId()));
+        intentToRemoveOldGeofenceMonitor.putExtra(BaseService.EXTRA_GEOFENCE_IDS_TO_REMOVE,
+                geofencesToRemove);
+        GeoFenceIntentService.removeFromCurrentGeofences(variable);
+        context.startService(intentToRemoveOldGeofenceMonitor);
     }
 }

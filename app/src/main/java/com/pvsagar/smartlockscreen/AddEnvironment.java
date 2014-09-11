@@ -42,6 +42,7 @@ import com.pvsagar.smartlockscreen.services.BaseService;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO see whether the location name entered exists for other lat/long/radius entries, and take appropriate actions
 
 public class AddEnvironment extends ActionBarActivity {
 

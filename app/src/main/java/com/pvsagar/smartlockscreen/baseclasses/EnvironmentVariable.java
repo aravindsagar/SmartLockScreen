@@ -3,6 +3,8 @@ package com.pvsagar.smartlockscreen.baseclasses;
 import android.content.ContentValues;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+
 /**
  * Created by aravind on 5/8/14.
  *
@@ -22,6 +24,7 @@ public abstract class EnvironmentVariable {
     public static final String TYPE_NOISE_LEVEL = "com.pvsagar.applogic_objects.TYPE_NOISE_LEVEL";
 
     protected long id = -1;
+
     //Stores the numeric values associated with the variable
     private double[] floatValues;
 
@@ -43,6 +46,7 @@ public abstract class EnvironmentVariable {
      */
     public EnvironmentVariable(String variableType,
                                int numberOfFloatValues, int numberOfStringValues){
+        Utility.checkForNullAndThrowException(variableType);
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(isValid){
             isInitialized = true;
@@ -56,18 +60,17 @@ public abstract class EnvironmentVariable {
     }
 
     public EnvironmentVariable(String variableType, double[] floatValues, String[] stringValues){
+        Utility.checkForNullAndThrowException(variableType);
         boolean isValid = checkTypeValidity(variableType) && !isInitialized;
         if(!isValid) {
             Log.e(LOG_TAG, "Initialization of environment variable not valid. Type: " + variableType);
             throw new IllegalArgumentException("Cannot initialize EnvironmentVariable with type "
                     + variableType);
         }
-        if(isValid){
-            isInitialized = true;
-            this.variableType = variableType;
-            setFloatValues(floatValues);
-            setStringValues(stringValues);
-        }
+        isInitialized = true;
+        this.variableType = variableType;
+        setFloatValues(floatValues);
+        setStringValues(stringValues);
     }
 
     /**
@@ -152,12 +155,12 @@ public abstract class EnvironmentVariable {
         }
     }
 
-    public double getFloatValue(int index) throws Exception{
+    public double getFloatValue(int index) throws UnsupportedOperationException, ArrayIndexOutOfBoundsException{
         if(isFloatValuesSupported() && isInitialized){
             return floatValues[index];
         }
         else{
-            throw new Exception("No double values associated with " + variableType) ;
+            throw new UnsupportedOperationException("No double values associated with " + variableType) ;
         }
     }
 
@@ -170,12 +173,12 @@ public abstract class EnvironmentVariable {
         }
     }
 
-    public String getStringValue(int index) throws Exception{
+    public String getStringValue(int index) throws UnsupportedOperationException, ArrayIndexOutOfBoundsException{
         if(isStringValuesSupported() && isInitialized){
             return stringValues[index];
         }
         else{
-            throw new Exception("No String values associated with " + variableType) ;
+            throw new UnsupportedOperationException("No String values associated with " + variableType) ;
         }
     }
 
@@ -183,10 +186,19 @@ public abstract class EnvironmentVariable {
 
     @Override
     public boolean equals(Object o) {
+        if(o == null){
+            return false;
+        }
+        Class<?> oClass = o.getClass();
+        if(!oClass.getSuperclass().getSimpleName().equals(EnvironmentVariable.class.getSimpleName())
+                && !oClass.getSimpleName().equals(EnvironmentVariable.class.getSimpleName())){
+            return false;
+        }
         EnvironmentVariable e = (EnvironmentVariable) o;
         if(!getVariableType().equals(e.getVariableType())) return false;
         if(isStringValuesSupported()){
-            if(!e.isStringValuesSupported() || stringValues.length != e.stringValues.length)
+            if(!e.isStringValuesSupported() || stringValues == null || e.stringValues == null
+                    || stringValues.length != e.stringValues.length)
                 return false;
             for (int i = 0; i < stringValues.length; i++) {
                 if(!stringValues[i].equals(e.stringValues[i])) {
@@ -195,7 +207,8 @@ public abstract class EnvironmentVariable {
             }
         }
         if(isFloatValuesSupported()){
-            if(!e.isFloatValuesSupported() || floatValues.length != e.floatValues.length)
+            if(!e.isFloatValuesSupported() || floatValues == null || e.floatValues == null ||
+                    floatValues.length != e.floatValues.length)
                 return false;
             for (int i = 0; i < floatValues.length; i++) {
                 if(!(floatValues[i] == e.floatValues[i])){
