@@ -314,7 +314,6 @@ public class EditEnvironment extends ActionBarActivity {
         private void initLocationDispItems(){
             setLocationItemsEnabled(true);
             enableLocationCheckBox.setChecked(true);
-
             //setting current location
             LocationEnvironmentVariable locationVariable = environment.getLocationEnvironmentVariable();
             nameLocationEditText.setText(locationVariable.getLocationName());
@@ -488,11 +487,13 @@ public class EditEnvironment extends ActionBarActivity {
                 public void onClick(View v) {
                     Log.v(LOG_TAG, "Starting select location");
                     Intent intent = new Intent(getActivity(), SelectLocation.class);
-                    LocationEnvironmentVariable location = environment.getLocationEnvironmentVariable();
-                    Bundle bundle = new Bundle();
-                    bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE, location.getLatitude());
-                    bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LONGITUDE, location.getLongitude());
-                    intent.putExtras(bundle);
+                    if(environment.hasLocation) {
+                        LocationEnvironmentVariable location = environment.getLocationEnvironmentVariable();
+                        Bundle bundle = new Bundle();
+                        bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE, location.getLatitude());
+                        bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LONGITUDE, location.getLongitude());
+                        intent.putExtras(bundle);
+                    }
                     Toast.makeText(getActivity(), "Select Location edit", Toast.LENGTH_SHORT).show();
                     getActivity().startActivityForResult(intent, REQUEST_LOCATION_SELECT);
                 }
@@ -725,20 +726,18 @@ public class EditEnvironment extends ActionBarActivity {
             newEnvironment.updateInDatabase(getActivity(),environmentName);
 
             /* Updating passphrase */
-            //if(passphraseEditText.getText().toString().equals("")){
-                if(!passphraseEditText.getText().toString().equals("")){
-                    //Password changed
-                    Log.d(LOG_TAG, "Password changed. Updating in db.");
-                    if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
-                        Password password = new Password(passphraseEditText.getText().toString());
-                        User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,newEnvironment);
-                    }
-                    else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                        Pin pin = new Pin(passphraseEditText.getText().toString());
-                        User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
-                    }
+            if(!passphraseEditText.getText().toString().equals("")){
+                //Password changed
+                Log.d(LOG_TAG, "Password changed. Updating in db.");
+                if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                    Password password = new Password(passphraseEditText.getText().toString());
+                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,newEnvironment);
                 }
-            //}
+                else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                    Pin pin = new Pin(passphraseEditText.getText().toString());
+                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
+                }
+            }
             /* done with updating passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_ADD_GEOFENCES));

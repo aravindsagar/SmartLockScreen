@@ -66,5 +66,7 @@
     <string name="alert_no_passphrase_message">No password/pin set</string>
     <string name="device_admin_name">Smart Lock Screen</string>
     <string name="device_admin_description">Required to change the password, and turn screen on/off automatically.</string>
+    <string name="auto_complete_text_view_address_hint">Search for places</string>
+    <string name="go">GO!</string>
 
 </resources>

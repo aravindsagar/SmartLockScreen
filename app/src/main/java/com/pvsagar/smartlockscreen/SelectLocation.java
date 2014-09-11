@@ -2,14 +2,22 @@ package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -22,7 +30,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class SelectLocation extends ActionBarActivity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -30,11 +40,21 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
     private final String LOG_TAG = SelectLocation.class.getSimpleName();
     public static final String INTENT_EXTRA_SELECTED_LATITUDE = "selectedLatitude";
     public static final String INTENT_EXTRA_SELECTED_LONGITUDE = "selectedLongitude";
+    public static final int GEOCODER_MAX_RESULTS_COUNT = 5;
+    public static final int AUTO_COMPLETE_THRESHOLD = 1;
 
     private GoogleMap googleMap;
     private static final int MAP_DFAULT_ZOOM_LEVEL = 14;
     private Location selectedLocation;
     private LocationClient mLocationClient;
+
+    //UI elements
+    private static Geocoder geocoder;
+    private static Button addressButton;
+    private static AutoCompleteTextView addressAutoCompleteTextView;
+    private static ArrayAdapter<String> addressAutoCompleteAdapter;
+    private static ArrayList<String> autoCompleteStrings;
+    private static LocationSuggestTask locationSuggestTask;
 
     //Intent
     Intent intent;
@@ -50,6 +70,117 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
         setUpActionBar();
         setUpGoogleMap();
 
+        //Geocoder
+        locationSuggestTask = new LocationSuggestTask();
+        setUpGeocoder();
+
+
+    }
+
+    class LocationSuggestTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            if(autoCompleteStrings == null){
+                autoCompleteStrings = new ArrayList<String>();
+            } else {
+                autoCompleteStrings.clear();
+            }
+            try{
+                List<Address> addresses =  geocoder.getFromLocationName(params[0].toString(),GEOCODER_MAX_RESULTS_COUNT);
+                addressAutoCompleteAdapter.clear();
+                for (Address address : addresses) {
+                    if(address.getFeatureName() != null){
+                        autoCompleteStrings.add(address.getFeatureName()+", "+address.getCountryName());
+                    } else {
+                        autoCompleteStrings.add(getReadableAddress(address));
+                    }
+                }
+
+            } catch (Exception e){
+                Log.e(LOG_TAG, e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            addressAutoCompleteAdapter.clear();
+            for (String autoCompleteString : autoCompleteStrings) {
+                addressAutoCompleteAdapter.add(autoCompleteString);
+                Log.v(LOG_TAG,autoCompleteString);
+            }
+        }
+    }
+
+    private void setUpGeocoder(){
+        geocoder = new Geocoder(this);
+        addressButton = (Button)findViewById(R.id.button_address);
+        addressAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.auto_complete_text_view_address);
+        autoCompleteStrings = new ArrayList<String>();
+        addressAutoCompleteAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_dropdown_item_1line,autoCompleteStrings);
+        addressAutoCompleteTextView.setAdapter(addressAutoCompleteAdapter);
+        addressAutoCompleteTextView.setThreshold(AUTO_COMPLETE_THRESHOLD);
+        addressAutoCompleteTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                /*if(locationSuggestTask != null && !(locationSuggestTask.getStatus() == AsyncTask.Status.FINISHED)){
+                    locationSuggestTask.cancel(true);
+                }
+                locationSuggestTask = new LocationSuggestTask();
+                locationSuggestTask.execute(s.toString());*/
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                try{
+                    List<Address> addresses =  geocoder.getFromLocationName(s.toString(),GEOCODER_MAX_RESULTS_COUNT);
+                    addressAutoCompleteAdapter.clear();
+                    Toast.makeText(getBaseContext(),""+addresses.size(),Toast.LENGTH_SHORT).show();
+                    for (Address address : addresses) {
+                        addressAutoCompleteAdapter.add(getReadableAddress(address));
+                        Log.v(LOG_TAG,getReadableAddress(address));
+                    }
+                } catch (Exception e){
+                    Log.e(LOG_TAG, e.toString());
+                }
+            }
+        });
+        addressButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    for (Address address : geocoder.getFromLocationName(addressAutoCompleteTextView.getText().toString(),
+                            GEOCODER_MAX_RESULTS_COUNT)) {
+                        Log.v(LOG_TAG,address.toString());
+                    }
+                    ;
+
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, e.toString());
+                }
+            }
+        });
+    }
+
+    public String getReadableAddress(Address address){
+        String readableAddress = "";
+        if(address.getFeatureName() != null){
+            readableAddress = address.getFeatureName();
+        }
+        for(int i=0;i<address.getMaxAddressLineIndex();i++){
+            if(!address.getAddressLine(i).equals("")) {
+                readableAddress = readableAddress + ", " + address.getAddressLine(i);
+            }
+        }
+        readableAddress = readableAddress+", "+address.getCountryName();
+        return readableAddress;
     }
 
     private void setUpActionBar(){
