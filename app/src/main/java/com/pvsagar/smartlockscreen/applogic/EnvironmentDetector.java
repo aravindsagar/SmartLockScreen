@@ -107,7 +107,7 @@ public class EnvironmentDetector {
             }
             //Now checking for environments without geofence
             List<Environment> potentialEnvironments = Environment.
-                    getAllnvironmentBarebonesWithoutLocation(context);
+                    getAllEnvironmentBarebonesWithoutLocation(context);
             if(potentialEnvironments != null && !potentialEnvironments.isEmpty()) {
                 currentEnvironments.addAll(checkWifiAndBluetoothOfPotentialEnvironments(context,
                         potentialEnvironments));

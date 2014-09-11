@@ -24,6 +24,7 @@ public abstract class EnvironmentVariable {
     public static final String TYPE_NOISE_LEVEL = "com.pvsagar.applogic_objects.TYPE_NOISE_LEVEL";
 
     protected long id = -1;
+
     //Stores the numeric values associated with the variable
     private double[] floatValues;
 
@@ -66,12 +67,10 @@ public abstract class EnvironmentVariable {
             throw new IllegalArgumentException("Cannot initialize EnvironmentVariable with type "
                     + variableType);
         }
-        if(isValid){
-            isInitialized = true;
-            this.variableType = variableType;
-            setFloatValues(floatValues);
-            setStringValues(stringValues);
-        }
+        isInitialized = true;
+        this.variableType = variableType;
+        setFloatValues(floatValues);
+        setStringValues(stringValues);
     }
 
     /**
@@ -156,12 +155,12 @@ public abstract class EnvironmentVariable {
         }
     }
 
-    public double getFloatValue(int index) throws Exception{
+    public double getFloatValue(int index) throws UnsupportedOperationException, ArrayIndexOutOfBoundsException{
         if(isFloatValuesSupported() && isInitialized){
             return floatValues[index];
         }
         else{
-            throw new Exception("No double values associated with " + variableType) ;
+            throw new UnsupportedOperationException("No double values associated with " + variableType) ;
         }
     }
 
@@ -174,12 +173,12 @@ public abstract class EnvironmentVariable {
         }
     }
 
-    public String getStringValue(int index) throws Exception{
+    public String getStringValue(int index) throws UnsupportedOperationException, ArrayIndexOutOfBoundsException{
         if(isStringValuesSupported() && isInitialized){
             return stringValues[index];
         }
         else{
-            throw new Exception("No String values associated with " + variableType) ;
+            throw new UnsupportedOperationException("No String values associated with " + variableType) ;
         }
     }
 
