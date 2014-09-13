@@ -7,11 +7,16 @@
  -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_layout_actionbar_done"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:divider="?android:attr/dividerVertical"
     android:showDividers="middle"
     android:dividerPadding="12dp">
-    <include layout="@layout/include_done_button" />
+    <include layout="@layout/include_done_button"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"/>
+    <include layout="@layout/include_search_button" />
 </LinearLayout>

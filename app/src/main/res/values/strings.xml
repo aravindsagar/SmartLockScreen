@@ -68,5 +68,7 @@
     <string name="device_admin_description">Required to change the password, and turn screen on/off automatically.</string>
     <string name="auto_complete_text_view_address_hint">Search for places</string>
     <string name="go">GO!</string>
-
+    <string name="title_activity_search_location">SearchLocation</string>
+    <string name="search">Search</string>
+    <string name="hint_searchbar">Search for location</string>
 </resources>
