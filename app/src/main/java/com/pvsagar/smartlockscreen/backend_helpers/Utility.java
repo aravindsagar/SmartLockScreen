@@ -38,4 +38,16 @@ public class Utility {
         }
         return true;
     }
+
+    public static boolean isEqual(double a, double b, double doubleErrorTolerance){
+        if(Math.abs(a-b) <= doubleErrorTolerance){
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isEqual(double a, double b){
+        final double defaultDoubleErrorTolerance = 0.0000449;
+        return isEqual(a, b, defaultDoubleErrorTolerance);
+    }
 }
