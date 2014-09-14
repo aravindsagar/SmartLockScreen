@@ -18,6 +18,9 @@ import javax.crypto.spec.SecretKeySpec;
 public class EncryptorDecryptor {
     public static String encrypt(final String plainMessage,
                                  final String symKeyHex) {
+        if(plainMessage.equals("")){
+            return "";
+        }
         final byte[] symKeyData = Base64.decode(symKeyHex, Base64.DEFAULT);
 
         final byte[] encodedMessage = plainMessage.getBytes(Charset
@@ -62,6 +65,9 @@ public class EncryptorDecryptor {
 
     public static String decrypt(final String ivAndEncryptedMessageBase64,
                                  final String symKeyHex) {
+        if(ivAndEncryptedMessageBase64.equals("")){
+            return "";
+        }
         final byte[] symKeyData = Base64.decode(symKeyHex, Base64.DEFAULT);
 
         final byte[] ivAndEncryptedMessage = Base64.decode(ivAndEncryptedMessageBase64, Base64.DEFAULT);

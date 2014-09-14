@@ -31,6 +31,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
@@ -786,6 +787,9 @@ public class EditEnvironment extends ActionBarActivity {
                 else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
                     Pin pin = new Pin(passphraseEditText.getText().toString());
                     User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
+                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
+                    NoSecurity noSecurity = new NoSecurity();
+                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(), noSecurity, newEnvironment);
                 }
             }
             /* done with updating passphrase */

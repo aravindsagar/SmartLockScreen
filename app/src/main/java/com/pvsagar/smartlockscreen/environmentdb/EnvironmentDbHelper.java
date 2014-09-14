@@ -106,7 +106,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_PASSWORDS = "CREATE TABLE " + PasswordEntry.TABLE_NAME + " ( " +
                 PasswordEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 PasswordEntry.COLUMN_PASSWORD_TYPE + " TEXT NOT NULL, " +
-                PasswordEntry.COLUMN_PASSWORD_STRING + " TEXT NOT NULL);";
+                PasswordEntry.COLUMN_PASSWORD_STRING + " TEXT);";
 
         final String SQL_CREATE_USER_PASSWORDS = "CREATE TABLE " +
                 UserPasswordsEntry.TABLE_NAME + " ( " +

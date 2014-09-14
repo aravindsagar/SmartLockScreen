@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
@@ -97,12 +98,17 @@ public abstract class Passphrase<PassphraseRepresentation> {
                 returnPassphrase = new Password();
             } else if(type.equals(TYPE_PIN)){
                 returnPassphrase = new Pin();
+            } else if(type.equals(TYPE_NONE)){
+                returnPassphrase = new NoSecurity();
             } else {
                 throw new TypeNotPresentException("The type read from database is not a valid type."
                         , new Exception());
             }
             returnPassphrase.encryptedPasswordString = cursor.getString(cursor.getColumnIndex
                     (PasswordEntry.COLUMN_PASSWORD_STRING));
+            if(returnPassphrase.passphraseType.equals(TYPE_NONE)){
+                returnPassphrase.encryptedPasswordString = "";
+            }
             returnPassphrase.decryptPassword();
             returnPassphrase.setPasswordRepresentation(returnPassphrase.
                     getPassphraseRepresentationFromPassphraseString(returnPassphrase.passwordString));
