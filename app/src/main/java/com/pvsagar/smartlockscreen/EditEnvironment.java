@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -117,6 +118,11 @@ public class EditEnvironment extends ActionBarActivity {
                     placeholderFragment.setBluetoothItemsEnabled(false);
                 }
             }
+        } else if(requestCode == REQUEST_LOCATION_SELECT){
+            Bundle bundle = data.getExtras();
+            Location location = (Location)bundle.get(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION);
+            placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
+            placeholderFragment.lonLocationEditText.setText(""+location.getLongitude());
         }
     }
 
