@@ -33,6 +33,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
@@ -187,6 +188,7 @@ public class AddEnvironment extends ActionBarActivity {
         /* Passphrase */
         private Spinner passphraseTypeSpinner;
         private EditText passphraseEditText;
+        private EditText passphraseConfirmationEditText;
 
         public PlaceholderFragment() {
         }
@@ -219,6 +221,7 @@ public class AddEnvironment extends ActionBarActivity {
             //Passphrase
             passphraseTypeSpinner = (Spinner) rootView.findViewById(R.id.spinner_passphrase_type);
             passphraseEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase);
+            passphraseConfirmationEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase_confirmation);
 
             /* Initialization */
             setUpBluetoothElements();
@@ -452,7 +455,7 @@ public class AddEnvironment extends ActionBarActivity {
                         locationNames[i] = ((LocationEnvironmentVariable) storedLocations.get(i)).getLocationName();
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle(R.string.dialog_pick_wifi_connection);
+                    builder.setTitle(R.string.dialog_pick_location_connection);
                     builder.setSingleChoiceItems(locationNames, mSelectedLocationItem, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -493,17 +496,31 @@ public class AddEnvironment extends ActionBarActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
+                    passphraseConfirmationEditText.setHint("Confirm "+Passphrase.passphraseTypes[position]);
                     selectedPassphrasetype = position;
                     if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                        setPassphraseItemsEnabled(true);
+                        setPassphraseItemsVisible(true);
                         passphraseEditText.setText("");
+                        passphraseConfirmationEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
                     }
                     else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                        setPassphraseItemsEnabled(true);
+                        setPassphraseItemsVisible(true);
                         passphraseEditText.setText("");
+                        passphraseConfirmationEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
+                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
+                        setPassphraseItemsEnabled(false);
+                        setPassphraseItemsVisible(false);
                     }
                 }
 
@@ -511,6 +528,14 @@ public class AddEnvironment extends ActionBarActivity {
                 public void onNothingSelected(AdapterView<?> parent) {
                     passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
                     selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+                    setPassphraseItemsEnabled(true);
+                    setPassphraseItemsVisible(true);
+                    passphraseEditText.setText("");
+                    passphraseConfirmationEditText.setText("");
+                    passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
             });
         }
@@ -543,6 +568,22 @@ public class AddEnvironment extends ActionBarActivity {
             radLocationEditText.setEnabled(flag);
             selectLocationTextView.setEnabled(flag);
             selectStoredLocationTextView.setEnabled(flag);
+        }
+
+        public void setPassphraseItemsEnabled(boolean flag){
+            passphraseEditText.setEnabled(flag);
+            passphraseConfirmationEditText.setEnabled(flag);
+        }
+
+        public void setPassphraseItemsVisible(boolean flag){
+            if(flag){
+                passphraseEditText.setVisibility(View.VISIBLE);
+                passphraseConfirmationEditText.setVisibility(View.VISIBLE);
+            }
+            else {
+                passphraseEditText.setVisibility(View.INVISIBLE);
+                passphraseConfirmationEditText.setVisibility(View.INVISIBLE);
+            }
         }
 
         /**
@@ -679,12 +720,22 @@ public class AddEnvironment extends ActionBarActivity {
 
             /* Passphrase */
 
-            if(passphraseEditText.getText().toString().equals("")){
+            if(selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
+                    passphraseEditText.getText().toString().equals("")){
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(R.string.alert_no_passphrase_title).setMessage(R.string.alert_no_passphrase_message);
                 builder.setPositiveButton(R.string.ok,null);
                 builder.create().show();
                 return;
+            } else{
+                if (selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
+                        !passphraseEditText.getText().toString().equals(passphraseConfirmationEditText.getText().toString())){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(R.string.alert_no_passphrase_match_title).setMessage(R.string.alert_no_passphrase_match_message);
+                    builder.setPositiveButton(R.string.ok,null);
+                    builder.create().show();
+                    return;
+                }
             }
             /* Data Parsed */
 
@@ -702,6 +753,9 @@ public class AddEnvironment extends ActionBarActivity {
             } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
                 Pin pin = new Pin(passphraseEditText.getText().toString());
                 User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,environment);
+            } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
+                NoSecurity noSecurity = new NoSecurity();
+                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),noSecurity,environment);
             }
             /* done with setting passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,

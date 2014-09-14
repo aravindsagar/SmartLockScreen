@@ -71,4 +71,7 @@
     <string name="title_activity_search_location">SearchLocation</string>
     <string name="search">Search</string>
     <string name="hint_searchbar">Search for location</string>
+    <string name="alert_no_passphrase_match_title">Warning</string>
+    <string name="alert_no_passphrase_match_message">Passwords do not match.</string>
+    <string name="dialog_pick_location_connection">Pick a Location</string>
 </resources>

@@ -197,6 +197,12 @@
                 android:layout_height="wrap_content"
                 android:password="true"
                 android:layout_marginTop="10dp"/>
+            <EditText
+                android:id="@+id/edit_text_passphrase_confirmation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:password="true"
+                android:layout_marginTop="10dp"/>
 
         </LinearLayout>
 </ScrollView>

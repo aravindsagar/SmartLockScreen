@@ -161,6 +161,7 @@ public class EditEnvironment extends ActionBarActivity {
         /* Passphrase */
         private Spinner passphraseTypeSpinner;
         private EditText passphraseEditText;
+        private EditText passphraseConfirmationEditText;
 
         public PlaceholderFragment() {
         }
@@ -198,6 +199,7 @@ public class EditEnvironment extends ActionBarActivity {
             //Passphrase
             passphraseTypeSpinner = (Spinner) rootView.findViewById(R.id.spinner_passphrase_type);
             passphraseEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase);
+            passphraseConfirmationEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase_confirmation);
 
             setUpActionBar();
 
@@ -550,16 +552,32 @@ public class EditEnvironment extends ActionBarActivity {
             passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
+                    passphraseConfirmationEditText.setHint("Confirm "+Passphrase.passphraseTypes[position]);
                     selectedPassphrasetype = position;
-                    if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
+                    if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                        setPassphraseItemsEnabled(true);
+                        setPassphraseItemsVisible(true);
                         passphraseEditText.setText("");
+                        passphraseConfirmationEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
-                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
+                    }
+                    else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                        setPassphraseItemsEnabled(true);
+                        setPassphraseItemsVisible(true);
                         passphraseEditText.setText("");
+                        passphraseConfirmationEditText.setText("");
                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
+                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
+                        setPassphraseItemsEnabled(false);
+                        setPassphraseItemsVisible(false);
                     }
                 }
 
@@ -567,6 +585,14 @@ public class EditEnvironment extends ActionBarActivity {
                 public void onNothingSelected(AdapterView<?> parent) {
                     passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
                     selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+                    setPassphraseItemsEnabled(true);
+                    setPassphraseItemsVisible(true);
+                    passphraseEditText.setText("");
+                    passphraseConfirmationEditText.setText("");
+                    passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
             });
         }
@@ -587,6 +613,22 @@ public class EditEnvironment extends ActionBarActivity {
             radLocationEditText.setEnabled(flag);
             selectLocationTextView.setEnabled(flag);
             selectStoredLocationTextView.setEnabled(flag);
+        }
+
+        public void setPassphraseItemsEnabled(boolean flag){
+            passphraseEditText.setEnabled(flag);
+            passphraseConfirmationEditText.setEnabled(flag);
+        }
+
+        public void setPassphraseItemsVisible(boolean flag){
+            if(flag){
+                passphraseEditText.setVisibility(View.VISIBLE);
+                passphraseConfirmationEditText.setVisibility(View.VISIBLE);
+            }
+            else {
+                passphraseEditText.setVisibility(View.INVISIBLE);
+                passphraseConfirmationEditText.setVisibility(View.INVISIBLE);
+            }
         }
 
         public void onDoneButtonClick(){
@@ -733,7 +775,8 @@ public class EditEnvironment extends ActionBarActivity {
             newEnvironment.updateInDatabase(getActivity(),environmentName);
 
             /* Updating passphrase */
-            if(!passphraseEditText.getText().toString().equals("")){
+            if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE || (!passphraseEditText.getText().toString().equals("") &&
+                    passphraseConfirmationEditText.getText().toString().equals(passphraseEditText.getText().toString()))){
                 //Password changed
                 Log.d(LOG_TAG, "Password changed. Updating in db.");
                 if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
