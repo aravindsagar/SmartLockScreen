@@ -10,8 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import com.pvsagar.smartlockscreen.services.BaseService;
-
 public class LockScreenActivity extends Activity {
 
     @Override
@@ -28,10 +26,8 @@ public class LockScreenActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
-        startService(BaseService.getServiceIntent(this, null, null));
+//        startService(BaseService.getServiceIntent(this, null, null));
     }
 
 

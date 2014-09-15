@@ -37,6 +37,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
+import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 import com.pvsagar.smartlockscreen.receivers.WifiReceiver;
 
 import java.lang.reflect.Method;
@@ -98,6 +99,7 @@ public class BaseService extends Service implements
             WifiReceiver.setCurrentWifiNetwork(currentWifi);
         }
         new BluetoothDeviceSearch().execute();
+        ScreenReceiver.registerScreenReceiver(this);
         super.onCreate();
     }
 
