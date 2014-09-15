@@ -8,6 +8,9 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -27,12 +30,14 @@ import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
+import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
+import com.pvsagar.smartlockscreen.receivers.WifiReceiver;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -54,6 +59,7 @@ public class BaseService extends Service implements
     public static final String ACTION_DETECT_ENVIRONMENT = PACKAGE_NAME + ".DETECT_ENVIRONMENT";
     public static final String ACTION_ADD_GEOFENCES = PACKAGE_NAME + ".ADD_GEOFENCES";
     public static final String ACTION_REMOVE_GEOFENCES = PACKAGE_NAME + ".REMOVE_GEOFENCES";
+    public static final String ACTION_DETECT_WIFI = PACKAGE_NAME + ".DETECT_WIFI";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
@@ -83,12 +89,15 @@ public class BaseService extends Service implements
     public void onCreate() {
         EnvironmentDbHelper.insertDefaultUser(this);
         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
-
+        AdminActions.initializeAdminObjects(this);
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
+        WiFiEnvironmentVariable currentWifi = getConnectedWifiNetwork();
+        if(currentWifi != null){
+            WifiReceiver.setCurrentWifiNetwork(currentWifi);
+        }
         new BluetoothDeviceSearch().execute();
-        //TODO: populate current wifi network in WifiReceiver
         super.onCreate();
     }
 
@@ -127,6 +136,8 @@ public class BaseService extends Service implements
                         throw new IllegalArgumentException("Intent should specify geofences to remove," +
                                 "if action is ACTION_REMOVE_GEOFENCES.");
                     }
+                } else if(action.equals(ACTION_DETECT_WIFI)){
+                    WifiReceiver.setCurrentWifiNetwork(getConnectedWifiNetwork());
                 }
                 //Additional action handling to be done here when more actions are added
             }
@@ -235,6 +246,30 @@ public class BaseService extends Service implements
         }
     }
 
+    private WiFiEnvironmentVariable getConnectedWifiNetwork(){
+        WifiManager wifiManager = (WifiManager)this.getSystemService(Context.WIFI_SERVICE);
+
+        if(wifiManager == null){
+            Log.e(LOG_TAG,"WiFi Hardware not available");
+            return null;
+        }
+        if(!wifiManager.isWifiEnabled()){
+            return null;
+        }
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        if(wifiInfo != null) {
+            List<WifiConfiguration> wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(this);
+            for(WifiConfiguration configuration: wifiConfigurations){
+                if(configuration.SSID.equals(wifiInfo.getSSID())) {
+                    String wifiEncryptionType = WiFiEnvironmentVariable.getSecurity(configuration);
+                    return WiFiEnvironmentVariable.getWifiEnvironmentVariableFromDatabase(
+                            this, wifiInfo.getSSID(), wifiEncryptionType);
+                }
+            }
+        }
+        return null;
+    }
+
     private class BluetoothDeviceSearch extends AsyncTask<Void, Void, List<BluetoothEnvironmentVariable>>{
         @Override
         protected List<BluetoothEnvironmentVariable> doInBackground(Void... params) {
@@ -271,6 +306,7 @@ public class BaseService extends Service implements
             for (BluetoothEnvironmentVariable device : variables) {
                 BluetoothReceiver.addBluetoothDeviceToConnectedDevices(device);
             }
+            startService(BaseService.getServiceIntent(getBaseContext(), null, ACTION_DETECT_ENVIRONMENT));
             super.onPostExecute(variables);
         }
     }
@@ -285,13 +321,26 @@ public class BaseService extends Service implements
         if (current == null) {
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
-            AdminActions.changePassword(""); //TODO: change this to master password
+            String masterPassword = ""; //TODO: change this to master password
+            if(!AdminActions.changePassword(masterPassword)){
+                AdminActions.initializeAdminObjects(this);
+                if(!AdminActions.changePassword(masterPassword)){
+                    startService(BaseService.getServiceIntent(this,
+                            "Please enable administrator for the app.", null));
+                }
+            }
         } else {
             User user = User.getCurrentUser(this);
             if(user != null) {
                 Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
                 if(passphrase != null){
-                    passphrase.setAsCurrentPassword();
+                    if(!passphrase.setAsCurrentPassword()){
+                        AdminActions.initializeAdminObjects(this);
+                        if(!passphrase.setAsCurrentPassword()){
+                            startService(BaseService.getServiceIntent(this,
+                                    "Please enable administrator for the app.", null));
+                        }
+                    }
                 } else {
                     Log.w(LOG_TAG, "Passphrase null for current user in current environment.");
                 }

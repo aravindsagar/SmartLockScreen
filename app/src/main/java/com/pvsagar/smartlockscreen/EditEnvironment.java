@@ -796,6 +796,8 @@ public class EditEnvironment extends ActionBarActivity {
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_ADD_GEOFENCES));
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
+                    BaseService.ACTION_DETECT_WIFI));
+            getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_DETECT_ENVIRONMENT));
             getActivity().finish();
 

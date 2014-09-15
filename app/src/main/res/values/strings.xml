@@ -5,7 +5,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="button_unlock">Unlock</string>
-    <string name="title_activity_manage_environment">ManageEnvironment</string>
+    <string name="title_activity_manage_environment">Manage Environment</string>
     <string name="action_add_environment">Add Environment</string>
     <string name="title_activity_add_environment">AddEnvironment</string>
     <string name="edit_text_environment_name">Environment Name</string>

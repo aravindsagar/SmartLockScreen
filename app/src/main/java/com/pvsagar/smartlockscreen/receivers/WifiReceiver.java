@@ -44,4 +44,8 @@ public class WifiReceiver extends BroadcastReceiver {
     public static WiFiEnvironmentVariable getCurrentWifiNetwork(){
         return currentWifiNetwork;
     }
+
+    public static void setCurrentWifiNetwork(WiFiEnvironmentVariable variable){
+        currentWifiNetwork = variable;
+    }
 }

@@ -2,7 +2,6 @@ package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
@@ -119,11 +118,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
         }
     }
 
-    public void setAsCurrentPassword(){
-        if(!AdminActions.isAdminEnabled()){
-            Log.e(LOG_TAG, "Cannot change password, admin not enabled.");
-            return;
-        }
-        AdminActions.changePassword(passwordString);
+    public boolean setAsCurrentPassword(){
+        return AdminActions.changePassword(passwordString);
     }
 }

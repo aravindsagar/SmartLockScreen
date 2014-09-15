@@ -40,17 +40,21 @@ public class AdminActions extends DeviceAdminReceiver {
     }
 
     public static void initAdmin(Context context){
-        if(mDPM == null || mDeviceAdmin == null) {
-            mDPM = (DevicePolicyManager) context.
-                    getSystemService(Context.DEVICE_POLICY_SERVICE);
-            mDeviceAdmin = new ComponentName(context, AdminActions.class);
-        }
+        initializeAdminObjects(context);
         if(!isAdminEnabled()){
             Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
                     "Hello!");
             context.startActivity(intent);
+        }
+    }
+
+    public static void initializeAdminObjects(Context context){
+        if(mDPM == null || mDeviceAdmin == null) {
+            mDPM = (DevicePolicyManager) context.
+                    getSystemService(Context.DEVICE_POLICY_SERVICE);
+            mDeviceAdmin = new ComponentName(context, AdminActions.class);
         }
     }
 
@@ -62,14 +66,14 @@ public class AdminActions extends DeviceAdminReceiver {
         }
     }
 
-    public static void changePassword(String password){
-        if(mDPM == null){
-            throw new UnsupportedOperationException("Device admin not initialized. Please call" +
-                    "AdminActions.initAdmin() first.");
-        }
-        if(isAdminEnabled())
+    public static boolean changePassword(String password){
+        if(isAdminEnabled()) {
             mDPM.resetPassword(password, 0);
-        else
+            return true;
+        }
+        else {
             Log.e(LOG_TAG, "No admin privileges, cannot change password.");
+            return false;
+        }
     }
 }
