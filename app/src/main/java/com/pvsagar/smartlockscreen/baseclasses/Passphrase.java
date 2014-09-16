@@ -2,9 +2,11 @@ package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
@@ -25,10 +27,11 @@ public abstract class Passphrase<PassphraseRepresentation> {
     private String passphraseType;
 
     //User friendly password type strings
-    public static final String[] passphraseTypes = {"Password","Pin","None"};
+    public static final String[] passphraseTypes = {"Password","Pin","Pattern","None"};
     public static final int INDEX_PASSPHRASE_TYPE_PASSWORD = 0;
     public static final int INDEX_PASSPHRASE_TYPE_PIN = 1;
-    public static final int INDEX_PASSPHRASE_TYPE_NONE = 2;
+    public static final int INDEX_PASSPHRASE_TYPE_PATTERN = 2;
+    public static final int INDEX_PASSPHRASE_TYPE_NONE = 3;
 
     private static final String KEY = "000102030405060708090A0B0C0D0E0F";
 
@@ -37,6 +40,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
     public static final String TYPE_PASSWORD = PACKAGE_PREFIX + ".TYPE_PASSWORD";
     public static final String TYPE_PIN = PACKAGE_PREFIX + ".TYPE_PIN";
     public static final String TYPE_NONE = PACKAGE_PREFIX + ".TYPE_NONE";
+    public static final String TYPE_PATTERN = PACKAGE_PREFIX + ".TYPE_PATTERN";
 
     public Passphrase(String type){
         Utility.checkForNullAndThrowException(type);
@@ -56,10 +60,16 @@ public abstract class Passphrase<PassphraseRepresentation> {
 
     protected abstract PassphraseRepresentation getPassphraseRepresentationFromPassphraseString(String passphrase);
 
-    public void setPasswordRepresentation(PassphraseRepresentation passphrase){
-        passphraseRepresentation = passphrase;
-        this.passwordString = getPassphraseStringFromPassphraseRepresentation(passphrase);
-        encryptPassword();
+    protected abstract boolean isPassphraseRepresentationValid(PassphraseRepresentation passphrase);
+
+    public void setPasswordRepresentation(PassphraseRepresentation passphrase) {
+        if (isPassphraseRepresentationValid(passphrase)) {
+            passphraseRepresentation = passphrase;
+            this.passwordString = getPassphraseStringFromPassphraseRepresentation(passphrase);
+            encryptPassword();
+        } else {
+            throw new IllegalArgumentException("Invalid passphrase passed.");
+        }
     }
 
     public PassphraseRepresentation getPassphraseRepresentation(){
@@ -68,7 +78,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
 
     private boolean checkTypeValidity(String variableType){
         if(variableType.equals(TYPE_NONE) || variableType.equals(TYPE_PASSWORD)
-                || variableType.equals(TYPE_PIN)){
+                || variableType.equals(TYPE_PIN) || variableType.equals(TYPE_PATTERN)){
             return true;
         }
         return false;
@@ -99,6 +109,8 @@ public abstract class Passphrase<PassphraseRepresentation> {
                 returnPassphrase = new Pin();
             } else if(type.equals(TYPE_NONE)){
                 returnPassphrase = new NoSecurity();
+            } else if(type.equals(TYPE_PATTERN)){
+                returnPassphrase = new Pattern();
             } else {
                 throw new TypeNotPresentException("The type read from database is not a valid type."
                         , new Exception());
@@ -119,6 +131,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
     }
 
     public boolean setAsCurrentPassword(){
-        return AdminActions.changePassword(passwordString);
+        Log.d(LOG_TAG, "Setting current password: " + passwordString);
+        return AdminActions.changePassword(passwordString, this.passphraseType);
     }
 }

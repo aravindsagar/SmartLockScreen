@@ -15,9 +15,6 @@ public class Pin extends Passphrase<String> {
 
     public Pin(String pin){
         super(Passphrase.TYPE_PIN, pin);
-        if(!Utility.isInteger(pin)){
-            throw new IllegalArgumentException("String should contain only numbers: " + pin);
-        }
     }
 
     @Override
@@ -31,12 +28,7 @@ public class Pin extends Passphrase<String> {
     }
 
     @Override
-    public void setPasswordRepresentation(String passphrase) {
-        if(Utility.isInteger(passphrase)) {
-            super.setPasswordRepresentation(passphrase);
-        } else {
-            throw new IllegalArgumentException("String should contain only numbers: " + passphrase);
-        }
+    protected boolean isPassphraseRepresentationValid(String passphrase) {
+        return passphrase!=null && !passphrase.isEmpty() && Utility.isInteger(passphrase);
     }
-
 }

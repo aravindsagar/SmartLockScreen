@@ -20,4 +20,9 @@ public class NoSecurity extends Passphrase<Void> {
     protected Void getPassphraseRepresentationFromPassphraseString(String passphrase) {
         return null;
     }
+
+    @Override
+    protected boolean isPassphraseRepresentationValid(Void passphrase) {
+        return true;
+    }
 }

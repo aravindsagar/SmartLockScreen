@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.haibison.android.lockpattern.LockPatternActivity;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
@@ -35,6 +36,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
@@ -48,6 +50,7 @@ import java.util.List;
 public class AddEnvironment extends ActionBarActivity {
 
     private static final String LOG_TAG = AddEnvironment.class.getSimpleName();
+    private static final int REQUEST_CREATE_PATTERN = 32;
     public static final int REQUEST_LOCATION_SELECT = 31;
     public static final String INTENT_EXTRA_SELECTED_LOCATION = "selectedLocation";
 
@@ -73,6 +76,8 @@ public class AddEnvironment extends ActionBarActivity {
     /* Passphrase */
     private static ArrayAdapter<String> passphraseAdapter;
     private static int selectedPassphrasetype;
+
+    private static char[] pattern;
 
     private PlaceholderFragment placeholderFragment;
 
@@ -507,7 +512,7 @@ public class AddEnvironment extends ActionBarActivity {
                         passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-
+                        pattern = null;
                     }
                     else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
                         setPassphraseItemsEnabled(true);
@@ -518,9 +523,18 @@ public class AddEnvironment extends ActionBarActivity {
                         passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        pattern = null;
+                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN){
+                        setPassphraseItemsEnabled(false);
+                        setPassphraseItemsVisible(false);
+
+                        Intent patternIntent = new Intent(LockPatternActivity.ACTION_CREATE_PATTERN, null,
+                                getActivity(), LockPatternActivity.class);
+                        startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
                     } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
                         setPassphraseItemsEnabled(false);
                         setPassphraseItemsVisible(false);
+                        pattern = null;
                     }
                 }
 
@@ -721,6 +735,7 @@ public class AddEnvironment extends ActionBarActivity {
             /* Passphrase */
 
             if(selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
+                    selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
                     passphraseEditText.getText().toString().equals("")){
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(R.string.alert_no_passphrase_title).setMessage(R.string.alert_no_passphrase_message);
@@ -729,6 +744,7 @@ public class AddEnvironment extends ActionBarActivity {
                 return;
             } else{
                 if (selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
+                        selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
                         !passphraseEditText.getText().toString().equals(passphraseConfirmationEditText.getText().toString())){
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.alert_no_passphrase_match_title).setMessage(R.string.alert_no_passphrase_match_message);
@@ -756,6 +772,9 @@ public class AddEnvironment extends ActionBarActivity {
             } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
                 NoSecurity noSecurity = new NoSecurity();
                 User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),noSecurity,environment);
+            } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
+                Pattern pattern1 = new Pattern(pattern);
+                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pattern1,environment);
             }
             /* done with setting passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
@@ -783,6 +802,18 @@ public class AddEnvironment extends ActionBarActivity {
             });
             builder.setNegativeButton(R.string.cancel,null);
             builder.create().show();
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if(requestCode == REQUEST_CREATE_PATTERN){
+                if (resultCode == RESULT_OK) {
+                    pattern = data.getCharArrayExtra(
+                            LockPatternActivity.EXTRA_PATTERN);
+                    Log.d(LOG_TAG, "pattern at onActivityResult: " + new String(pattern));
+                }
+            }
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 }

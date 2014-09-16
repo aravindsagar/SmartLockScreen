@@ -324,9 +324,9 @@ public class BaseService extends Service implements
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
             String masterPassword = ""; //TODO: change this to master password
-            if(!AdminActions.changePassword(masterPassword)){
+            if(!AdminActions.changePassword(masterPassword, Passphrase.TYPE_NONE)){
                 AdminActions.initializeAdminObjects(this);
-                if(!AdminActions.changePassword(masterPassword)){
+                if(!AdminActions.changePassword(masterPassword, Passphrase.TYPE_NONE)){
                     startService(BaseService.getServiceIntent(this,
                             "Please enable administrator for the app.", null));
                 }

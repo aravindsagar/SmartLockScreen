@@ -25,4 +25,9 @@ public class Password extends Passphrase<String> {
     protected String getPassphraseRepresentationFromPassphraseString(String passphrase) {
         return passphrase;
     }
+
+    @Override
+    protected boolean isPassphraseRepresentationValid(String passphrase) {
+        return passphrase != null && !passphrase.isEmpty();
+    }
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 /**
@@ -22,8 +23,19 @@ public class AdminActions extends DeviceAdminReceiver {
     private static DevicePolicyManager mDPM;
     private static ComponentName mDeviceAdmin;
 
+    private static String currentPassphraseType;
+    private static String currentPassphraseString;
+
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public static String getCurrentPassphraseType() {
+        return currentPassphraseType;
+    }
+
+    public static String getCurrentPassphraseString() {
+        return currentPassphraseString;
     }
 
     @Override
@@ -73,7 +85,11 @@ public class AdminActions extends DeviceAdminReceiver {
         }
     }
 
-    public static boolean changePassword(String password){
+    public static boolean changePassword(String password, String passphraseType){
+        currentPassphraseType = passphraseType;
+        if(passphraseType.equals(Passphrase.TYPE_PATTERN)){
+            currentPassphraseString = password;
+        }
         if(isAdminEnabled()) {
             mDPM.resetPassword(password, 0);
             return true;

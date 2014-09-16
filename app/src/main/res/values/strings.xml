@@ -74,4 +74,6 @@
     <string name="alert_no_passphrase_match_title">Warning</string>
     <string name="alert_no_passphrase_match_message">Passwords do not match.</string>
     <string name="dialog_pick_location_connection">Pick a Location</string>
+    <string name="title_activity_dismiss_keyguard">DismissKeyguardActivity</string>
+
 </resources>
