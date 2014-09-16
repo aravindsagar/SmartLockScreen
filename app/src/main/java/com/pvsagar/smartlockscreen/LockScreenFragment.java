@@ -1,21 +1,23 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ViewAnimator;
+
+import java.util.ArrayList;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by aravind on 6/8/14.
  */
 public class LockScreenFragment extends Fragment {
-
-    ViewAnimator passphraseAnimator;
 
     public LockScreenFragment() {
     }
@@ -23,34 +25,37 @@ public class LockScreenFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_lock_screen, container, false);
-        passphraseAnimator = (ViewAnimator)rootView.findViewById(R.id.passphraseInput);
-        //Adding the different passphrase views
-        addViewToPassphraseAnimator(R.layout.password_lock, R.id.passwordLayout,
-                inflater, container, 0);
-
-        passphraseAnimator.setDisplayedChild(0);
-
-        Button button = (Button) rootView.findViewById(R.id.UnlockButton);
-        button.setOnClickListener(new View.OnClickListener() {
+        buildCardList(rootView);
+        Button unlockButton = (Button) rootView.findViewById(R.id.unlock_button);
+        unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v("LockScreenActivity","Unlock Button Clicked");
-                Intent intent = new Intent(getActivity(),ManageEnvironment.class);
-                startActivity(intent);
-                //Intent intent = new Intent(getActivity(),SelectLocation.class);
-                //startActivity(intent);
+                getActivity().finish();
             }
         });
-        //AdminActions.initAdmin(getActivity());
-
         return rootView;
     }
 
-    private void addViewToPassphraseAnimator(int layoutId, int viewId, LayoutInflater inflater,
-                                             ViewGroup container, int index){
-        View passphraseLayout = inflater.inflate(layoutId, container, false);
-        View passphraseView = passphraseLayout.findViewById(viewId);
-        passphraseAnimator.addView(passphraseView, index);
+    private void buildCardList(View rootView){
+        ArrayList<Card> cards = new ArrayList<Card>();
+        //Create a Card
+        Card card = new Card(getActivity());
+
+        //Create a CardHeader
+        CardHeader header = new CardHeader(getActivity());
+
+        header.setTitle("Testing1");
+        //Add Header to card
+        card.addCardHeader(header);
+        card.setTitle("Testing2");
+
+        cards.add(card);
+
+        CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(),cards);
+        CardListView listView = (CardListView) rootView.findViewById(R.id.notification_list);
+
+        listView.setAdapter(mCardArrayAdapter);
     }
 }

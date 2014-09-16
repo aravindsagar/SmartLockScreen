@@ -1,6 +1,5 @@
 package com.pvsagar.smartlockscreen.receivers;
 
-import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,16 +16,14 @@ public class ScreenReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-            //Log.d(LOG_TAG, "Screen off.");
-            KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-            if(keyguardManager.inKeyguardRestrictedInputMode()){
-                Intent lockscreenIntent = new Intent(context, LockScreenActivity.class);
-                lockscreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(lockscreenIntent);
+            Intent lockscreenIntent = new Intent(context, LockScreenActivity.class);
+            lockscreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(lockscreenIntent);
+        } else {
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                //Might be useful later, while adding notifications etc
+                //TODO remove this and the action in intent filter if not required
             }
-        } else if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
-            //Might be useful later, while adding notifications etc
-            //TODO remove this and the action in intent filter if not required
         }
     }
 

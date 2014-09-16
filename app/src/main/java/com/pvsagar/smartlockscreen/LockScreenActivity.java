@@ -1,13 +1,11 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 public class LockScreenActivity extends Activity {
@@ -22,11 +20,18 @@ public class LockScreenActivity extends Activity {
                     .commit();
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        getWindow().setDimAmount((float)0.4);
+        getWindow().setDimAmount((float) 0.4);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
+        int systemUiVisibilityFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+        getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
 //        startService(BaseService.getServiceIntent(this, null, null));
     }
 
@@ -48,21 +53,5 @@ public class LockScreenActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_lock_screen, container, false);
-            return rootView;
-        }
     }
 }
