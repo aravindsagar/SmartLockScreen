@@ -44,6 +44,7 @@ public class LockScreenFragment extends Fragment {
                     Intent patternIntent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
                             getActivity(), LockPatternActivity.class);
                     patternIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.AppTheme);
                     if(AdminActions.getCurrentPassphraseString() != null) {
                         patternIntent.putExtra(LockPatternActivity.EXTRA_PATTERN,
                                 AdminActions.getCurrentPassphraseString().toCharArray());
