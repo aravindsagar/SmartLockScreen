@@ -36,11 +36,12 @@ public class LockScreenFragment extends Fragment {
                     Intent patternIntent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
                             getActivity(), LockPatternActivity.class);
                     patternIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                    patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.AppTheme);
+                    patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.TransparentThemeNoActionBar);
                     if(AdminActions.getCurrentPassphraseString() != null) {
                         patternIntent.putExtra(LockPatternActivity.EXTRA_PATTERN,
                                 AdminActions.getCurrentPassphraseString().toCharArray());
                         startActivityForResult(patternIntent, REQUEST_ENTER_PATTERN);
+//                        getActivity().overridePendingTransition(0, 0);
                     } else {
                         getActivity().finish();
                     }
@@ -62,7 +63,9 @@ public class LockScreenFragment extends Fragment {
                         Intent intent = new Intent(getActivity(), DismissKeyguardActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                         getActivity().startActivity(intent);
+                        getActivity().overridePendingTransition(0, 0);
                         getActivity().finish();
+                        getActivity().overridePendingTransition(0, 0);
                         break;
                     case Activity.RESULT_CANCELED:
                         // The user cancelled the task

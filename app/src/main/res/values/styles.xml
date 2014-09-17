@@ -17,4 +17,17 @@
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
+    <style name="TransparentThemeNoActionBar" parent="android:Theme.Holo.Dialog.NoActionBar">
+
+        <item name="android:background">@android:color/transparent</item>
+        <item name="background">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="HoloWithoutActionBar" parent="android:Theme.Holo.NoActionBar">
+
+    </style>
+
 </resources>

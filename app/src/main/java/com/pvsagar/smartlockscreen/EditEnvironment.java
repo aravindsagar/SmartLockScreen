@@ -587,6 +587,7 @@ public class EditEnvironment extends ActionBarActivity {
 
                         Intent patternIntent = new Intent(LockPatternActivity.ACTION_CREATE_PATTERN, null,
                                 getActivity(), LockPatternActivity.class);
+                        patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.HoloWithoutActionBar);
                         startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
                     } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
                         setPassphraseItemsEnabled(false);

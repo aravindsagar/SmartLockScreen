@@ -76,6 +76,13 @@ public class DismissKeyguardActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DETECT_ENVIRONMENT));
             finish();
+            overridePendingTransition(0, 0);
         }
+    }
+
+    @Override
+    protected void onStop() {
+        overridePendingTransition(0, 0);
+        super.onStop();
     }
 }
