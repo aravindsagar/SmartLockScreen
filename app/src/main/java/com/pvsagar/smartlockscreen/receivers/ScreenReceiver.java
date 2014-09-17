@@ -17,6 +17,8 @@ public class ScreenReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             Intent lockscreenIntent = new Intent(context, LockScreenActivity.class);
+            //ToDo: Check whether the app is already running, if not clear the activity stack
+            //lockscreenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             lockscreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(lockscreenIntent);
         } else {
