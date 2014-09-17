@@ -322,7 +322,7 @@ public class LockPatternActivity extends Activity {
 
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        getWindow().setDimAmount((float) 0.4);
+        getWindow().setDimAmount((float) 0.6);
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
@@ -477,6 +477,7 @@ public class LockPatternActivity extends Activity {
 
         mTextInfo = (TextView) findViewById(R.id.alp_42447968_textview_info);
         mLockPatternView = (LockPatternView) findViewById(R.id.alp_42447968_view_lock_pattern);
+        mLockPatternView.setBackgroundResource(R.drawable.background_pattern);
 
         mFooter = findViewById(R.id.alp_42447968_viewgroup_footer);
         mBtnCancel = (Button) findViewById(R.id.alp_42447968_button_cancel);
