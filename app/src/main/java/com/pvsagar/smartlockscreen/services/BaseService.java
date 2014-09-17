@@ -61,6 +61,7 @@ public class BaseService extends Service implements
     public static final String ACTION_ADD_GEOFENCES = PACKAGE_NAME + ".ADD_GEOFENCES";
     public static final String ACTION_REMOVE_GEOFENCES = PACKAGE_NAME + ".REMOVE_GEOFENCES";
     public static final String ACTION_DETECT_WIFI = PACKAGE_NAME + ".DETECT_WIFI";
+    public static final String ACTION_DETECT_BLUETOOTH = PACKAGE_NAME + ".DETECT_BLUETOOTH";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
@@ -140,12 +141,15 @@ public class BaseService extends Service implements
                     }
                 } else if(action.equals(ACTION_DETECT_WIFI)){
                     WifiReceiver.setCurrentWifiNetwork(getConnectedWifiNetwork());
+                } else if(action.equals(ACTION_DETECT_BLUETOOTH)){
+                    new BluetoothDeviceSearch().execute();
                 }
                 //Additional action handling to be done here when more actions are added
             }
         }
 
-        return super.onStartCommand(intent, flags, startId);
+        super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
@@ -303,10 +307,10 @@ public class BaseService extends Service implements
 
         @Override
         protected void onPostExecute(List<BluetoothEnvironmentVariable> variables) {
-            if(Utility.checkForNullAndWarn(variables, LOG_TAG))
-                return;
-            for (BluetoothEnvironmentVariable device : variables) {
-                BluetoothReceiver.addBluetoothDeviceToConnectedDevices(device);
+            if(!Utility.checkForNullAndWarn(variables, LOG_TAG)) {
+                for (BluetoothEnvironmentVariable device : variables) {
+                    BluetoothReceiver.addBluetoothDeviceToConnectedDevices(device);
+                }
             }
             startService(BaseService.getServiceIntent(getBaseContext(), null, ACTION_DETECT_ENVIRONMENT));
             super.onPostExecute(variables);

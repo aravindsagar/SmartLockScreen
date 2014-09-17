@@ -735,9 +735,11 @@ public class AddEnvironment extends ActionBarActivity {
 
             /* Passphrase */
 
-            if(selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
+            if((selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
                     selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
-                    passphraseEditText.getText().toString().equals("")){
+                    passphraseEditText.getText().toString().equals("")) ||
+                    selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
+                    pattern == null){
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(R.string.alert_no_passphrase_title).setMessage(R.string.alert_no_passphrase_message);
                 builder.setPositiveButton(R.string.ok,null);

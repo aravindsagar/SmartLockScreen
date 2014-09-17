@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.haibison.android.lockpattern.LockPatternActivity;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 
@@ -17,6 +18,7 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
  * Created by aravind on 6/8/14.
  */
 public class LockScreenFragment extends Fragment {
+    private static final String LOG_TAG = LockScreenFragment.class.getSimpleName();
     private static final int REQUEST_ENTER_PATTERN = 33;
 
     public LockScreenFragment() {
@@ -31,17 +33,23 @@ public class LockScreenFragment extends Fragment {
         unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(AdminActions.getCurrentPassphraseType() != null &&
-                        AdminActions.getCurrentPassphraseType().equals(Passphrase.TYPE_PATTERN)){
-                    Intent patternIntent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
-                            getActivity(), LockPatternActivity.class);
-                    patternIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                    patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.TransparentThemeNoActionBar);
-                    if(AdminActions.getCurrentPassphraseString() != null) {
-                        patternIntent.putExtra(LockPatternActivity.EXTRA_PATTERN,
-                                AdminActions.getCurrentPassphraseString().toCharArray());
-                        startActivityForResult(patternIntent, REQUEST_ENTER_PATTERN);
-//                        getActivity().overridePendingTransition(0, 0);
+                String currentPassphraseType = AdminActions.getCurrentPassphraseType();
+                if (!Utility.checkForNullAndWarn(currentPassphraseType, LOG_TAG)){
+                    if (currentPassphraseType.equals(Passphrase.TYPE_PATTERN)) {
+                        Intent patternIntent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                                getActivity(), LockPatternActivity.class);
+                        patternIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                        patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.TransparentThemeNoActionBar);
+                        if (AdminActions.getCurrentPassphraseString() != null) {
+                            patternIntent.putExtra(LockPatternActivity.EXTRA_PATTERN,
+                                    AdminActions.getCurrentPassphraseString().toCharArray());
+                            startActivityForResult(patternIntent, REQUEST_ENTER_PATTERN);
+                            //                        getActivity().overridePendingTransition(0, 0);
+                        } else {
+                            getActivity().finish();
+                        }
+                    } else if(currentPassphraseType.equals(Passphrase.TYPE_NONE)) {
+                        dismissKeyguard();
                     } else {
                         getActivity().finish();
                     }
@@ -60,12 +68,7 @@ public class LockScreenFragment extends Fragment {
                 switch (resultCode) {
                     case Activity.RESULT_OK:
                         AdminActions.changePassword("", Passphrase.TYPE_NONE);
-                        Intent intent = new Intent(getActivity(), DismissKeyguardActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                        getActivity().startActivity(intent);
-                        getActivity().overridePendingTransition(0, 0);
-                        getActivity().finish();
-                        getActivity().overridePendingTransition(0, 0);
+                        dismissKeyguard();
                         break;
                     case Activity.RESULT_CANCELED:
                         // The user cancelled the task
@@ -84,5 +87,14 @@ public class LockScreenFragment extends Fragment {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void dismissKeyguard(){
+        Intent intent = new Intent(getActivity(), DismissKeyguardActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        getActivity().startActivity(intent);
+        getActivity().overridePendingTransition(0, 0);
+        getActivity().finish();
+        getActivity().overridePendingTransition(0, 0);
     }
 }
