@@ -787,7 +787,7 @@ public class EditEnvironment extends ActionBarActivity {
                 newEnvironment.setBluetoothAllOrAny(bluetoothAllFlag);
             }
             newEnvironment.setHint(environmentHint);
-            newEnvironment.updateInDatabase(getActivity(),environmentName);
+            newEnvironment.updateInDatabase(getActivity(),this.environmentName);
 
             /* Updating passphrase */
             if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE || (!passphraseEditText.getText().toString().equals("") &&

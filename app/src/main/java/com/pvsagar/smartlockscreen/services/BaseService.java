@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
 import com.google.android.gms.location.LocationStatusCodes;
+import com.pvsagar.smartlockscreen.LockScreenActivity;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
@@ -62,6 +63,7 @@ public class BaseService extends Service implements
     public static final String ACTION_REMOVE_GEOFENCES = PACKAGE_NAME + ".REMOVE_GEOFENCES";
     public static final String ACTION_DETECT_WIFI = PACKAGE_NAME + ".DETECT_WIFI";
     public static final String ACTION_DETECT_BLUETOOTH = PACKAGE_NAME + ".DETECT_BLUETOOTH";
+    public static final String ACTION_START_LOCKSCREEN_ACTIVITY = PACKAGE_NAME + ".START_LOCKSCREEN_ACTIVITY";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
@@ -95,10 +97,7 @@ public class BaseService extends Service implements
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
-        WiFiEnvironmentVariable currentWifi = getConnectedWifiNetwork();
-        if(currentWifi != null){
-            WifiReceiver.setCurrentWifiNetwork(currentWifi);
-        }
+        new DetermineConnectedWifiNetwork().execute();
         new BluetoothDeviceSearch().execute();
         ScreenReceiver.registerScreenReceiver(this);
         super.onCreate();
@@ -140,9 +139,14 @@ public class BaseService extends Service implements
                                 "if action is ACTION_REMOVE_GEOFENCES.");
                     }
                 } else if(action.equals(ACTION_DETECT_WIFI)){
-                    WifiReceiver.setCurrentWifiNetwork(getConnectedWifiNetwork());
+                    new DetermineConnectedWifiNetwork().execute();
                 } else if(action.equals(ACTION_DETECT_BLUETOOTH)){
                     new BluetoothDeviceSearch().execute();
+                } else if(action.equals(ACTION_START_LOCKSCREEN_ACTIVITY)){
+                    Intent lockscreenIntent = new Intent(this, LockScreenActivity.class);
+                    lockscreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Log.d(LOG_TAG, "Starting lockscreen overlay.");
+                    startActivity(lockscreenIntent);
                 }
                 //Additional action handling to be done here when more actions are added
             }
@@ -314,6 +318,21 @@ public class BaseService extends Service implements
             }
             startService(BaseService.getServiceIntent(getBaseContext(), null, ACTION_DETECT_ENVIRONMENT));
             super.onPostExecute(variables);
+        }
+    }
+
+    private class DetermineConnectedWifiNetwork extends AsyncTask<Void, Void, WiFiEnvironmentVariable>{
+        @Override
+        protected WiFiEnvironmentVariable doInBackground(Void... params) {
+            return getConnectedWifiNetwork();
+        }
+
+        @Override
+        protected void onPostExecute(WiFiEnvironmentVariable variable) {
+            if(variable != null){
+                WifiReceiver.setCurrentWifiNetwork(variable);
+            }
+            super.onPostExecute(variable);
         }
     }
 

@@ -18,6 +18,7 @@ public class NotificationHelper {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setPriority(Notification.PRIORITY_MIN);
         Intent notificationIntent = new Intent(context, LockScreenActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
         notificationBuilder.setContentIntent(pendingIntent);
         notificationBuilder.setContentTitle(NOTIFICATION_TITLE);

@@ -23,7 +23,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.WiF
 
 import java.util.List;
 
-import static com.pvsagar.smartlockscreen.backend_helpers.Utility.*;
+import static com.pvsagar.smartlockscreen.backend_helpers.Utility.isEqual;
 
 /**
  * Created by aravind on 17/8/14.
@@ -659,6 +659,8 @@ public class EnvironmentProvider extends ContentProvider {
         return new long[]{oldWifiId, wifiId};
     }
 
+    //TODO see whether location entry with same lat, long and radius exists, if yes use that location.
+    // if no, see whether the name is already in use elsewhere. If yes, append name with env name, else insert with given name
     private long[] insertEnvironmentLocation(Uri uri, SQLiteDatabase db, ContentValues values){
         long environmentId = Long.parseLong(uri.getPathSegments().get(1));
         String geofenceSelection = GeoFenceEntry.COLUMN_LOCATION_NAME + " = ? ";
@@ -690,11 +692,24 @@ public class EnvironmentProvider extends ContentProvider {
                 if(!environmentCursor.moveToFirst()){
                     throw new IllegalArgumentException("Invalid environmentId passed.");
                 }
-                String newLocationName = geofenceSelectionArgs[0] + ":" + environmentCursor.getString(
-                        environmentCursor.getColumnIndex(EnvironmentEntry.COLUMN_NAME));
-                values.remove(GeoFenceEntry.COLUMN_LOCATION_NAME);
-                values.put(GeoFenceEntry.COLUMN_LOCATION_NAME, newLocationName);
-                geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
+                // Checking whether the same geofence is used in any other environment.
+                // If yes, the name is appended with environment name. Else the geofence entry is updated
+                geofenceId = geofenceCursor.getLong(geofenceCursor.getColumnIndex(GeoFenceEntry._ID));
+                Cursor environmentsWithSameGeofenceCursor = db.query(EnvironmentEntry.TABLE_NAME, null,
+                        EnvironmentEntry.COLUMN_GEOFENCE_ID + " = ? AND " + EnvironmentEntry._ID +
+                        " != ? ", new String[]{String.valueOf(geofenceId), String.valueOf(environmentId)},
+                        null, null, null);
+                if(environmentsWithSameGeofenceCursor.moveToFirst()) {
+                    String newLocationName = geofenceSelectionArgs[0] + ":" + environmentCursor.getString(
+                            environmentCursor.getColumnIndex(EnvironmentEntry.COLUMN_NAME));
+                    values.remove(GeoFenceEntry.COLUMN_LOCATION_NAME);
+                    values.put(GeoFenceEntry.COLUMN_LOCATION_NAME, newLocationName);
+                    geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
+                } else {
+                    db.update(GeoFenceEntry.TABLE_NAME, values, GeoFenceEntry._ID + " = ? ",
+                            new String[]{String.valueOf(geofenceId)});
+                }
+                environmentsWithSameGeofenceCursor.close();
                 environmentCursor.close();
             }
         }
