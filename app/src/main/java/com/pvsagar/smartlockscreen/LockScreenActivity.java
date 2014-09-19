@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -17,18 +16,15 @@ import android.widget.Button;
 
 import com.haibison.android.lockpattern.LockPatternActivity;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
-import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
 import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 
 public class LockScreenActivity extends Activity implements GestureDetector.OnGestureListener {
     private static final String LOG_TAG = LockScreenActivity.class.getSimpleName();
     private static final int REQUEST_ENTER_PATTERN = 33;
-    private static final String LOG_TAG = LockScreenActivity.class.getSimpleName();
     private static final String PACKAGE_NAME = "com.pvsagar.smartlockscreen";
-    private static final String KEY_LOCKSCREEN_FRAGMENT = PACKAGE_NAME + ".keys.LOCKSCREEN_FRAGMENT";
-    LockScreenFragment lockScreenFragment;
     GestureDetectorCompat gestureDetectorCompat;
 
     @Override
