@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -86,6 +87,14 @@ public class SearchLocation extends ActionBarActivity {
         /* Initialization */
         init();
         setUpActionBar();
+        this.setFinishOnTouchOutside(true);
+        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.linear_layout_search_location);
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
 
