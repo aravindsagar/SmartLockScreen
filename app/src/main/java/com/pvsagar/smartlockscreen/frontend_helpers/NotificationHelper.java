@@ -28,7 +28,6 @@ public class NotificationHelper {
         notificationBuilder.setContentText(text);
         notificationBuilder.setOngoing(true);
         notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
-        Notification notification = notificationBuilder.build();
-        return notification;
+        return notificationBuilder.build();
     }
 }
