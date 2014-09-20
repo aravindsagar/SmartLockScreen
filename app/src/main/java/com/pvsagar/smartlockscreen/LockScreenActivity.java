@@ -1,37 +1,99 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.GestureDetectorCompat;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 
 import com.haibison.android.lockpattern.LockPatternActivity;
-import com.pvsagar.smartlockscreen.backend_helpers.Utility;
-import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
-import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
-import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
+public class LockScreenActivity extends Activity{
+    private static final String LOG_TAG = LockScreenActivity.class.getSimpleName();
+    private static final int REQUEST_ENTER_PATTERN = 33;
+    private static final int REQUEST_DISMISS_LOCKSCREEN_OVERLAY = 1001;
+    private static final String PACKAGE_NAME = LockScreenActivity.class.getPackage().getName();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+
+        int systemUiVisibilityFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+        getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent patternIntent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                this.getApplicationContext(), LockPatternActivity.class);
+        patternIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.TransparentThemeNoActionBar);
+        patternIntent.putExtra(LockPatternActivity.EXTRA_PATTERN,
+                AdminActions.getCurrentPassphraseString().toCharArray());
+        PendingIntent dismissOverLayPendingIntent = PendingIntent.getService(this,
+                REQUEST_DISMISS_LOCKSCREEN_OVERLAY,
+                BaseService.getServiceIntent(this, null, BaseService.ACTION_DISMISS_LOCKSCREEN_OVERLAY), 0);
+        patternIntent.putExtra(LockPatternActivity.EXTRA_PENDING_INTENT_ONCREATE, dismissOverLayPendingIntent);
+        startActivityForResult(patternIntent, REQUEST_ENTER_PATTERN);
+        overridePendingTransition(0,0);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case REQUEST_ENTER_PATTERN: {
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        startService(BaseService.getServiceIntent(this, null, BaseService.ACTION_DISMISS_KEYGUARD));
+                        overridePendingTransition(0,0);
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        // The user cancelled the task
+                        break;
+                    case LockPatternActivity.RESULT_FAILED:
+                        // The user failed to enter the pattern
+                        break;
+                    case LockPatternActivity.RESULT_FORGOT_PATTERN:
+                        // The user forgot the pattern and invoked your recovery Activity.
+                        break;
+                }
+                int retryCount = data.getIntExtra(
+                        LockPatternActivity.EXTRA_RETRY_COUNT, 0);
+
+                break;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+        finish();
+        overridePendingTransition(0,0);
+    }
+}
+
+/*
 public class LockScreenActivity extends Activity implements GestureDetector.OnGestureListener {
     private static final String LOG_TAG = LockScreenActivity.class.getSimpleName();
     private static final int REQUEST_ENTER_PATTERN = 33;
-    private static final String PACKAGE_NAME = "com.pvsagar.smartlockscreen";
+    private static final String PACKAGE_NAME = LockScreenActivity.class.getPackage().getName();
     GestureDetectorCompat gestureDetectorCompat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(LOG_TAG, "LockscreenActivity onCreate()");
         super.onCreate(savedInstanceState);
-        /*setContentView(R.layout.activity_lock_screen);
+        */
+/*setContentView(R.layout.activity_lock_screen);
         if (savedInstanceState == null) {
             lockScreenFragment = new LockScreenFragment();
             getFragmentManager().beginTransaction()
@@ -39,7 +101,8 @@ public class LockScreenActivity extends Activity implements GestureDetector.OnGe
                     .commit();
         } else{
             lockScreenFragment = (LockScreenFragment) savedInstanceState.get(KEY_LOCKSCREEN_FRAGMENT);
-        }*/
+        }*//*
+
         setContentView(R.layout.fragment_lock_screen);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         getWindow().setDimAmount((float) 0.4);
@@ -137,13 +200,17 @@ public class LockScreenActivity extends Activity implements GestureDetector.OnGe
         if (!Utility.checkForNullAndWarn(currentPassphraseType, LOG_TAG)){
             if (currentPassphraseType.equals(Passphrase.TYPE_PATTERN)) {
                 Intent patternIntent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
-                        this, LockPatternActivity.class);
+                        this.getApplicationContext(), LockPatternActivity.class);
                 patternIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.TransparentThemeNoActionBar);
                 if (AdminActions.getCurrentPassphraseString() != null) {
                     patternIntent.putExtra(LockPatternActivity.EXTRA_PATTERN,
                             AdminActions.getCurrentPassphraseString().toCharArray());
-                    startActivityForResult(patternIntent, REQUEST_ENTER_PATTERN);
+                    patternIntent.putExtra(LockPatternActivity.EXTRA_PENDING_INTENT_OK,
+                                PendingIntent.getService(this, 1001,
+                                        BaseService.getServiceIntent(this, null, BaseService.ACTION_DISMISS_KEYGUARD), 0));
+
+                    startActivity(patternIntent);
                     //                        getActivity().overridePendingTransition(0, 0);
                 } else {
                     this.finish();
@@ -195,3 +262,4 @@ public class LockScreenActivity extends Activity implements GestureDetector.OnGe
         this.overridePendingTransition(0, 0);
     }
 }
+*/

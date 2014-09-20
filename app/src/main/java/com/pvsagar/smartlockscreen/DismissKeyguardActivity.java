@@ -9,10 +9,15 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 
 public class DismissKeyguardActivity extends Activity {
+    private static final String PACKAGE_NAME = DismissKeyguardActivity.class.getPackage().getName();
+    public static final String EXTRA_PREVIOUS_PASSPHRASE_TYPE = PACKAGE_NAME + ".PREVIOUS_PASSPHRASE_TYPE";
+
+    private boolean mIsOverlayDismissRequired;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +35,10 @@ public class DismissKeyguardActivity extends Activity {
             systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
         getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
+
+        String previousPassphraseType = getIntent().getStringExtra(EXTRA_PREVIOUS_PASSPHRASE_TYPE);
+        mIsOverlayDismissRequired = !(previousPassphraseType != null &&
+                previousPassphraseType.equals(Passphrase.TYPE_PATTERN));
     }
 
     @Override
@@ -77,6 +86,10 @@ public class DismissKeyguardActivity extends Activity {
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DETECT_ENVIRONMENT));
             finish();
             overridePendingTransition(0, 0);
+//            startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_BLANK_OVERLAY));
+            if(mIsOverlayDismissRequired) {
+                startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_LOCKSCREEN_OVERLAY));
+            }
         }
     }
 

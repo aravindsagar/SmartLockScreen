@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,7 +26,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
 import com.google.android.gms.location.LocationStatusCodes;
-import com.pvsagar.smartlockscreen.LockScreenActivity;
+import com.pvsagar.smartlockscreen.DismissKeyguardActivity;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
@@ -33,6 +34,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
@@ -40,6 +42,7 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 import com.pvsagar.smartlockscreen.receivers.WifiReceiver;
+import com.pvsagar.smartlockscreen.services.window_helpers.LockScreenOverlayHelper;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -57,13 +60,15 @@ public class BaseService extends Service implements
     public static final int ONGOING_NOTIFICATION_ID = 1;
     public static final int GEOFENCE_SERVICE_REQUEST_CODE = 2;
 
-    private static final String PACKAGE_NAME = "com.pvsagar.smartlockscreen.services";
+    private static final String PACKAGE_NAME = BaseService.class.getPackage().getName();
     public static final String ACTION_DETECT_ENVIRONMENT = PACKAGE_NAME + ".DETECT_ENVIRONMENT";
     public static final String ACTION_ADD_GEOFENCES = PACKAGE_NAME + ".ADD_GEOFENCES";
     public static final String ACTION_REMOVE_GEOFENCES = PACKAGE_NAME + ".REMOVE_GEOFENCES";
     public static final String ACTION_DETECT_WIFI = PACKAGE_NAME + ".DETECT_WIFI";
     public static final String ACTION_DETECT_BLUETOOTH = PACKAGE_NAME + ".DETECT_BLUETOOTH";
-    public static final String ACTION_START_LOCKSCREEN_ACTIVITY = PACKAGE_NAME + ".START_LOCKSCREEN_ACTIVITY";
+    public static final String ACTION_START_LOCKSCREEN_OVERLAY = PACKAGE_NAME + ".START_LOCKSCREEN_OVERLAY";
+    public static final String ACTION_DISMISS_KEYGUARD = PACKAGE_NAME + ".DISMISS_KEYGUARD";
+    public static final String ACTION_DISMISS_LOCKSCREEN_OVERLAY = PACKAGE_NAME + ".DISMISS_LOCKSCREEN_OVERLAY";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
@@ -75,6 +80,10 @@ public class BaseService extends Service implements
     private boolean mInProgress;
     //List of geofence ids to delete when calling removeGeofences
     private List<String> mGeofencesToRemove;
+
+    private WindowManager windowManager;
+
+    private LockScreenOverlayHelper mLockScreenOverlayHelper;
 
     public static Intent getServiceIntent(Context context, String extraText, String action){
         Intent serviceIntent  = new Intent();
@@ -100,6 +109,8 @@ public class BaseService extends Service implements
         new DetermineConnectedWifiNetwork().execute();
         new BluetoothDeviceSearch().execute();
         ScreenReceiver.registerScreenReceiver(this);
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        mLockScreenOverlayHelper = new LockScreenOverlayHelper(this, windowManager);
         super.onCreate();
     }
 
@@ -142,11 +153,28 @@ public class BaseService extends Service implements
                     new DetermineConnectedWifiNetwork().execute();
                 } else if(action.equals(ACTION_DETECT_BLUETOOTH)){
                     new BluetoothDeviceSearch().execute();
-                } else if(action.equals(ACTION_START_LOCKSCREEN_ACTIVITY)){
-                    Intent lockscreenIntent = new Intent(this, LockScreenActivity.class);
+                } else if(action.equals(ACTION_START_LOCKSCREEN_OVERLAY)){
+                    /*Intent lockscreenIntent = new Intent(this, LockScreenActivity.class);
                     lockscreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     Log.d(LOG_TAG, "Starting lockscreen overlay.");
-                    startActivity(lockscreenIntent);
+                    startActivity(lockscreenIntent);*/
+                    mLockScreenOverlayHelper.execute();
+                    WakeLockHelper.releaseWakeLock(ScreenReceiver.WAKELOCK_TAG);
+
+                } else if(action.equals(ACTION_DISMISS_KEYGUARD)){
+                    Log.d(LOG_TAG, "Dismiss keyguard");
+//                    mBlankOverlayHelper.execute();
+                    Intent dismissKeyguardIntent = new Intent(this, DismissKeyguardActivity.class);
+                    if(AdminActions.getCurrentPassphraseType() == Passphrase.TYPE_PATTERN) {
+                        AdminActions.changePassword("", Passphrase.TYPE_NONE);
+                    } else {
+                        dismissKeyguardIntent.putExtra(DismissKeyguardActivity.EXTRA_PREVIOUS_PASSPHRASE_TYPE,
+                                Passphrase.TYPE_PATTERN);
+                    }
+                    dismissKeyguardIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    this.startActivity(dismissKeyguardIntent);
+                } else if(action.equals(ACTION_DISMISS_LOCKSCREEN_OVERLAY)){
+                    mLockScreenOverlayHelper.remove();
                 }
                 //Additional action handling to be done here when more actions are added
             }

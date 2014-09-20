@@ -20,7 +20,7 @@ public class OnUpgradeBroadcastReceiver extends BroadcastReceiver {
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         if(!powerManager.isScreenOn()){
-            context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_ACTIVITY));
+            context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_OVERLAY));
         }
     }
 }

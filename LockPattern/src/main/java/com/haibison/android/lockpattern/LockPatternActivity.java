@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -218,6 +219,11 @@ public class LockPatternActivity extends Activity {
             + ".result_receiver";
 
     /**
+     * For SmartLockScreen
+     */
+    public static final String EXTRA_PENDING_INTENT_ONCREATE = CLASSNAME + ".pending_intent_oncreate";
+
+    /**
      * Put a {@link PendingIntent} into this key. It will be sent before
      * {@link Activity#RESULT_OK} will be returning. If you were calling this
      * activity with {@link #ACTION_CREATE_PATTERN}, key {@link #EXTRA_PATTERN}
@@ -309,6 +315,7 @@ public class LockPatternActivity extends Activity {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(CLASSNAME, "OnCreate");
         if (BuildConfig.DEBUG)
             Log.d(CLASSNAME, "ClassName = " + CLASSNAME);
 
@@ -326,18 +333,22 @@ public class LockPatternActivity extends Activity {
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
-        /*int systemUiVisibilityFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+        int systemUiVisibilityFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_FULLSCREEN;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
-        getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);*/
+        getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
         loadSettings();
 
         mIntentResult = new Intent();
         setResult(RESULT_CANCELED, mIntentResult);
 
         initContentView();
+
+        PendingIntent pi = getIntent().getParcelableExtra(
+                EXTRA_PENDING_INTENT_ONCREATE);
+        new SendOnCreateIndent().execute(pi);
     }// onCreate()
 
     @Override
@@ -803,6 +814,7 @@ public class LockPatternActivity extends Activity {
         }
 
         finish();
+        overridePendingTransition(0,0);
     }// finishWithResultOk()
 
     /**
@@ -844,6 +856,7 @@ public class LockPatternActivity extends Activity {
         }
 
         finish();
+        overridePendingTransition(0,0);
     }// finishWithNegativeResult()
 
     /*
@@ -985,4 +998,26 @@ public class LockPatternActivity extends Activity {
         }// run()
     };// mLockPatternViewReloader
 
+    private static class SendOnCreateIndent extends AsyncTask<PendingIntent, Void, Void>{
+        @Override
+        protected Void doInBackground(PendingIntent... params) {
+            if(params == null){
+                return null;
+            }
+            PendingIntent pi = params[0];
+            if (pi != null) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                try {
+                    pi.send();
+                } catch (Throwable t) {
+                    Log.e(CLASSNAME, "Error sending PendingIntent: " + pi, t);
+                }
+            }
+            return null;
+        }
+    }
 }

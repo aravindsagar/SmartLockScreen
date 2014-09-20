@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
@@ -9,6 +10,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
@@ -102,19 +104,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
     public static Passphrase getPassphraseFromCursor(Cursor cursor){
         try{
             String type = cursor.getString(cursor.getColumnIndex(PasswordEntry.COLUMN_PASSWORD_TYPE));
-            Passphrase returnPassphrase;
-            if(type.equals(TYPE_PASSWORD)){
-                returnPassphrase = new Password();
-            } else if(type.equals(TYPE_PIN)){
-                returnPassphrase = new Pin();
-            } else if(type.equals(TYPE_NONE)){
-                returnPassphrase = new NoSecurity();
-            } else if(type.equals(TYPE_PATTERN)){
-                returnPassphrase = new Pattern();
-            } else {
-                throw new TypeNotPresentException("The type read from database is not a valid type."
-                        , new Exception());
-            }
+            Passphrase returnPassphrase = getNewInstanceOfType(type);
             returnPassphrase.encryptedPasswordString = cursor.getString(cursor.getColumnIndex
                     (PasswordEntry.COLUMN_PASSWORD_STRING));
             if(returnPassphrase.passphraseType.equals(TYPE_NONE)){
@@ -133,5 +123,39 @@ public abstract class Passphrase<PassphraseRepresentation> {
     public boolean setAsCurrentPassword(){
         Log.d(LOG_TAG, "Setting current password: " + passwordString);
         return AdminActions.changePassword(passwordString, this.passphraseType);
+    }
+
+    public static void setMasterPassword(Passphrase masterPassword, Context context){
+        SharedPreferencesHelper.setMasterPassword(context, masterPassword.encryptedPasswordString,
+                masterPassword.passphraseType);
+    }
+
+    public static Passphrase getMasterPassword(Context context){
+        Passphrase masterPassphrase = getNewInstanceOfType(SharedPreferencesHelper.getMasterPasswordType(context));
+        masterPassphrase.encryptedPasswordString = SharedPreferencesHelper.getMasterPasswordString(context);
+        if(masterPassphrase.passphraseType.equals(TYPE_NONE)){
+            masterPassphrase.encryptedPasswordString = "";
+        }
+        masterPassphrase.decryptPassword();
+        masterPassphrase.setPasswordRepresentation(masterPassphrase.
+                getPassphraseRepresentationFromPassphraseString(masterPassphrase.passwordString));
+        return masterPassphrase;
+    }
+
+    private static Passphrase getNewInstanceOfType(final String type){
+        Passphrase returnPassphrase;
+        if(type.equals(TYPE_PASSWORD)){
+            returnPassphrase = new Password();
+        } else if(type.equals(TYPE_PIN)){
+            returnPassphrase = new Pin();
+        } else if(type.equals(TYPE_NONE)){
+            returnPassphrase = new NoSecurity();
+        } else if(type.equals(TYPE_PATTERN)){
+            returnPassphrase = new Pattern();
+        } else {
+            throw new TypeNotPresentException("The type read from database is not a valid type."
+                    , new Exception());
+        }
+        return returnPassphrase;
     }
 }

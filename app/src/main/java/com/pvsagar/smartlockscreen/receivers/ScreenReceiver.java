@@ -27,7 +27,7 @@ public class ScreenReceiver extends BroadcastReceiver {
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             WakeLockHelper.acquireWakeLock(WAKELOCK_TAG, context);
             Log.d(LOG_TAG, "Screen off");
-            context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_ACTIVITY));
+            context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_OVERLAY));
         } else {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 //Might be useful later, while adding notifications etc
