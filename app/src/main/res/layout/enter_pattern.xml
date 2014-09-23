@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:patternType="checkPattern"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/pattern_margin_below"
+        android:layout_centerInParent="true"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_vertical_margin"
         android:layout_marginLeft="@dimen/activity_vertical_margin"/>
