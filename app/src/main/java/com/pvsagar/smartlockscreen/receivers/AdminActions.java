@@ -89,6 +89,7 @@ public class AdminActions extends DeviceAdminReceiver {
         currentPassphraseType = passphraseType;
         if(passphraseType.equals(Passphrase.TYPE_PATTERN)){
             currentPassphraseString = password;
+            password = "";
         }
         if(isAdminEnabled()) {
             mDPM.resetPassword(password, 0);

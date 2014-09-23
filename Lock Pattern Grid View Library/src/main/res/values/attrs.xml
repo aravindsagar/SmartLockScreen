@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PatternGridView">
+        <attr name="patternType" format="enum">
+            <enum name="storePattern" value="0"/>
+            <enum name="checkPattern" value="1"/>
+        </attr>
+    </declare-styleable>
+</resources>

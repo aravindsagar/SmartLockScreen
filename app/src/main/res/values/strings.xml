@@ -76,5 +76,7 @@
     <string name="dialog_pick_location_connection">Pick a Location</string>
     <string name="title_activity_dismiss_keyguard">DismissKeyguardActivity</string>
     <string name="task_lockscreen">com.pvsagar.smartlockscreen.lockscreen_overlay.task</string>
-
+    <string name="title_activity_store_pattern">Store Pattern</string>
+    <string name="pattern_continue">Continue</string>
+    <string name="pattern_confirm">Confirm</string>
 </resources>

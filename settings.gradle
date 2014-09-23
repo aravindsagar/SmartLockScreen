@@ -1,1 +1,1 @@
-include ':app', ':LockPattern'
+include ':app', ':Lock Pattern Grid View Library'

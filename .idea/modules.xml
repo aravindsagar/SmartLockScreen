@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/LockPattern/LockPattern.iml" filepath="$PROJECT_DIR$/LockPattern/LockPattern.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Lock Pattern Grid View Library/Lock Pattern Grid View Library.iml" filepath="$PROJECT_DIR$/Lock Pattern Grid View Library/Lock Pattern Grid View Library.iml" />
       <module fileurl="file://$PROJECT_DIR$/SmartLockScreen.iml" filepath="$PROJECT_DIR$/SmartLockScreen.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

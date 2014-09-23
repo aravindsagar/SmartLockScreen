@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="min_cell_size">96dp</dimen>
+    <dimen name="inner_circle_radius">5dp</dimen>
+    <dimen name="outer_circle_radius">30dp</dimen>
+</resources>

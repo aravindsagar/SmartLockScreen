@@ -158,4 +158,8 @@ public abstract class Passphrase<PassphraseRepresentation> {
         }
         return returnPassphrase;
     }
+
+    public boolean compareString(String passphrase){
+        return passwordString != null && passphrase != null && passwordString.equals(passphrase);
+    }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/enter_pattern_layout">
+
+    <com.sagar.lockpattern_gridview.PatternGridView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/enter_pattern_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:patternType="checkPattern"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/pattern_margin_below"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"/>
+    <TextView
+        android:id="@+id/enter_pattern_status_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/enter_pattern_grid"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+
+</RelativeLayout>

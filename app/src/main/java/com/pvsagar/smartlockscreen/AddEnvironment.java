@@ -28,7 +28,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.haibison.android.lockpattern.LockPatternActivity;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
@@ -77,7 +76,7 @@ public class AddEnvironment extends ActionBarActivity {
     private static ArrayAdapter<String> passphraseAdapter;
     private static int selectedPassphrasetype;
 
-    private static char[] pattern;
+    private static List<Integer> pattern;
 
     private PlaceholderFragment placeholderFragment;
 
@@ -528,9 +527,7 @@ public class AddEnvironment extends ActionBarActivity {
                         setPassphraseItemsEnabled(false);
                         setPassphraseItemsVisible(false);
 
-                        Intent patternIntent = new Intent(LockPatternActivity.ACTION_CREATE_PATTERN, null,
-                                getActivity(), LockPatternActivity.class);
-                        patternIntent.putExtra(LockPatternActivity.EXTRA_THEME, R.style.HoloWithoutActionBar);
+                        Intent patternIntent = new Intent(getActivity(), StorePattern.class);
                         startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
                     } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
                         setPassphraseItemsEnabled(false);
@@ -811,9 +808,7 @@ public class AddEnvironment extends ActionBarActivity {
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             if(requestCode == REQUEST_CREATE_PATTERN){
                 if (resultCode == RESULT_OK) {
-                    pattern = data.getCharArrayExtra(
-                            LockPatternActivity.EXTRA_PATTERN);
-                    Log.d(LOG_TAG, "pattern at onActivityResult: " + new String(pattern));
+                    pattern = data.getIntegerArrayListExtra(StorePattern.EXTRA_PATTERN);
                 }
             }
             super.onActivityResult(requestCode, resultCode, data);

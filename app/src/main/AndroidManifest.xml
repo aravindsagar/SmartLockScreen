@@ -34,12 +34,6 @@
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name=".LockScreenActivity"
-            android:label="@string/app_name"
-            android:excludeFromRecents="true"
-            android:taskAffinity="@string/task_lockscreen">
-        </activity>
-        <activity
             android:name=".ManageEnvironment"
             android:label="@string/title_activity_manage_environment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
@@ -65,22 +59,13 @@
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
         </activity>
         <activity
-            android:name="com.haibison.android.lockpattern.LockPatternActivity"
-            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
-            android:screenOrientation="user"
-            android:theme="@style/Alp.42447968.Theme.Dialog.Light" />
-        <activity
             android:name=".SearchLocation"
             android:label="@string/title_activity_search_location"
             android:theme="@style/TransparentTheme" >
         </activity>
-        <activity
-            android:name=".DismissKeyguardActivity"
-            android:label="@string/title_activity_dismiss_keyguard"
-            android:excludeFromRecents="true"
-            android:taskAffinity="@string/task_lockscreen"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
-        </activity>
+        <activity android:name=".StorePattern"
+            android:label="@string/title_activity_store_pattern"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth"/>
 
         <provider
             android:name=".environmentdb.EnvironmentProvider"
