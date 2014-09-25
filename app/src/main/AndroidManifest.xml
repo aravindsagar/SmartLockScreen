@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -66,6 +68,13 @@
         <activity android:name=".StorePattern"
             android:label="@string/title_activity_store_pattern"
             android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth"/>
+        <activity
+            android:name=".DismissKeyguardActivity"
+            android:label="@string/title_activity_dismiss_keyguard"
+            android:excludeFromRecents="true"
+            android:taskAffinity="@string/task_lockscreen"
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
+        </activity>
 
         <provider
             android:name=".environmentdb.EnvironmentProvider"

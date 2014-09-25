@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -26,8 +25,6 @@ import com.pvsagar.smartlockscreen.services.BaseService;
  */
 public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();
-    private static final int DISMISS_KEYGAURD_REQUEST_CODE = 1001;
-    private static final int REQUEST_ENTER_PATTERN = 33;
 
     public LockScreenOverlayHelper(Context context, WindowManager windowManager){
         super(context, windowManager);
@@ -37,12 +34,8 @@ public class LockScreenOverlayHelper extends Overlay{
     protected View getLayout(){
         final RelativeLayout rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
         final LinearLayout layout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
-        int systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            systemUiVisibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        }
-        layout.setSystemUiVisibility(systemUiVisibility);
+
+        layout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         layout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -90,5 +83,11 @@ public class LockScreenOverlayHelper extends Overlay{
         params.x = 0;
         params.y = 0;
         return params;
+    }
+
+    @Override
+    public void remove() {
+//        NotificationAreaHelper.expand(context);
+        super.remove();
     }
 }

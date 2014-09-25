@@ -26,6 +26,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
 import com.google.android.gms.location.LocationStatusCodes;
+import com.pvsagar.smartlockscreen.DismissKeyguardActivity;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
@@ -69,6 +70,7 @@ public class BaseService extends Service implements
     public static final String ACTION_START_LOCKSCREEN_OVERLAY = PACKAGE_NAME + ".START_LOCKSCREEN_OVERLAY";
     public static final String ACTION_START_PATTERN_OVERLAY = PACKAGE_NAME + ".START_PATTERN_OVERLAY";
     public static final String ACTION_DISMISS_LOCKSCREEN_OVERLAY = PACKAGE_NAME + ".DISMISS_LOCKSCREEN_OVERLAY";
+    public static final String ACTION_DISMISS_PATTERN_OVERLAY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY";
     public static final String ACTION_UNLOCK = PACKAGE_NAME + ".UNLOCK";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
@@ -81,8 +83,6 @@ public class BaseService extends Service implements
     private boolean mInProgress;
     //List of geofence ids to delete when calling removeGeofences
     private List<String> mGeofencesToRemove;
-
-    private WindowManager windowManager;
 
     private LockScreenOverlayHelper mLockScreenOverlayHelper;
 
@@ -112,9 +112,10 @@ public class BaseService extends Service implements
         new DetermineConnectedWifiNetwork().execute();
         new BluetoothDeviceSearch().execute();
         ScreenReceiver.registerScreenReceiver(this);
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mLockScreenOverlayHelper = new LockScreenOverlayHelper(this, windowManager);
         mPatternLockOverlay = new PatternLockOverlay(this, windowManager);
+
         super.onCreate();
     }
 
@@ -165,6 +166,11 @@ public class BaseService extends Service implements
                 } else if(action.equals(ACTION_START_PATTERN_OVERLAY)){
                     mPatternLockOverlay.execute();
                 } else if(action.equals(ACTION_UNLOCK)){
+                    AdminActions.changePassword("", Passphrase.TYPE_NONE);
+                    Intent dismissIntent = new Intent(this, DismissKeyguardActivity.class);
+                    dismissIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    this.getApplicationContext().startActivity(dismissIntent);
+                } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY)){
                     mPatternLockOverlay.remove();
                     mLockScreenOverlayHelper.remove();
                 }
@@ -244,7 +250,7 @@ public class BaseService extends Service implements
 
     @Override
     public void onRemoveGeofencesByPendingIntentResult(int i, PendingIntent pendingIntent) {
-        return;
+
     }
 
     @Override

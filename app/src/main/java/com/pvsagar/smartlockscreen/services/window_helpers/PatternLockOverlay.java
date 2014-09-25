@@ -3,7 +3,6 @@ package com.pvsagar.smartlockscreen.services.window_helpers;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -50,17 +49,11 @@ public class PatternLockOverlay extends Overlay {
     protected View getLayout() {
         final String currentPassword = AdminActions.getCurrentPassphraseString();
 
-        RelativeLayout enterPatternLayout = (RelativeLayout) inflater.inflate(R.layout.enter_pattern, null);
+        final RelativeLayout enterPatternLayout = (RelativeLayout) inflater.inflate(R.layout.enter_pattern, null);
         final TextView statusView = (TextView) enterPatternLayout.findViewById(R.id.enter_pattern_status_textview);
         final PatternGridView patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
 
-        int systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN |
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            systemUiVisibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        }
-        enterPatternLayout.setSystemUiVisibility(systemUiVisibility);
-
+        enterPatternLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         patternGridView.setPatternListener(new PatternInterface.PatternListener() {
             Timer mClearTimer;
             @Override
@@ -74,6 +67,7 @@ public class PatternLockOverlay extends Overlay {
                 if(enteredPattern.compareString(currentPassword)){
                     context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
                     patternGridView.setRingColor(COLOR_VALID_PATTERN);
+                    patternGridView.setInputEnabled(false);
                 } else {
                     patternGridView.setRingColor(COLOR_INVALID_PATTERN);
                     statusView.setText("Wrong pattern");
@@ -89,6 +83,6 @@ public class PatternLockOverlay extends Overlay {
                 statusView.setText("");
             }
         });
-        return (View) enterPatternLayout;
+        return enterPatternLayout;
     }
 }
