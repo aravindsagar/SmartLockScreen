@@ -40,7 +40,7 @@ public class DismissKeyguardActivity extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -55,11 +55,5 @@ public class DismissKeyguardActivity extends Activity {
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
 
         }
-    }
-
-    @Override
-    protected void onStop() {
-        overridePendingTransition(0, 0);
-        super.onStop();
     }
 }

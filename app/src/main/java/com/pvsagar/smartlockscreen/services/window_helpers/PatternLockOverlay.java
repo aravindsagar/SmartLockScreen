@@ -71,6 +71,7 @@ public class PatternLockOverlay extends Overlay {
                 } else {
                     patternGridView.setRingColor(COLOR_INVALID_PATTERN);
                     statusView.setText("Wrong pattern");
+                    //TODO Set timer
                 }
             }
 

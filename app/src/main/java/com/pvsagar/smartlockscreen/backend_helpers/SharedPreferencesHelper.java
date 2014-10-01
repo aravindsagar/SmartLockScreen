@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
-
 /**
  * Created by aravind on 19/9/14.
  */
@@ -25,12 +23,12 @@ public class SharedPreferencesHelper {
 
     public static String getMasterPasswordString(Context context){
         initPreferences(context);
-        return preferences.getString(KEY_MASTER_PASSWORD, "");
+        return preferences.getString(KEY_MASTER_PASSWORD, null);
     }
 
     public static String getMasterPasswordType(Context context){
         initPreferences(context);
-        return preferences.getString(KEY_MASTER_PASSWORD_TYPE, Passphrase.TYPE_NONE);
+        return preferences.getString(KEY_MASTER_PASSWORD_TYPE, null);
     }
 
     public static void setMasterPassword(Context context, String passwordString, String passwordType){

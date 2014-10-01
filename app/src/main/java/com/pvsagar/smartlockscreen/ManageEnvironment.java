@@ -15,7 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.receivers.AdminActions;
+import com.pvsagar.smartlockscreen.frontend_helpers.OneTimeInitializer;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
@@ -34,7 +34,9 @@ public class ManageEnvironment extends ActionBarActivity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
-        AdminActions.initAdmin(this);
+        if(!OneTimeInitializer.initialize(this)){
+            finish();
+        }
         startService(BaseService.getServiceIntent(this, null, null));
     }
 

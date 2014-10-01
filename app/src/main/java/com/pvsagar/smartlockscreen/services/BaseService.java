@@ -40,6 +40,7 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
+import com.pvsagar.smartlockscreen.receivers.PhoneStateReceiver;
 import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 import com.pvsagar.smartlockscreen.receivers.WifiReceiver;
 import com.pvsagar.smartlockscreen.services.window_helpers.LockScreenOverlayHelper;
@@ -87,6 +88,8 @@ public class BaseService extends Service implements
     private LockScreenOverlayHelper mLockScreenOverlayHelper;
 
     private PatternLockOverlay mPatternLockOverlay;
+
+    private boolean mIsInCall = false;
 
     public static Intent getServiceIntent(Context context, String extraText, String action){
         Intent serviceIntent  = new Intent();
@@ -159,10 +162,18 @@ public class BaseService extends Service implements
                 } else if(action.equals(ACTION_DETECT_BLUETOOTH)){
                     new BluetoothDeviceSearch().execute();
                 } else if(action.equals(ACTION_START_LOCKSCREEN_OVERLAY)){
-                    mLockScreenOverlayHelper.execute();
+                    if(!intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, true)){
+                        mIsInCall = false;
+                    }
+                    if(!mIsInCall){
+                        mLockScreenOverlayHelper.execute();
+                    }
                     WakeLockHelper.releaseWakeLock(ScreenReceiver.WAKELOCK_TAG);
                 } else if(action.equals(ACTION_DISMISS_LOCKSCREEN_OVERLAY)){
                     mLockScreenOverlayHelper.remove();
+                    if(intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, false)){
+                        mIsInCall = true;
+                    }
                 } else if(action.equals(ACTION_START_PATTERN_OVERLAY)){
                     mPatternLockOverlay.execute();
                 } else if(action.equals(ACTION_UNLOCK)){
@@ -173,6 +184,9 @@ public class BaseService extends Service implements
                 } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY)){
                     mPatternLockOverlay.remove();
                     mLockScreenOverlayHelper.remove();
+                    if(intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, false)){
+                        mIsInCall = true;
+                    }
                 }
                 //Additional action handling to be done here when more actions are added
             }
@@ -372,10 +386,10 @@ public class BaseService extends Service implements
         if (current == null) {
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
-            String masterPassword = ""; //TODO: change this to master password
-            if(!AdminActions.changePassword(masterPassword, Passphrase.TYPE_NONE)){
+            Passphrase masterPassphrase = Passphrase.getMasterPassword(this);
+            if(!masterPassphrase.setAsCurrentPassword()){
                 AdminActions.initializeAdminObjects(this);
-                if(!AdminActions.changePassword(masterPassword, Passphrase.TYPE_NONE)){
+                if(!masterPassphrase.setAsCurrentPassword()){
                     startService(BaseService.getServiceIntent(this,
                             "Please enable administrator for the app.", null));
                 }

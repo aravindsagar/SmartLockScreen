@@ -50,6 +50,7 @@
     <string name="alert_rad_location_selection_message">Please Enter a valid Radius.</string>
     <string name="alert_cancel_add_environment_title">Warning</string>
     <string name="alert_cancel_add_environment_message">Do you want to cancel adding environment?</string>
+    <string name="alert_cancel_master_password_message">Do you want to cancel setting Master password?</string>
     <string name="alert_no_variables_title">No Variables Selected</string>
     <string name="alert_no_variables_message">At least select one variable</string>
     <string name="title_activity_select_location">Select Location</string>
@@ -63,7 +64,7 @@
     <string name="dialog_pick_stored_location">Stored Location</string>
     <string name="text_view_passphrase">Passphrase</string>
     <string name="alert_no_passphrase_title">Warning</string>
-    <string name="alert_no_passphrase_message">No password/pin set</string>
+    <string name="alert_no_passphrase_message">No password/pin/pattern set</string>
     <string name="device_admin_name">Smart Lock Screen</string>
     <string name="device_admin_description">Required to change the password, and turn screen on/off automatically.</string>
     <string name="auto_complete_text_view_address_hint">Search for places</string>
@@ -79,4 +80,7 @@
     <string name="title_activity_store_pattern">Store Pattern</string>
     <string name="pattern_continue">Continue</string>
     <string name="pattern_confirm">Confirm</string>
+    <string name="title_activity_set_master_password">Set Master Password</string>
+    <string name="master_password_set">Master password set</string>
+
 </resources>

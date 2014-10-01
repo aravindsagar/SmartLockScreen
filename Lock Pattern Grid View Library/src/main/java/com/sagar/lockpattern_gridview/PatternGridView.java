@@ -503,7 +503,7 @@ public class PatternGridView extends View implements PatternInterface{
                 mPatternListener.onPatternCleared();
             }
         }
-        invalidate();
+//        invalidate();
         handleActionMove(event);
     }
 

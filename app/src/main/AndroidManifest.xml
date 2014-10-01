@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -38,7 +39,7 @@
         <activity
             android:name=".ManageEnvironment"
             android:label="@string/title_activity_manage_environment"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -65,15 +66,21 @@
             android:label="@string/title_activity_search_location"
             android:theme="@style/TransparentTheme" >
         </activity>
-        <activity android:name=".StorePattern"
+        <activity
+            android:name=".StorePattern"
             android:label="@string/title_activity_store_pattern"
-            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth"/>
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" />
         <activity
             android:name=".DismissKeyguardActivity"
-            android:label="@string/title_activity_dismiss_keyguard"
             android:excludeFromRecents="true"
+            android:label="@string/title_activity_dismiss_keyguard"
             android:taskAffinity="@string/task_lockscreen"
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen">
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+        </activity>
+        <activity
+            android:name=".SetMasterPassword"
+            android:label="@string/title_activity_set_master_password"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
         </activity>
 
         <provider
@@ -119,10 +126,14 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".receivers.OnUpgradeBroadcastReceiver">
+        <receiver android:name=".receivers.OnUpgradeBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.PhoneStateReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
 
