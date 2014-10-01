@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="debug" >
+        <source path="/home/aravind/Android/workspace/SmartLockScreen/LockPattern/build/intermediates/bundles/debug/assets" />
+    </dataSet>
+    <dataSet config="main" >
+        <source path="/home/aravind/Android/workspace/SmartLockScreen/LockPattern/src/androidTest/assets" />
+    </dataSet>
+
+</merger>
