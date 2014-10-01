@@ -131,8 +131,14 @@ public abstract class Passphrase<PassphraseRepresentation> {
     }
 
     public static Passphrase getMasterPassword(Context context){
-        Passphrase masterPassphrase = getNewInstanceOfType(SharedPreferencesHelper.getMasterPasswordType(context));
-        masterPassphrase.encryptedPasswordString = SharedPreferencesHelper.getMasterPasswordString(context);
+        String masterPasswordType = SharedPreferencesHelper.getMasterPasswordType(context),
+                masterPasswordString = SharedPreferencesHelper.getMasterPasswordString(context);
+        if(masterPasswordType == null || masterPasswordString == null){
+            masterPasswordType = TYPE_NONE;
+            masterPasswordString = "";
+        }
+        Passphrase masterPassphrase = getNewInstanceOfType(masterPasswordType);
+        masterPassphrase.encryptedPasswordString = masterPasswordString;
         if(masterPassphrase.passphraseType.equals(TYPE_NONE)){
             masterPassphrase.encryptedPasswordString = "";
         }
