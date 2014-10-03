@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
@@ -360,6 +361,7 @@ public class Environment {
 
         context.getContentResolver().delete(EnvironmentEntry.
                 buildEnvironmentUriWithIdAndBluetooth(oldEnvironment.id), null, null);
+
         if(hasBluetoothDevices && getBluetoothEnvironmentVariables() != null
                 && !getBluetoothEnvironmentVariables().isEmpty()){
             Vector<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables =
@@ -367,6 +369,7 @@ public class Environment {
             Uri insertUri = EnvironmentEntry.
                     buildEnvironmentUriWithIdAndBluetooth(oldEnvironment.id);
             for(BluetoothEnvironmentVariable variable: bluetoothEnvironmentVariables) {
+                Log.d(LOG_TAG, "Inserting bluetooth device " + variable.getDeviceName());
                 ContentValues bluetoothValues = variable.getContentValues();
                 context.getContentResolver().insert(insertUri, bluetoothValues);
             }

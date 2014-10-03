@@ -302,6 +302,7 @@ public class EditEnvironment extends ActionBarActivity {
             for(int i = 0; i < bluetoothDevices.size(); i++){
                 for(int j = 0; j < bluetoothVariables.size(); j++){
                     if(bluetoothVariables.get(j).getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())){
+                        Log.d(LOG_TAG, "Adding " + bluetoothDevices.get(i).getName() + " to mSelectedBluetoothDevices.");
                         mSelectedBluetoothDevices.add(bluetoothDevices.get(i));
                         mSelectedBluetoothItems.add(i);
                     }
@@ -414,6 +415,7 @@ public class EditEnvironment extends ActionBarActivity {
                     builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            mSelectedBluetoothDevices.clear();
                             for (Integer mSelectedItem : mSelectedBluetoothItems) {
                                 mSelectedBluetoothDevices.add(bluetoothDevices.get(mSelectedItem));
                             }
