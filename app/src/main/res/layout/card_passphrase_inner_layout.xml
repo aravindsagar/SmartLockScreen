@@ -40,7 +40,7 @@
             style="@style/card.header_outer_layout"
             android:id="@+id/card_header_layout"
             android:layout_width="match_parent"
-            card:card_header_layout_resourceID="@layout/card_enable_disable_header_layout"
+            card:card_header_layout_resourceID="@layout/card_passphrase_header_layout"
             android:layout_height="?android:attr/listPreferredItemHeight"/>
 
         <!-- Expand layout. You can customize this element with your CardExpand class -->
