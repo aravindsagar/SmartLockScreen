@@ -2,7 +2,8 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card="http://schemas.android.com/apk/res-auto">
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    android:background="@color/card_background_grey">
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
@@ -27,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/card_bluetooth"
                 card:card_layout_resourceID="@layout/card_enable_disable_inner_layout"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+                android:layout_marginTop="@dimen/card_spacing"/>
 
             <!-- Wifi -->
             <it.gmariotti.cardslib.library.view.CardView
@@ -35,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/card_wifi"
                 card:card_layout_resourceID="@layout/card_enable_disable_inner_layout"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+                android:layout_marginTop="@dimen/card_spacing"/>
 
             <!-- Location -->
             <it.gmariotti.cardslib.library.view.CardView
@@ -43,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/card_location"
                 card:card_layout_resourceID="@layout/card_enable_disable_inner_layout"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+                android:layout_marginTop="@dimen/card_spacing"/>
 
             <!-- Passphrase -->
             <it.gmariotti.cardslib.library.view.CardView
@@ -51,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/card_passphrase"
                 card:card_layout_resourceID="@layout/card_passphrase_inner_layout"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+                android:layout_marginTop="@dimen/card_spacing"/>
 
         </LinearLayout>
 </ScrollView>

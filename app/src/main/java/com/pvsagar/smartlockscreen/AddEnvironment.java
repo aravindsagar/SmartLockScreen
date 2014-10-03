@@ -535,7 +535,6 @@ public class AddEnvironment extends ActionBarActivity {
 
             nameLocationEditText = new EditText(getActivity());
             nameLocationEditText.setHint(getString(R.string.edit_text_location_name));
-            nameLocationEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
             nameLocationEditText.setLayoutParams(marginTopLayoutParams);
             latLocationEditText = new EditText(getActivity());
             latLocationEditText.setHint(getString(R.string.edit_text_location_lat));
@@ -557,6 +556,7 @@ public class AddEnvironment extends ActionBarActivity {
             selectLocationTextView.setGravity(Gravity.CENTER_VERTICAL);
             selectLocationTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
             selectLocationTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectLocationTextView.setLayoutParams(marginTopLayoutParams);
             selectLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
