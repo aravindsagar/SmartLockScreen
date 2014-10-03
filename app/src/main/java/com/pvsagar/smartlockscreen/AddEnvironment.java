@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,10 +43,16 @@ import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
+import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
+import it.gmariotti.cardslib.library.view.CardView;
 
 //TODO see whether the location name entered exists for other lat/long/radius entries, and take appropriate actions
 
@@ -177,6 +187,7 @@ public class AddEnvironment extends ActionBarActivity {
         private CheckBox enableBluetoothCheckBox;
         private TextView selectBluetoothDevicesTextView;
         private CheckBox bluetoothAllCheckbox;
+        private CardView bluetoothCardView;
         /* WiFi */
         private CheckBox enableWiFiCheckBox;
         private TextView selectWiFiConnectionTextView;
@@ -194,6 +205,9 @@ public class AddEnvironment extends ActionBarActivity {
         private EditText passphraseEditText;
         private EditText passphraseConfirmationEditText;
 
+        /* Misc */
+        int listPreferredItemHeight;
+
         public PlaceholderFragment() {
         }
 
@@ -207,9 +221,7 @@ public class AddEnvironment extends ActionBarActivity {
             environmentNameEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_name);
             environmentHintEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_hint);
             //Bluetooth
-            enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
-            selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
-            bluetoothAllCheckbox = (CheckBox)rootView.findViewById(R.id.checkbox_bluetooth_all);
+            bluetoothCardView = (CardView) rootView.findViewById(R.id.card_bluetooth);
             //WiFi
             enableWiFiCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_wifi);
             selectWiFiConnectionTextView = (TextView)rootView.findViewById(R.id.text_view_wifi_connection_select);
@@ -226,6 +238,9 @@ public class AddEnvironment extends ActionBarActivity {
             passphraseTypeSpinner = (Spinner) rootView.findViewById(R.id.spinner_passphrase_type);
             passphraseEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase);
             passphraseConfirmationEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase_confirmation);
+
+            //Misc
+            listPreferredItemHeight = (int) getListPreferredItemHeight();
 
             /* Initialization */
             setUpBluetoothElements();
@@ -274,6 +289,15 @@ public class AddEnvironment extends ActionBarActivity {
             /* End of Action Bar Code */
         }
 
+        private float getListPreferredItemHeight(){
+            android.util.TypedValue value = new android.util.TypedValue();
+            boolean b = getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+            String s = TypedValue.coerceToString(value.type, value.data);
+            android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            return value.getDimension(metrics);
+        }
+
         /**
          * Sets up the bluetooth UI elements including action listeners.
          */
@@ -283,44 +307,14 @@ public class AddEnvironment extends ActionBarActivity {
             bluetoothDevices = new ArrayList<BluetoothDevice>();
             mSelectedBluetoothItems = new ArrayList<Integer>();
             mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
-            setBluetoothItemsEnabled(false);
-            bluetoothAllCheckbox.setChecked(false);
-
-            /* CheckBox CheckedChange Listener */
-            enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
-                        ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
-                        if (bluetoothDevices != null) {
-                            //Populate the String list and Set the adapter for the list view
-                            for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
-                                deviceNamesArrayList.add(bluetoothDevice.getName());
-                            }
-                            AddEnvironment.bluetoothDevices = bluetoothDevices;
-                            setBluetoothItemsEnabled(true);
-
-
-                        } else {
-                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (mBluetoothAdapter == null) {
-                                enableBluetoothCheckBox.setChecked(false);
-                                //Disable the list
-                                AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                                setBluetoothItemsEnabled(false);
-                            }
-                        }
-
-                    } else {
-                        //Disable the list
-                        AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                        setBluetoothItemsEnabled(false);
-                    }
-                }
-            });
 
             /* Text View onClickListener */
+            selectBluetoothDevicesTextView = new TextView(getActivity());
+            selectBluetoothDevicesTextView.setText(getString(R.string.text_view_bluetooth_devices_select));
+            selectBluetoothDevicesTextView.setMinHeight(listPreferredItemHeight);
+            selectBluetoothDevicesTextView.setGravity(Gravity.CENTER_VERTICAL);
+            selectBluetoothDevicesTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            selectBluetoothDevicesTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
             selectBluetoothDevicesTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -360,6 +354,65 @@ public class AddEnvironment extends ActionBarActivity {
                     alert.show();
                 }
             });
+
+            bluetoothAllCheckbox = new CheckBox(getActivity());
+            bluetoothAllCheckbox.setText(getString(R.string.checkbox_bluetooth_all));
+
+            final Card bluetoothCard = new Card(getActivity());
+            ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
+            bluetoothCard.setViewToClickToExpand(viewToClickToExpand);
+
+            EnableDisableCardHeader bluetoothCardHeader = new EnableDisableCardHeader(getActivity(),
+                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                        @Override
+                        public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
+                            setBluetoothItemsEnabled(false);
+                            bluetoothAllCheckbox.setChecked(false);
+
+                            header.setTitle("Bluetooth");
+                            enableBluetoothCheckBox = header.getCheckBox();
+
+                            /* CheckBox CheckedChange Listener */
+                            enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    if (isChecked) {
+                                        bluetoothCard.doExpand();
+                                        ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
+                                        ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
+                                        if (bluetoothDevices != null) {
+                                            //Populate the String list and Set the adapter for the list view
+                                            for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
+                                                deviceNamesArrayList.add(bluetoothDevice.getName());
+                                            }
+                                            AddEnvironment.bluetoothDevices = bluetoothDevices;
+                                            setBluetoothItemsEnabled(true);
+
+
+                                        } else {
+                                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                                            if (mBluetoothAdapter == null) {
+                                                enableBluetoothCheckBox.setChecked(false);
+                                                //Disable the list
+                                                AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
+                                                setBluetoothItemsEnabled(false);
+                                            }
+                                        }
+
+                                    } else {
+                                        bluetoothCard.doCollapse();
+                                        //Disable the list
+                                        AddEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
+                                        setBluetoothItemsEnabled(false);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+            bluetoothCard.addCardHeader(bluetoothCardHeader);
+            bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
+            bluetoothCardView.setCard(bluetoothCard);
         }
 
         /**
@@ -374,17 +427,16 @@ public class AddEnvironment extends ActionBarActivity {
             enableWiFiCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
+                    if (isChecked) {
                         //WiFi is enabled
                         wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(getActivity());
                         setWiFiItemsEnabled(true);
-                        if(wifiConfigurations == null){
+                        if (wifiConfigurations == null) {
                             //No WiFi adapter Found
                             enableWiFiCheckBox.setChecked(false);
                             setWiFiItemsEnabled(false);
                         }
-                    }
-                    else{
+                    } else {
                         setWiFiItemsEnabled(false);
                     }
                 }
@@ -426,16 +478,14 @@ public class AddEnvironment extends ActionBarActivity {
 
             setLocationItemsEnabled(false);
             enableLocationCheckBox.setChecked(false);
-
             enableLocationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
+                    if (isChecked) {
                         setLocationItemsEnabled(true);
                         storedLocations = LocationEnvironmentVariable.getLocationEnvironmentVariables(getActivity());
                         mSelectedLocationItem = -1;
-                    }
-                    else {
+                    } else {
                         setLocationItemsEnabled(false);
                     }
                 }
@@ -445,9 +495,9 @@ public class AddEnvironment extends ActionBarActivity {
             selectLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.v(LOG_TAG,"Starting select location");
-                    Intent intent = new Intent(getActivity(),SelectLocation.class);
-                    getActivity().startActivityForResult(intent,REQUEST_LOCATION_SELECT);
+                    Log.v(LOG_TAG, "Starting select location");
+                    Intent intent = new Intent(getActivity(), SelectLocation.class);
+                    getActivity().startActivityForResult(intent, REQUEST_LOCATION_SELECT);
                 }
             });
             /* Select stored location */
@@ -499,10 +549,10 @@ public class AddEnvironment extends ActionBarActivity {
             passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
-                    passphraseConfirmationEditText.setHint("Confirm "+Passphrase.passphraseTypes[position]);
+                    passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                    passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
                     selectedPassphrasetype = position;
-                    if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                    if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
                         setPassphraseItemsEnabled(true);
                         setPassphraseItemsVisible(true);
                         passphraseEditText.setText("");
@@ -512,8 +562,7 @@ public class AddEnvironment extends ActionBarActivity {
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         pattern = null;
-                    }
-                    else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
                         setPassphraseItemsEnabled(true);
                         setPassphraseItemsVisible(true);
                         passphraseEditText.setText("");
@@ -523,13 +572,13 @@ public class AddEnvironment extends ActionBarActivity {
                         passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         pattern = null;
-                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN){
+                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
                         setPassphraseItemsEnabled(false);
                         setPassphraseItemsVisible(false);
 
                         Intent patternIntent = new Intent(getActivity(), StorePattern.class);
                         startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
-                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
+                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE) {
                         setPassphraseItemsEnabled(false);
                         setPassphraseItemsVisible(false);
                         pattern = null;
@@ -812,6 +861,36 @@ public class AddEnvironment extends ActionBarActivity {
                 }
             }
             super.onActivityResult(requestCode, resultCode, data);
+        }
+
+        private class CardBluetoothExpand extends CardExpand {
+            public CardBluetoothExpand(Context context) {
+                super(context);
+            }
+
+            @Override
+            public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(getNewSeparatorView());
+                layout.addView(selectBluetoothDevicesTextView);
+                layout.addView(bluetoothAllCheckbox);
+                parent.addView(layout);
+                return layout;
+            }
+        }
+
+        private int convertPxToDip(int pixel){
+            float scale = getResources().getDisplayMetrics().density;
+            return (int) ((pixel / scale) + 0.5f);
+        }
+
+        private View getNewSeparatorView(){
+            View view = new View(getActivity());
+            view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    convertPxToDip(2)));
+            view.setBackgroundColor(Color.parseColor("#2B497B"));
+            return view;
         }
     }
 }

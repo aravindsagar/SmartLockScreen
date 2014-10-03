@@ -28,4 +28,12 @@
         <item name="android:windowBackground">@android:color/white</item>
     </style>
 
+    <style name="card.main_layout_expandinside" parent="card.main_layout">
+        <item name="android:background">@drawable/card_background</item>
+    </style>
+    <style name="card.main_contentExpand_custom">
+        <item name="android:background">@color/card_background</item>
+        <item name="android:padding">@dimen/card_expand_layout_padding</item>
+    </style>
+
 </resources>

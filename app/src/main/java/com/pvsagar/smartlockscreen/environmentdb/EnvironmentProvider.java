@@ -809,27 +809,33 @@ public class EnvironmentProvider extends ContentProvider {
     }
 
     private int deleteBluetoothEnvironmentVariable(long environmentId, SQLiteDatabase db){
-        String selection = EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID+ " = ? ";
-        String[] selectionArgs = new String[]{String.valueOf(environmentId)};
+        String envSelection = EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID+ " = ? ";
+        String[] envSelectionArgs = new String[]{String.valueOf(environmentId)};
         Cursor oldBluetoothEntries = db.query(EnvironmentBluetoothEntry.TABLE_NAME, null,
-                selection, selectionArgs, null, null, null);
-        int returnValue = db.delete(EnvironmentBluetoothEntry.TABLE_NAME, selection, selectionArgs);
+                envSelection, envSelectionArgs, null, null, null);
+        int returnValue = 0;
+        String useBluetoothSelection = EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + " = ? AND " +
+                EnvironmentBluetoothEntry.COLUMN_ENVIRONMENT_ID + " != ? ";
+        String[] useBluetoothSelectionArgs;
         String bluetoothSelection = BluetoothDevicesEntry._ID + " = ? ";
+        String[] bluetoothSelectionArgs;
+
         if(oldBluetoothEntries.moveToFirst()){
             for(; !oldBluetoothEntries.isAfterLast(); oldBluetoothEntries.moveToNext()){
                 long bluetoothId = oldBluetoothEntries.getLong(oldBluetoothEntries.
                         getColumnIndex(EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID));
-                selection = EnvironmentBluetoothEntry.COLUMN_BLUETOOTH_ID + " = ? ";
-                selectionArgs = new String[]{String.valueOf(bluetoothId)};
+                useBluetoothSelectionArgs = new String[]{String.valueOf(bluetoothId), String.valueOf(environmentId)};
                 Cursor bluetoothCursor = db.query(EnvironmentBluetoothEntry.TABLE_NAME,
-                        null, selection, selectionArgs, null, null, null, null);
+                        null, useBluetoothSelection, useBluetoothSelectionArgs, null, null, null, null);
+                bluetoothSelectionArgs = new String[]{String.valueOf(bluetoothId)};
                 if(bluetoothCursor.getCount() == 0){
                     returnValue += db.delete(BluetoothDevicesEntry.TABLE_NAME, bluetoothSelection,
-                            selectionArgs);
+                            bluetoothSelectionArgs);
                 }
                 bluetoothCursor.close();
             }
         }
+        returnValue += db.delete(EnvironmentBluetoothEntry.TABLE_NAME, envSelection, envSelectionArgs);
         oldBluetoothEntries.close();
         return returnValue;
     }
