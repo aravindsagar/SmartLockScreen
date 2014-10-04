@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
@@ -14,7 +16,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,6 +27,8 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,11 +44,20 @@ import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
+import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
+import com.pvsagar.smartlockscreen.cards.EnvironmentCardHeader;
+import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
+import it.gmariotti.cardslib.library.view.CardView;
 
 //TODO see whether the location name entered exists for other lat/long/radius entries, and take appropriate actions
 
@@ -64,9 +80,6 @@ public class EditEnvironment extends ActionBarActivity {
     private static int mSelectedWiFiItem;
 
     /* Location */
-    private static double latLocation;
-    private static double lonLocation;
-    private static double radLocation;
     private static List<EnvironmentVariable> storedLocations;
     private static int mSelectedLocationItem;
     private static LocationEnvironmentVariable mSelectedLocation;
@@ -136,25 +149,27 @@ public class EditEnvironment extends ActionBarActivity {
         placeholderFragment.onCancelButtonClick();
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class PlaceholderFragment extends Fragment {
 
         Environment environment;
         String environmentName;
 
+        /* Variables containing the UI elements */
         /* Environment Details */
+        private CardView environmentCardView;
         private EditText environmentNameEditText;
         private EditText environmentHintEditText;
         /* Bluetooth */
+        private CardView bluetoothCardView;
         private CheckBox enableBluetoothCheckBox;
         private TextView selectBluetoothDevicesTextView;
         private CheckBox bluetoothAllCheckbox;
         /* WiFi */
+        private CardView wifiCardView;
         private CheckBox enableWiFiCheckBox;
         private TextView selectWiFiConnectionTextView;
         /* Location */
+        private CardView locationCardView;
         private CheckBox enableLocationCheckBox;
         private EditText nameLocationEditText;
         private EditText latLocationEditText;
@@ -164,9 +179,16 @@ public class EditEnvironment extends ActionBarActivity {
         private TextView selectStoredLocationTextView;
 
         /* Passphrase */
+        private CardView passphraseCardView;
         private Spinner passphraseTypeSpinner;
         private EditText passphraseEditText;
         private EditText passphraseConfirmationEditText;
+        private TextView passphraseEnterPatternTextView;
+
+        /* Misc */
+        int listPreferredItemHeight;
+        int textViewTouchedColor, textViewNormalColor;
+        LinearLayout.LayoutParams marginTopLayoutParams;
 
         public PlaceholderFragment() {
         }
@@ -174,7 +196,7 @@ public class EditEnvironment extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_edit_environment, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
 
             //Get the environment
             Intent passedIntent = getActivity().getIntent();
@@ -183,37 +205,38 @@ public class EditEnvironment extends ActionBarActivity {
 
             /* Variable Initialization */
             //Environment details
-            environmentNameEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_name);
-            environmentHintEditText = (EditText) rootView.findViewById(R.id.edit_text_environment_hint);
+            environmentCardView = (CardView) rootView.findViewById(R.id.card_environment_basic);
             //Bluetooth
-            enableBluetoothCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_bluetooth);
-            selectBluetoothDevicesTextView = (TextView)rootView.findViewById(R.id.text_view_bluetooth_devices_select);
-            bluetoothAllCheckbox = (CheckBox)rootView.findViewById(R.id.checkbox_bluetooth_all);
+            bluetoothCardView = (CardView) rootView.findViewById(R.id.card_bluetooth);
             //WiFi
-            enableWiFiCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_wifi);
-            selectWiFiConnectionTextView = (TextView)rootView.findViewById(R.id.text_view_wifi_connection_select);
+            wifiCardView = (CardView) rootView.findViewById(R.id.card_wifi);
             //Location
-            enableLocationCheckBox = (CheckBox)rootView.findViewById(R.id.checkbox_enable_location);
-            nameLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_name);
-            latLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lat);
-            lonLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_lon);
-            radLocationEditText = (EditText)rootView.findViewById(R.id.edit_text_location_rad);
-            selectLocationTextView = (TextView)rootView.findViewById(R.id.text_view_select_location);
-            selectStoredLocationTextView = (TextView) rootView.findViewById(R.id.text_view_select_stored_location);
-
+            locationCardView = (CardView) rootView.findViewById(R.id.card_location);
             //Passphrase
-            passphraseTypeSpinner = (Spinner) rootView.findViewById(R.id.spinner_passphrase_type);
-            passphraseEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase);
-            passphraseConfirmationEditText = (EditText) rootView.findViewById(R.id.edit_text_passphrase_confirmation);
-
-            setUpActionBar();
-
+            passphraseCardView = (CardView) rootView.findViewById(R.id.card_passphrase);
+            //Misc
+            listPreferredItemHeight = (int) getListPreferredItemHeight();
+            textViewNormalColor = Color.argb(0, 0, 0, 0);
+            textViewTouchedColor = getResources().getColor(R.color.text_view_touched);
+            marginTopLayoutParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            marginTopLayoutParams.topMargin = convertDipToPx(8);
 
             /* Initialization */
+            setUpActionBar();
             setUpEditEnvironment();
             /* End of Initialization */
 
             return rootView;
+        }
+
+        private float getListPreferredItemHeight(){
+            android.util.TypedValue value = new android.util.TypedValue();
+            boolean b = getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+            String s = TypedValue.coerceToString(value.type, value.data);
+            android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            return value.getDimension(metrics);
         }
 
         private void setUpActionBar(){
@@ -250,6 +273,7 @@ public class EditEnvironment extends ActionBarActivity {
 
         private void setUpEditEnvironment(){
             /* Environment Details */
+            setupEnvironmentBasic();
             environmentNameEditText.setText(environment.getName());
             environmentHintEditText.setText(environment.getHint());
             /* setting up */
@@ -338,66 +362,86 @@ public class EditEnvironment extends ActionBarActivity {
         }
 
         private void initPassphraseElements(){
-            // Todo: do initialization form database
+            Passphrase passphrase = User.getCurrentUser(getActivity()).getPassphraseForEnvironment(getActivity(), environment);
             passphraseEditText.setHint("(Unchanged)");
-            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
-            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+            if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
+                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+            } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PATTERN)){
+                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN);
+                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN;
+                passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
+            } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
+                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PIN);
+                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
+            } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_NONE)){
+                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_NONE);
+                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_NONE;
+            }
         }
 
-        private void setUpBluetoothElements(){
+        private void setupEnvironmentBasic(){
 
-            /* CheckBox CheckedChange Listener */
-            enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        ArrayList<BluetoothDevice> bluetoothDevices = new BluetoothEnvironmentVariable().getPairedBluetoothDevices(getActivity());
-                        ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
-                        if (bluetoothDevices != null) {
-                            //Populate the String list and Set the adapter for the list view
-                            for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
-                                deviceNamesArrayList.add(bluetoothDevice.getName());
-                            }
-                            EditEnvironment.bluetoothDevices = bluetoothDevices;
-                            setBluetoothItemsEnabled(true);
+            environmentHintEditText = new EditText(getActivity());
+            environmentHintEditText.setHint(getString(R.string.edit_text_environment_hint));
+            environmentHintEditText.setSingleLine(true);
+            environmentHintEditText.setLayoutParams(marginTopLayoutParams);
 
+            environmentNameEditText = new EditText(getActivity());
+            environmentNameEditText.setHint(getString(R.string.edit_text_environment_name));
+            environmentNameEditText.setSingleLine(true);
+            environmentNameEditText.setLayoutParams(marginTopLayoutParams);
 
-                        } else {
-                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (mBluetoothAdapter == null) {
-                                enableBluetoothCheckBox.setChecked(false);
-                                //Disable the list
-                                EditEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                                setBluetoothItemsEnabled(false);
-                            }
+            Card environmentCard = new Card(getActivity());
+            ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
+            environmentCard.setViewToClickToExpand(viewToClickToExpand);
+
+            CardHeader environmentCardHeader = new EnvironmentCardHeader(getActivity(),
+                    new EnvironmentCardHeader.InnerViewElementsSetUpListener() {
+                        @Override
+                        public void onInnerViewElementsSetUp(EnvironmentCardHeader header) {
+                            header.setTitle("Environment");
                         }
-                    } else {
-                        //Disable the list
-                        EditEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
-                        setBluetoothItemsEnabled(false);
-                    }
-                }
-            });
+                    });
 
-            /* Text View onClickListener */
+            environmentCard.addCardHeader(environmentCardHeader);
+            CardExpand environmentCardExpand = new CardEnvironmentExpand(getActivity());
+            environmentCard.addCardExpand(environmentCardExpand);
+
+            environmentCardView.setCard(environmentCard);
+            environmentCard.doExpand();
+        }
+
+        /**
+         * Sets up the bluetooth UI elements including action listeners.
+         */
+        public void setUpBluetoothElements(){
+
+            /* Initialization */
+            bluetoothDevices = new ArrayList<BluetoothDevice>();
+            mSelectedBluetoothItems = new ArrayList<Integer>();
+            mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
+
+            /* Text View */
+            selectBluetoothDevicesTextView = new TextView(getActivity());
+            selectBluetoothDevicesTextView.setText(getString(R.string.text_view_bluetooth_devices_select));
+            selectBluetoothDevicesTextView.setMinHeight(listPreferredItemHeight);
+            selectBluetoothDevicesTextView.setGravity(Gravity.CENTER_VERTICAL);
+            selectBluetoothDevicesTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            selectBluetoothDevicesTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectBluetoothDevicesTextView.setOnTouchListener(new TextViewTouchListener());
             selectBluetoothDevicesTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (bluetoothDevices == null) {
-                        bluetoothDevices = new ArrayList<BluetoothDevice>();
-                    }
                     String[] bluetoothDevicesName = new String[bluetoothDevices.size()];
-                    for (int i = 0; i < bluetoothDevices.size(); i++) {
+
+                    for(int i=0;i<bluetoothDevices.size();i++){
                         bluetoothDevicesName[i] = bluetoothDevices.get(i).getName();
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.dialog_pick_bluetooth_devices);
                     //Set boolean array for previously checked items
                     boolean[] checkedItems = new boolean[bluetoothDevices.size()];
-                    if (mSelectedBluetoothDevices == null || mSelectedBluetoothItems == null) {
-                        mSelectedBluetoothDevices = new ArrayList<BluetoothDevice>();
-                        mSelectedBluetoothItems = new ArrayList<Integer>();
-                    }
                     for (Integer mSelectedItem : mSelectedBluetoothItems) {
                         checkedItems[mSelectedItem] = true;
                     }
@@ -412,10 +456,9 @@ public class EditEnvironment extends ActionBarActivity {
                             }
                         }
                     });
-                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            mSelectedBluetoothDevices.clear();
                             for (Integer mSelectedItem : mSelectedBluetoothItems) {
                                 mSelectedBluetoothDevices.add(bluetoothDevices.get(mSelectedItem));
                             }
@@ -426,50 +469,98 @@ public class EditEnvironment extends ActionBarActivity {
                     alert.show();
                 }
             });
+
+            bluetoothAllCheckbox = new CheckBox(getActivity());
+            bluetoothAllCheckbox.setText(getString(R.string.checkbox_bluetooth_all));
+
+            final Card bluetoothCard = new Card(getActivity());
+            ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
+            bluetoothCard.setViewToClickToExpand(viewToClickToExpand);
+
+            EnableDisableCardHeader bluetoothCardHeader = new EnableDisableCardHeader(getActivity(),
+                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                        @Override
+                        public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
+                            setBluetoothItemsEnabled(false);
+                            bluetoothAllCheckbox.setChecked(false);
+
+                            header.setTitle(getString(R.string.text_view_bluetooth));
+                            enableBluetoothCheckBox = header.getCheckBox();
+
+                            /* CheckBox CheckedChange Listener */
+                            enableBluetoothCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    if (isChecked) {
+                                        bluetoothCard.doExpand();
+                                        ArrayList<BluetoothDevice> bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
+                                        ArrayList<String> deviceNamesArrayList = new ArrayList<String>();
+                                        if (bluetoothDevices != null) {
+                                            //Populate the String list and Set the adapter for the list view
+                                            for (BluetoothDevice bluetoothDevice : bluetoothDevices) {
+                                                deviceNamesArrayList.add(bluetoothDevice.getName());
+                                            }
+                                            EditEnvironment.bluetoothDevices = bluetoothDevices;
+                                            setBluetoothItemsEnabled(true);
+
+
+                                        } else {
+                                            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                                            if (mBluetoothAdapter == null) {
+                                                enableBluetoothCheckBox.setChecked(false);
+                                                //Disable the list
+                                                EditEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
+                                                setBluetoothItemsEnabled(false);
+                                            }
+                                        }
+
+                                    } else {
+                                        bluetoothCard.doCollapse();
+                                        //Disable the list
+                                        EditEnvironment.bluetoothDevices = new ArrayList<BluetoothDevice>();
+                                        setBluetoothItemsEnabled(false);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+            bluetoothCard.addCardHeader(bluetoothCardHeader);
+            bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
+            bluetoothCardView.setCard(bluetoothCard);
         }
 
-        private void setUpWiFiElements(){
+        /**
+         * Sets up the WifI UI elements including action listeners.
+         */
+        public void setUpWiFiElements(){
+            wifiConfigurations = new ArrayList<WifiConfiguration>();
+            mSelectedWiFiItem = -1;
 
-            /* Check Box listener */
-            enableWiFiCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
-                        //WiFi is enabled
-                        wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(getActivity());
-                        setWiFiItemsEnabled(true);
-                        if(wifiConfigurations == null){
-                            //No WiFi adapter Found
-                            enableWiFiCheckBox.setChecked(false);
-                            setWiFiItemsEnabled(false);
-                        }
-                    }
-                    else{
-                        setWiFiItemsEnabled(false);
-                    }
-                }
-            });
-
+            selectWiFiConnectionTextView = new TextView(getActivity());
+            selectWiFiConnectionTextView.setText(getString(R.string.text_view_wifi_connection_select));
+            selectWiFiConnectionTextView.setMinHeight(listPreferredItemHeight);
+            selectWiFiConnectionTextView.setGravity(Gravity.CENTER_VERTICAL);
+            selectWiFiConnectionTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            selectWiFiConnectionTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectWiFiConnectionTextView.setOnTouchListener(new TextViewTouchListener());
             selectWiFiConnectionTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String[] wifiConnectionNames = new String[wifiConfigurations.size()];
-                    for(int i=0; i<wifiConfigurations.size();i++){
+                    for (int i = 0; i < wifiConfigurations.size(); i++) {
                         wifiConnectionNames[i] = wifiConfigurations.get(i).SSID;
-                    }
-                    if(mSelectedWiFiItem == -1){
-                        mSelectedWifiConfiguration = null;
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.dialog_pick_wifi_connection);
-                    builder.setSingleChoiceItems(wifiConnectionNames,mSelectedWiFiItem,new DialogInterface.OnClickListener() {
+                    builder.setSingleChoiceItems(wifiConnectionNames, mSelectedWiFiItem, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mSelectedWiFiItem = which;
                             mSelectedWifiConfiguration = wifiConfigurations.get(which);
                         }
                     });
-                    builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                         }
@@ -480,51 +571,101 @@ public class EditEnvironment extends ActionBarActivity {
 
                 }
             });
+
+            final Card wifiCard = new Card(getActivity());
+            ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
+            wifiCard.setViewToClickToExpand(viewToClickToExpand);
+
+            EnableDisableCardHeader wifiCardHeader = new EnableDisableCardHeader(getActivity(),
+                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                        @Override
+                        public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
+                            setWiFiItemsEnabled(false);
+                            enableWiFiCheckBox = header.getCheckBox();
+                            /* Check Box listener */
+                            enableWiFiCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    if (isChecked) {
+                                        //WiFi is enabled
+                                        wifiCard.doExpand();
+                                        wifiConfigurations = WiFiEnvironmentVariable.getConfiguredWiFiConnections(getActivity());
+                                        setWiFiItemsEnabled(true);
+                                        if (wifiConfigurations == null) {
+                                            //No WiFi adapter Found
+                                            enableWiFiCheckBox.setChecked(false);
+                                            setWiFiItemsEnabled(false);
+                                        }
+                                    } else {
+                                        wifiCard.doCollapse();
+                                        setWiFiItemsEnabled(false);
+                                    }
+                                }
+                            });
+                            header.setTitle(getString(R.string.text_view_wifi));
+                        }
+                    });
+            wifiCard.addCardHeader(wifiCardHeader);
+            wifiCard.addCardExpand(new CardWifiExpand(getActivity()));
+
+            wifiCardView.setCard(wifiCard);
         }
 
-        private void setUpLocationElements(){
+        /**
+         * Sets up the location UI elements including action listeners.
+         */
+        public void setUpLocationElements(){
 
-            enableLocationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        setLocationItemsEnabled(true);
-                        storedLocations = LocationEnvironmentVariable.
-                                getLocationEnvironmentVariables(getActivity());
-                        mSelectedLocationItem = -1;
-                    } else {
-                        setLocationItemsEnabled(false);
-                    }
-                }
-            });
+            nameLocationEditText = new EditText(getActivity());
+            nameLocationEditText.setHint(getString(R.string.edit_text_location_name));
+            nameLocationEditText.setLayoutParams(marginTopLayoutParams);
+            latLocationEditText = new EditText(getActivity());
+            latLocationEditText.setHint(getString(R.string.edit_text_location_lat));
+            latLocationEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            latLocationEditText.setLayoutParams(marginTopLayoutParams);
+            lonLocationEditText = new EditText(getActivity());
+            lonLocationEditText.setHint(getString(R.string.edit_text_location_lon));
+            lonLocationEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            lonLocationEditText.setLayoutParams(marginTopLayoutParams);
+            radLocationEditText = new EditText(getActivity());
+            radLocationEditText.setHint(getString(R.string.edit_text_location_rad));
+            radLocationEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            radLocationEditText.setLayoutParams(marginTopLayoutParams);
 
+            /* Select location form Map */
+            selectLocationTextView = new TextView(getActivity());
+            selectLocationTextView.setText(getString(R.string.text_view_select_location));
+            selectLocationTextView.setMinHeight(listPreferredItemHeight);
+            selectLocationTextView.setGravity(Gravity.CENTER_VERTICAL);
+            selectLocationTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            selectLocationTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectLocationTextView.setOnTouchListener(new TextViewTouchListener());
             selectLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.v(LOG_TAG, "Starting select location");
                     Intent intent = new Intent(getActivity(), SelectLocation.class);
-                    if(environment.hasLocation) {
-                        LocationEnvironmentVariable location = environment.getLocationEnvironmentVariable();
-                        Bundle bundle = new Bundle();
-                        bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE, location.getLatitude());
-                        bundle.putDouble(SelectLocation.INTENT_EXTRA_SELECTED_LONGITUDE, location.getLongitude());
-                        intent.putExtras(bundle);
-                    }
-                    Toast.makeText(getActivity(), "Select Location edit", Toast.LENGTH_SHORT).show();
                     getActivity().startActivityForResult(intent, REQUEST_LOCATION_SELECT);
                 }
             });
 
             /* Select stored location */
+            selectStoredLocationTextView = new TextView(getActivity());
+            selectStoredLocationTextView.setText(getString(R.string.text_view__select_stored_location));
+            selectStoredLocationTextView.setMinHeight(listPreferredItemHeight);
+            selectStoredLocationTextView.setGravity(Gravity.CENTER_VERTICAL);
+            selectStoredLocationTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            selectStoredLocationTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectStoredLocationTextView.setOnTouchListener(new TextViewTouchListener());
             selectStoredLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String[] locationNames = new String[storedLocations.size()];
-                    for (int i=0; i<storedLocations.size();i++) {
-                        locationNames[i] = ((LocationEnvironmentVariable)storedLocations.get(i)).getLocationName();
+                    for (int i = 0; i < storedLocations.size(); i++) {
+                        locationNames[i] = ((LocationEnvironmentVariable) storedLocations.get(i)).getLocationName();
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle(R.string.dialog_pick_wifi_connection);
+                    builder.setTitle(R.string.dialog_pick_location_connection);
                     builder.setSingleChoiceItems(locationNames, mSelectedLocationItem, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -549,66 +690,152 @@ public class EditEnvironment extends ActionBarActivity {
 
                 }
             });
+
+            final Card locationCard = new Card(getActivity());
+            ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
+            locationCard.setViewToClickToExpand(viewToClickToExpand);
+
+            EnableDisableCardHeader locationCardHeader = new EnableDisableCardHeader(getActivity(),
+                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                        @Override
+                        public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
+                            setLocationItemsEnabled(false);
+                            enableLocationCheckBox = header.getCheckBox();
+                            enableLocationCheckBox.setChecked(false);
+                            enableLocationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    if (isChecked) {
+                                        locationCard.doExpand();
+                                        setLocationItemsEnabled(true);
+                                        storedLocations = LocationEnvironmentVariable.getLocationEnvironmentVariables(getActivity());
+                                        mSelectedLocationItem = -1;
+                                    } else {
+                                        locationCard.doCollapse();
+                                        setLocationItemsEnabled(false);
+                                    }
+                                }
+                            });
+                            header.setTitle(getString(R.string.text_view_location));
+                        }
+                    });
+            locationCard.addCardHeader(locationCardHeader);
+            locationCard.addCardExpand(new CardLocationExpand(getActivity()));
+
+            locationCardView.setCard(locationCard);
         }
 
+        /**
+         * Sets up the passphrase UI elements including action listeners.
+         */
         public void setUpPassphraseElements(){
-            //Adapter for spinner
-            passphraseAdapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_dropdown_item, Passphrase.passphraseTypes);
-            passphraseTypeSpinner.setAdapter(passphraseAdapter);
-            passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    passphraseEditText.setHint("Set "+Passphrase.passphraseTypes[position]);
-                    passphraseConfirmationEditText.setHint("Confirm "+Passphrase.passphraseTypes[position]);
-                    selectedPassphrasetype = position;
-                    if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
-                        setPassphraseItemsEnabled(true);
-                        setPassphraseItemsVisible(true);
-                        passphraseEditText.setText("");
-                        passphraseConfirmationEditText.setText("");
-                        passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                        passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        pattern = null;
-                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                        setPassphraseItemsEnabled(true);
-                        setPassphraseItemsVisible(true);
-                        passphraseEditText.setText("");
-                        passphraseConfirmationEditText.setText("");
-                        passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
-                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
-                        passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        pattern = null;
-                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN){
-                        setPassphraseItemsEnabled(false);
-                        setPassphraseItemsVisible(false);
 
-                        Intent patternIntent = new Intent(getActivity(), StorePattern.class);
-                        startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
-                    } else if(position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
-                        setPassphraseItemsEnabled(false);
-                        setPassphraseItemsVisible(false);
-                        pattern = null;
-                    }
-                }
+            passphraseEditText = new EditText(getActivity());
+            passphraseEditText.setLayoutParams(marginTopLayoutParams);
+            passphraseConfirmationEditText = new EditText(getActivity());
+            passphraseConfirmationEditText.setLayoutParams(marginTopLayoutParams);
 
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            passphraseEnterPatternTextView = new TextView(getActivity());
+            passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern));
+            passphraseEnterPatternTextView.setMinHeight(listPreferredItemHeight);
+            passphraseEnterPatternTextView.setGravity(Gravity.CENTER_VERTICAL);
+            passphraseEnterPatternTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            passphraseEnterPatternTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            passphraseEnterPatternTextView.setLayoutParams(params);
+            passphraseEnterPatternTextView.setOnTouchListener(new TextViewTouchListener());
+            passphraseEnterPatternTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
-                    selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
-                    setPassphraseItemsEnabled(true);
-                    setPassphraseItemsVisible(true);
-                    passphraseEditText.setText("");
-                    passphraseConfirmationEditText.setText("");
-                    passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                public void onClick(View v) {
+                    Intent patternIntent = new Intent(getActivity(), StorePattern.class);
+                    startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
                 }
             });
+
+            final Card passphraseCard = new Card(getActivity());
+            ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
+            passphraseCard.setViewToClickToExpand(viewToClickToExpand);
+
+            PassphraseCardHeader passphraseCardHeader = new PassphraseCardHeader(getActivity(),
+                    new PassphraseCardHeader.InnerViewElementsSetUpListener() {
+                        @Override
+                        public void onInnerViewElementsSetUp(PassphraseCardHeader header) {
+                            header.setTitle(getString(R.string.text_view_passphrase));
+                            passphraseTypeSpinner = header.getSpinner();
+                            //Adapter for spinner
+                            passphraseAdapter = new ArrayAdapter<String>(getActivity(),
+                                    android.R.layout.simple_spinner_dropdown_item, Passphrase.passphraseTypes);
+
+                            passphraseTypeSpinner.setAdapter(passphraseAdapter);
+                            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+                            passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                    passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
+                                    selectedPassphrasetype = position;
+                                    if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
+                                        setPassphraseItemsEnabled(true);
+                                        setPassphraseItemsVisible(true);
+                                        setPatternTextViewVisible(false);
+                                        passphraseEditText.setText("");
+                                        passphraseConfirmationEditText.setText("");
+                                        passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                        passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                        pattern = null;
+                                        passphraseCard.doExpand();
+                                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
+                                        setPassphraseItemsEnabled(true);
+                                        setPassphraseItemsVisible(true);
+                                        setPatternTextViewVisible(false);
+                                        passphraseEditText.setText("");
+                                        passphraseConfirmationEditText.setText("");
+                                        passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
+                                        passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
+                                        passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                        passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                        pattern = null;
+                                        passphraseCard.doExpand();
+                                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
+                                        setPassphraseItemsEnabled(false);
+                                        setPassphraseItemsVisible(false);
+                                        setPatternTextViewVisible(true);
+                                        passphraseCard.doExpand();
+                                    } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE) {
+                                        setPassphraseItemsEnabled(false);
+                                        setPassphraseItemsVisible(false);
+                                        setPatternTextViewVisible(false);
+                                        pattern = null;
+                                        passphraseCard.doCollapse();
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {
+                                    passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                                    selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+                                    setPassphraseItemsEnabled(true);
+                                    setPassphraseItemsVisible(true);
+                                    passphraseEditText.setText("");
+                                    passphraseConfirmationEditText.setText("");
+                                    passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                    passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                    passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                    passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                    passphraseCard.doExpand();
+                                }
+                            });
+
+                        }
+                    });
+            passphraseCard.addCardHeader(passphraseCardHeader);
+            passphraseCard.addCardExpand(new CardPassphraseExpand(getActivity()));
+
+            passphraseCardView.setCard(passphraseCard);
         }
 
         public void setBluetoothItemsEnabled(boolean flag){
@@ -642,6 +869,15 @@ public class EditEnvironment extends ActionBarActivity {
             else {
                 passphraseEditText.setVisibility(View.INVISIBLE);
                 passphraseConfirmationEditText.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        public void setPatternTextViewVisible(boolean flag){
+            if(flag){
+                passphraseEnterPatternTextView.setVisibility(View.VISIBLE);
+            }
+            else {
+                passphraseEnterPatternTextView.setVisibility(View.GONE);
             }
         }
 
@@ -837,9 +1073,119 @@ public class EditEnvironment extends ActionBarActivity {
             if(requestCode == REQUEST_CREATE_PATTERN){
                 if (resultCode == RESULT_OK) {
                     pattern = data.getIntegerArrayListExtra(StorePattern.EXTRA_PATTERN);
+                    passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
                 }
             }
             super.onActivityResult(requestCode, resultCode, data);
+        }
+
+        private class CardBluetoothExpand extends CardExpand {
+            public CardBluetoothExpand(Context context) {
+                super(context);
+            }
+
+            @Override
+            public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(selectBluetoothDevicesTextView);
+                layout.addView(bluetoothAllCheckbox);
+                parent.addView(layout);
+                return layout;
+            }
+        }
+
+        private class CardWifiExpand extends CardExpand {
+            public CardWifiExpand(Context context) {
+                super(context);
+            }
+
+            @Override
+            public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(selectWiFiConnectionTextView);
+                parent.addView(layout);
+                return layout;
+            }
+        }
+
+        private class CardLocationExpand extends CardExpand {
+            public CardLocationExpand(Context context) {
+                super(context);
+            }
+
+            @Override
+            public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(selectLocationTextView);
+                layout.addView(selectStoredLocationTextView);
+                layout.addView(nameLocationEditText);
+                layout.addView(latLocationEditText);
+                layout.addView(lonLocationEditText);
+                layout.addView(radLocationEditText);
+                parent.addView(layout);
+                return layout;
+            }
+        }
+
+        private class CardPassphraseExpand extends CardExpand {
+            public CardPassphraseExpand(Context context) {
+                super(context);
+            }
+
+            @Override
+            public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                RelativeLayout relativeLayout = new RelativeLayout(getActivity());
+                LinearLayout layout = new LinearLayout(context);
+                layout.setLayoutParams(params);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(passphraseEditText);
+                layout.addView(passphraseConfirmationEditText);
+                relativeLayout.addView(layout);
+                relativeLayout.addView(passphraseEnterPatternTextView);
+                parent.addView(relativeLayout);
+                return layout;
+            }
+        }
+
+        private class CardEnvironmentExpand extends CardExpand {
+            public CardEnvironmentExpand(Context context) {
+                super(context);
+            }
+
+            @Override
+            public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.addView(environmentNameEditText);
+                layout.addView(environmentHintEditText);
+                parent.addView(layout);
+                return layout;
+            }
+        }
+
+        private int convertDipToPx(int pixel){
+            float scale = getResources().getDisplayMetrics().density;
+            return (int) ((pixel * scale) + 0.5f);
+        }
+
+        public class TextViewTouchListener implements View.OnTouchListener{
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        v.setBackgroundColor(textViewTouchedColor);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        v.setBackgroundColor(textViewNormalColor);
+                }
+                return false;
+            }
         }
     }
 }

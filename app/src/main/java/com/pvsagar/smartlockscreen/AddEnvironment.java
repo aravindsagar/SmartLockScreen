@@ -20,6 +20,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -28,6 +29,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,9 +80,6 @@ public class AddEnvironment extends ActionBarActivity {
     private static int mSelectedWiFiItem;
 
     /* Location */
-    private static double latLocation;
-    private static double lonLocation;
-    private static double radLocation;
     private static List<EnvironmentVariable> storedLocations;
     private static int mSelectedLocationItem;
     private static LocationEnvironmentVariable mSelectedLocation;
@@ -209,9 +208,12 @@ public class AddEnvironment extends ActionBarActivity {
         private Spinner passphraseTypeSpinner;
         private EditText passphraseEditText;
         private EditText passphraseConfirmationEditText;
+        private TextView passphraseEnterPatternTextView;
 
         /* Misc */
         int listPreferredItemHeight;
+        int textViewTouchedColor, textViewNormalColor;
+        LinearLayout.LayoutParams marginTopLayoutParams;
 
         public PlaceholderFragment() {
         }
@@ -234,6 +236,11 @@ public class AddEnvironment extends ActionBarActivity {
             passphraseCardView = (CardView) rootView.findViewById(R.id.card_passphrase);
             //Misc
             listPreferredItemHeight = (int) getListPreferredItemHeight();
+            textViewNormalColor = Color.argb(0,0,0,0);
+            textViewTouchedColor = getResources().getColor(R.color.text_view_touched);
+            marginTopLayoutParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            marginTopLayoutParams.topMargin = convertDipToPx(8);
 
             /* Initialization */
             setupEnvironmentBasic();
@@ -284,19 +291,16 @@ public class AddEnvironment extends ActionBarActivity {
         }
 
         private void setupEnvironmentBasic(){
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.topMargin = convertDipToPx(14);
 
             environmentHintEditText = new EditText(getActivity());
             environmentHintEditText.setHint(getString(R.string.edit_text_environment_hint));
             environmentHintEditText.setSingleLine(true);
-            environmentHintEditText.setLayoutParams(layoutParams);
+            environmentHintEditText.setLayoutParams(marginTopLayoutParams);
 
             environmentNameEditText = new EditText(getActivity());
             environmentNameEditText.setHint(getString(R.string.edit_text_environment_name));
             environmentNameEditText.setSingleLine(true);
-            environmentNameEditText.setLayoutParams(layoutParams);
+            environmentNameEditText.setLayoutParams(marginTopLayoutParams);
 
             Card environmentCard = new Card(getActivity());
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
@@ -344,6 +348,7 @@ public class AddEnvironment extends ActionBarActivity {
             selectBluetoothDevicesTextView.setGravity(Gravity.CENTER_VERTICAL);
             selectBluetoothDevicesTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
             selectBluetoothDevicesTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectBluetoothDevicesTextView.setOnTouchListener(new TextViewTouchListener());
             selectBluetoothDevicesTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -457,7 +462,7 @@ public class AddEnvironment extends ActionBarActivity {
             selectWiFiConnectionTextView.setGravity(Gravity.CENTER_VERTICAL);
             selectWiFiConnectionTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
             selectWiFiConnectionTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
-
+            selectWiFiConnectionTextView.setOnTouchListener(new TextViewTouchListener());
             selectWiFiConnectionTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -529,9 +534,6 @@ public class AddEnvironment extends ActionBarActivity {
          * Sets up the location UI elements including action listeners.
          */
         public void setUpLocationElements(){
-            LinearLayout.LayoutParams marginTopLayoutParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            marginTopLayoutParams.topMargin = convertDipToPx(14);
 
             nameLocationEditText = new EditText(getActivity());
             nameLocationEditText.setHint(getString(R.string.edit_text_location_name));
@@ -556,7 +558,7 @@ public class AddEnvironment extends ActionBarActivity {
             selectLocationTextView.setGravity(Gravity.CENTER_VERTICAL);
             selectLocationTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
             selectLocationTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
-            selectLocationTextView.setLayoutParams(marginTopLayoutParams);
+            selectLocationTextView.setOnTouchListener(new TextViewTouchListener());
             selectLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -573,6 +575,7 @@ public class AddEnvironment extends ActionBarActivity {
             selectStoredLocationTextView.setGravity(Gravity.CENTER_VERTICAL);
             selectStoredLocationTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
             selectStoredLocationTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            selectStoredLocationTextView.setOnTouchListener(new TextViewTouchListener());
             selectStoredLocationTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -645,14 +648,29 @@ public class AddEnvironment extends ActionBarActivity {
          * Sets up the passphrase UI elements including action listeners.
          */
         public void setUpPassphraseElements(){
-            LinearLayout.LayoutParams marginTopLayoutParams = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            marginTopLayoutParams.topMargin = convertDipToPx(14);
 
             passphraseEditText = new EditText(getActivity());
             passphraseEditText.setLayoutParams(marginTopLayoutParams);
             passphraseConfirmationEditText = new EditText(getActivity());
             passphraseConfirmationEditText.setLayoutParams(marginTopLayoutParams);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            passphraseEnterPatternTextView = new TextView(getActivity());
+            passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern));
+            passphraseEnterPatternTextView.setMinHeight(listPreferredItemHeight);
+            passphraseEnterPatternTextView.setGravity(Gravity.CENTER_VERTICAL);
+            passphraseEnterPatternTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
+            passphraseEnterPatternTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
+            passphraseEnterPatternTextView.setLayoutParams(params);
+            passphraseEnterPatternTextView.setOnTouchListener(new TextViewTouchListener());
+            passphraseEnterPatternTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent patternIntent = new Intent(getActivity(), StorePattern.class);
+                    startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
+                }
+            });
 
             final Card passphraseCard = new Card(getActivity());
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
@@ -680,6 +698,7 @@ public class AddEnvironment extends ActionBarActivity {
                                     if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
                                         setPassphraseItemsEnabled(true);
                                         setPassphraseItemsVisible(true);
+                                        setPatternTextViewVisible(false);
                                         passphraseEditText.setText("");
                                         passphraseConfirmationEditText.setText("");
                                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -691,6 +710,7 @@ public class AddEnvironment extends ActionBarActivity {
                                     } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
                                         setPassphraseItemsEnabled(true);
                                         setPassphraseItemsVisible(true);
+                                        setPatternTextViewVisible(false);
                                         passphraseEditText.setText("");
                                         passphraseConfirmationEditText.setText("");
                                         passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
@@ -702,13 +722,12 @@ public class AddEnvironment extends ActionBarActivity {
                                     } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
                                         setPassphraseItemsEnabled(false);
                                         setPassphraseItemsVisible(false);
-
-                                        Intent patternIntent = new Intent(getActivity(), StorePattern.class);
-                                        startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
-                                        passphraseCard.doCollapse();
+                                        setPatternTextViewVisible(true);
+                                        passphraseCard.doExpand();
                                     } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE) {
                                         setPassphraseItemsEnabled(false);
                                         setPassphraseItemsVisible(false);
+                                        setPatternTextViewVisible(false);
                                         pattern = null;
                                         passphraseCard.doCollapse();
                                     }
@@ -779,8 +798,17 @@ public class AddEnvironment extends ActionBarActivity {
                 passphraseConfirmationEditText.setVisibility(View.VISIBLE);
             }
             else {
-                passphraseEditText.setVisibility(View.INVISIBLE);
-                passphraseConfirmationEditText.setVisibility(View.INVISIBLE);
+                passphraseEditText.setVisibility(View.GONE);
+                passphraseConfirmationEditText.setVisibility(View.GONE);
+            }
+        }
+
+        public void setPatternTextViewVisible(boolean flag){
+            if(flag){
+                passphraseEnterPatternTextView.setVisibility(View.VISIBLE);
+            }
+            else {
+                passphraseEnterPatternTextView.setVisibility(View.GONE);
             }
         }
 
@@ -995,6 +1023,7 @@ public class AddEnvironment extends ActionBarActivity {
             if(requestCode == REQUEST_CREATE_PATTERN){
                 if (resultCode == RESULT_OK) {
                     pattern = data.getIntegerArrayListExtra(StorePattern.EXTRA_PATTERN);
+                    passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
                 }
             }
             super.onActivityResult(requestCode, resultCode, data);
@@ -1009,7 +1038,6 @@ public class AddEnvironment extends ActionBarActivity {
             public View getInnerView(Context context, ViewGroup parent) {
                 LinearLayout layout = new LinearLayout(context);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                layout.addView(getNewSeparatorView());
                 layout.addView(selectBluetoothDevicesTextView);
                 layout.addView(bluetoothAllCheckbox);
                 parent.addView(layout);
@@ -1026,7 +1054,6 @@ public class AddEnvironment extends ActionBarActivity {
             public View getInnerView(Context context, ViewGroup parent) {
                 LinearLayout layout = new LinearLayout(context);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                layout.addView(getNewSeparatorView());
                 layout.addView(selectWiFiConnectionTextView);
                 parent.addView(layout);
                 return layout;
@@ -1042,7 +1069,6 @@ public class AddEnvironment extends ActionBarActivity {
             public View getInnerView(Context context, ViewGroup parent) {
                 LinearLayout layout = new LinearLayout(context);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                layout.addView(getNewSeparatorView());
                 layout.addView(selectLocationTextView);
                 layout.addView(selectStoredLocationTextView);
                 layout.addView(nameLocationEditText);
@@ -1061,12 +1087,17 @@ public class AddEnvironment extends ActionBarActivity {
 
             @Override
             public View getInnerView(Context context, ViewGroup parent) {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                RelativeLayout relativeLayout = new RelativeLayout(getActivity());
                 LinearLayout layout = new LinearLayout(context);
+                layout.setLayoutParams(params);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                layout.addView(getNewSeparatorView());
                 layout.addView(passphraseEditText);
                 layout.addView(passphraseConfirmationEditText);
-                parent.addView(layout);
+                relativeLayout.addView(layout);
+                relativeLayout.addView(passphraseEnterPatternTextView);
+                parent.addView(relativeLayout);
                 return layout;
             }
         }
@@ -1080,7 +1111,6 @@ public class AddEnvironment extends ActionBarActivity {
             public View getInnerView(Context context, ViewGroup parent) {
                 LinearLayout layout = new LinearLayout(context);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                layout.addView(getNewSeparatorView());
                 layout.addView(environmentNameEditText);
                 layout.addView(environmentHintEditText);
                 parent.addView(layout);
@@ -1093,16 +1123,23 @@ public class AddEnvironment extends ActionBarActivity {
             return (int) ((pixel * scale) + 0.5f);
         }
 
-        private View getNewSeparatorView(){
-            View view = new View(getActivity());
-            view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    convertDipToPx(2)));
-            view.setBackgroundColor(Color.parseColor("#2B497B"));
-            return view;
-        }
-
         public void setBluetoothCheckBoxChecked(boolean checked){
             enableBluetoothCheckBox.setChecked(checked);
+        }
+
+        public class TextViewTouchListener implements View.OnTouchListener{
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        v.setBackgroundColor(textViewTouchedColor);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        v.setBackgroundColor(textViewNormalColor);
+                }
+                return false;
+            }
         }
     }
 }

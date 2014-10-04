@@ -659,8 +659,6 @@ public class EnvironmentProvider extends ContentProvider {
         return new long[]{oldWifiId, wifiId};
     }
 
-    //TODO see whether location entry with same lat, long and radius exists, if yes use that location.
-    // if no, see whether the name is already in use elsewhere. If yes, append name with env name, else insert with given name
     private long[] insertEnvironmentLocation(Uri uri, SQLiteDatabase db, ContentValues values){
         long environmentId = Long.parseLong(uri.getPathSegments().get(1));
         String geofenceSelection = GeoFenceEntry.COLUMN_LOCATION_NAME + " = ? ";

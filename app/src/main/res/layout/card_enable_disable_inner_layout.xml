@@ -43,6 +43,13 @@
             card:card_header_layout_resourceID="@layout/card_enable_disable_header_layout"
             android:layout_height="?android:attr/listPreferredItemHeightSmall"/>
 
+        <!-- Card shadow below header -->
+        <it.gmariotti.cardslib.library.view.component.CardShadowView
+            style="@style/card.shadow_outer_layout"
+            android:id="@+id/card_header_shadow_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
         <!-- Expand layout. You can customize this element with your CardExpand class -->
         <FrameLayout
             android:id="@+id/card_content_expand_layout"

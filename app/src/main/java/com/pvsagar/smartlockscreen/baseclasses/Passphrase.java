@@ -79,11 +79,12 @@ public abstract class Passphrase<PassphraseRepresentation> {
     }
 
     private boolean checkTypeValidity(String variableType){
-        if(variableType.equals(TYPE_NONE) || variableType.equals(TYPE_PASSWORD)
-                || variableType.equals(TYPE_PIN) || variableType.equals(TYPE_PATTERN)){
-            return true;
-        }
-        return false;
+        return variableType.equals(TYPE_NONE) || variableType.equals(TYPE_PASSWORD)
+                || variableType.equals(TYPE_PIN) || variableType.equals(TYPE_PATTERN);
+    }
+
+    public String getPassphraseType(){
+        return passphraseType;
     }
 
     private void encryptPassword(){

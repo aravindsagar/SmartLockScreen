@@ -63,6 +63,8 @@
     <string name="text_view__select_stored_location">Select stored location</string>
     <string name="dialog_pick_stored_location">Stored Location</string>
     <string name="text_view_passphrase">Passphrase</string>
+    <string name="text_view_enter_pattern">Set pattern</string>
+    <string name="text_view_enter_pattern_after_entry">Touch to change pattern</string>
     <string name="alert_no_passphrase_title">Warning</string>
     <string name="alert_no_passphrase_message">No password/pin/pattern set</string>
     <string name="device_admin_name">Smart Lock Screen</string>
