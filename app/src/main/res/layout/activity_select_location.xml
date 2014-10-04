@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.pvsagar.smartlockscreen.SelectLocation$PlaceholderFragment">
+    tools:context="com.pvsagar.smartlockscreen.SelectLocation$PlaceholderFragment"
+    android:fitsSystemWindows="true">
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/map_select_location"
         android:layout_width="match_parent"

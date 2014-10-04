@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.net.wifi.WifiConfiguration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -23,6 +25,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -49,6 +52,7 @@ import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
 import com.pvsagar.smartlockscreen.cards.EnvironmentCardHeader;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +108,14 @@ public class AddEnvironment extends ActionBarActivity {
                     .add(R.id.container, placeholderFragment)
                     .commit();
         }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
+            SystemBarTintManager tintManager = new SystemBarTintManager(this);
+            tintManager.setStatusBarTintEnabled(true);
+            tintManager.setTintColor(getResources().getColor(R.color.action_bar_add_environment));
+        }
     }
 
 
@@ -287,6 +298,9 @@ public class AddEnvironment extends ActionBarActivity {
                     new ActionBar.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT));
+            actionBar.setBackgroundDrawable(new ColorDrawable(
+                    getResources().getColor(R.color.action_bar_add_environment)));
+
             /* End of Action Bar Code */
         }
 

@@ -2,4 +2,11 @@
 <resources>
     <color name="card_background_grey">#ffe9e9e9</color>
     <color name="text_view_touched">#ffeeeeee</color>
+
+    <color name="action_bar_manage_environment">#2346a4</color>
+    <color name="action_bar_add_environment">#ff1a713f</color>
+    <color name="action_bar_edit_environment">#ffa5840d</color>
+    <color name="action_bar_settings_main">#ffa50f66</color>
+    <color name="action_bar_setup">#ff08a6d2</color>
+    <color name="action_bar_location">#ff3a3a3c</color>
 </resources>

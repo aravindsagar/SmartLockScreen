@@ -84,5 +84,6 @@
     <string name="pattern_confirm">Confirm</string>
     <string name="title_activity_set_master_password">Set Master Password</string>
     <string name="master_password_set">Master password set</string>
+    <string name="title_activity_smart_lock_screen_settings">SmartLockScreen Settings</string>
 
 </resources>

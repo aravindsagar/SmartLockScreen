@@ -2,7 +2,9 @@ package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -21,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.Date;
 
@@ -53,6 +57,14 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
         //Init
         setUpActionBar();
         setUpGoogleMap();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            SystemBarTintManager tintManager = new SystemBarTintManager(this);
+            tintManager.setStatusBarTintEnabled(true);
+            tintManager.setTintColor(getResources().getColor(R.color.action_bar_location));
+        }
     }
 
     @Override
@@ -106,6 +118,8 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
                 new ActionBar.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
+        actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(
+                R.color.action_bar_location)));
             /* End of Action Bar Code */
     }
 

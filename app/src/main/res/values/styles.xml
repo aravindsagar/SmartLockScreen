@@ -35,5 +35,4 @@
         <item name="android:background">@color/card_background</item>
         <item name="android:padding">@dimen/card_expand_layout_padding</item>
     </style>
-
 </resources>

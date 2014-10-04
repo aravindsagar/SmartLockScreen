@@ -39,17 +39,13 @@
         <activity
             android:name=".ManageEnvironment"
             android:label="@string/title_activity_manage_environment"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:parentActivityName=".SmartLockScreenSettings">
         </activity>
         <activity
             android:name=".AddEnvironment"
             android:label="@string/title_activity_add_environment"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
         </activity>
         <activity
             android:name=".SelectLocation"
@@ -80,7 +76,17 @@
         <activity
             android:name=".SetMasterPassword"
             android:label="@string/title_activity_set_master_password"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+        </activity>
+        <activity
+            android:name=".SmartLockScreenSettings"
+            android:label="@string/title_activity_smart_lock_screen_settings"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <provider
