@@ -101,12 +101,12 @@ public class SearchLocation extends ActionBarActivity {
             }
         });
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS  | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(getResources().getColor(R.color.action_bar_location));
+            tintManager.setTintColor(getResources().getColor(R.color.action_bar_location_search));
         }
     }
 
@@ -177,7 +177,7 @@ public class SearchLocation extends ActionBarActivity {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
         actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(
-                R.color.action_bar_location)));
+                R.color.action_bar_location_search)));
             /* End of Action Bar Code */
     }
 
@@ -198,6 +198,7 @@ public class SearchLocation extends ActionBarActivity {
                 Log.v(LOG_TAG,""+resultIntent.getExtras().getDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE));
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
+                overridePendingTransition(0, R.anim.abc_fade_out);
             }
         });
     }
@@ -221,5 +222,6 @@ public class SearchLocation extends ActionBarActivity {
         Intent resultIntent = new Intent();
         setResult(RESULT_CANCELED,resultIntent);
         finish();
+        overridePendingTransition(0, R.anim.abc_fade_out);
     }
 }

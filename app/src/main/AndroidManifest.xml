@@ -32,7 +32,7 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyCmsKWYR1zAMlAB-NYo5FG6Hx03ZDP-waI" />
+            android:value="AIzaSyBhho9pFJA8NNNYLzcuEDPLc_coM9S-Fn0" />
 
         <uses-library android:name="com.google.android.maps" />
 
@@ -60,7 +60,7 @@
         <activity
             android:name=".SearchLocation"
             android:label="@string/title_activity_search_location"
-            android:theme="@style/TransparentTheme" >
+            android:theme="@style/TransparentTheme">
         </activity>
         <activity
             android:name=".StorePattern"

@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -44,8 +46,8 @@ public class ManageEnvironment extends ActionBarActivity {
             finish();
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
         startService(BaseService.getServiceIntent(this, null, null));
     }
@@ -98,6 +100,14 @@ public class ManageEnvironment extends ActionBarActivity {
             tintManager = new SystemBarTintManager(getActivity());
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
+            rootView.setPadding(rootView.getPaddingLeft(),
+                    rootView.getPaddingTop() + tintManager.getConfig().getPixelInsetTop(true),
+                    rootView.getPaddingRight(), rootView.getPaddingBottom());
+            View bottomPaddingView = new View(getActivity());
+            bottomPaddingView.setBackgroundColor(Color.TRANSPARENT);
+            bottomPaddingView.setLayoutParams(new AbsListView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, tintManager.getConfig().getNavigationBarHeight()));
+            environmentsListView.addFooterView(bottomPaddingView);
             //Init
             init();
             return rootView;

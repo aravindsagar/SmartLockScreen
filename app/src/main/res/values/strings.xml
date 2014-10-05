@@ -39,7 +39,7 @@
     <string name="alert_wifi_connection_selection_title">No WiFi connection selected</string>
     <string name="alert_wifi_connection_selection_message">Please select a WiFi connection.</string>
     <string name="alert_cancel_edit_environment_title">Warning</string>
-    <string name="alert_cancel_edit_environment_message">do you really want to exit?</string>
+    <string name="alert_cancel_edit_environment_message">Do you really want to exit?</string>
     <string name="alert_name_location_title">Invalid Location name</string>
     <string name="alert_name_location_selection_message">Please Enter a valid Location name.</string>
     <string name="alert_lat_location_title">Invalid Latitude</string>

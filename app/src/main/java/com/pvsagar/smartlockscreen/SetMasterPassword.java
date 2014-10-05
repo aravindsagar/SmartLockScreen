@@ -28,10 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
@@ -90,8 +87,8 @@ public class SetMasterPassword extends ActionBarActivity {
         setUpPassphraseElements();
         setUpButtons();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
@@ -278,18 +275,9 @@ public class SetMasterPassword extends ActionBarActivity {
                         return;
                     }
                 }
-                Passphrase masterPassphrase;
-                if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
-                    masterPassphrase = new Password(passphraseEditText.getText().toString());
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                    masterPassphrase = new Pin(passphraseEditText.getText().toString());
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
-                    masterPassphrase = new NoSecurity();
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
-                    masterPassphrase = new Pattern(pattern);
-                } else {
-                    throw new InternalError("Internal error in " + LOG_TAG);
-                }
+                Passphrase masterPassphrase = PassphraseFactory.getPassphraseInstance(
+                        selectedPassphrasetype,passphraseEditText.getText().toString(),
+                        passphraseEditText.getText().toString(), pattern);
                 Passphrase.setMasterPassword(masterPassphrase, getBaseContext());
                 Toast.makeText(getBaseContext(), getString(R.string.master_password_set), Toast.LENGTH_SHORT).show();
                 finish();

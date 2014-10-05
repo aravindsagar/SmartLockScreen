@@ -18,7 +18,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Created by aravind on 6/9/14.
- * Contains static functions related to detecting the current environment
+ * Contains static functions related to detecting the current environments
  */
 public class EnvironmentDetector {
     private static final String LOG_TAG = EnvironmentDetector.class.getSimpleName();
@@ -52,16 +52,16 @@ public class EnvironmentDetector {
      * This class runs the actual environment detection task in a separate thread. Used internally
      * by EnvironmentDetector class
      */
-    private class EnvironmentDetectorAsyncTask extends AsyncTask<Context, Void, Environment>{
+    private class EnvironmentDetectorAsyncTask extends AsyncTask<Context, Void, List<Environment>>{
 
         /**
-         * The function which is run in background. Checks for the stored environment which matches
+         * The function which is run in background. Checks for the stored environments which matches
          * the current variable values
          * @param params Activity/service context
-         * @return The detected environment
+         * @return The detected environment list
          */
         @Override
-        protected Environment doInBackground(Context... params) {
+        protected List<Environment> doInBackground(Context... params) {
             if(params.length == 0 || params[0] == null){
                 throw new IllegalArgumentException
                         ("The current activity/service context should be passed as argument.");
@@ -113,25 +113,22 @@ public class EnvironmentDetector {
                         potentialEnvironments));
             }
             manageEnvironmentDetectionCriticalSection.release();
-            if(currentEnvironments.size() > 1){
-                Log.w(LOG_TAG, "Environment Conflict, " + currentEnvironments.toString());
-            }
             if(currentEnvironments.size() == 0) {
                 Log.v(LOG_TAG, "No stored environment matched current environment.");
                 return null;
             }
-            return currentEnvironments.get(0);
+            return currentEnvironments;
         }
 
         /**
          * This function is executed in the UI thread when doInBackground is finished. It calls the
          * call back function passed, and passes the detected environment to it
-         * @param environment Result of doInBackground
+         * @param environments Result of doInBackground
          */
         @Override
-        protected void onPostExecute(Environment environment) {
-            callback.onEnvironmentDetected(environment);
-            super.onPostExecute(environment);
+        protected void onPostExecute(List<Environment> environments) {
+            callback.onEnvironmentDetected(environments);
+            super.onPostExecute(environments);
         }
 
         /**
@@ -214,9 +211,9 @@ public class EnvironmentDetector {
     /**
      * Interface which should be extended to receive callback when environment detection background
      * task is over. The implementation registered via EnvironmentDetector.detectCurrentEnvironment
-     * will receive the current environment detected; it can take further actions based on that.
+     * will receive the current environments detected; it can take further actions based on that.
      */
     public interface EnvironmentDetectedCallback{
-        public abstract void onEnvironmentDetected(Environment current);
+        public abstract void onEnvironmentDetected(List<Environment> currentList);
     }
 }

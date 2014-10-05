@@ -94,6 +94,8 @@ public class EditEnvironment extends ActionBarActivity {
 
     private static List<Integer> pattern;
 
+    private static int mPaddingTop = 0, mPaddingBottom;
+
     PlaceholderFragment placeholderFragment;
 
     @Override
@@ -107,12 +109,14 @@ public class EditEnvironment extends ActionBarActivity {
                     .commit();
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_edit_environment));
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
     }
 
@@ -149,6 +153,8 @@ public class EditEnvironment extends ActionBarActivity {
                 }
             }
         } else if(requestCode == REQUEST_LOCATION_SELECT){
+            if(data == null)
+                return;
             Bundle bundle = data.getExtras();
             Location location = (Location)bundle.get(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION);
             placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
@@ -216,6 +222,9 @@ public class EditEnvironment extends ActionBarActivity {
             environment = Environment.getFullEnvironment(getActivity(),environmentName);
 
             /* Variable Initialization */
+            LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.add_environment_card_layout);
+            layout.setPadding(layout.getPaddingLeft(), layout.getPaddingTop() + mPaddingTop,
+                    layout.getPaddingRight(), layout.getPaddingBottom() + mPaddingBottom);
             //Environment details
             environmentCardView = (CardView) rootView.findViewById(R.id.card_environment_basic);
             //Bluetooth
@@ -492,6 +501,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             bluetoothCard.setViewToClickToExpand(viewToClickToExpand);
 
+            bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
             EnableDisableCardHeader bluetoothCardHeader = new EnableDisableCardHeader(getActivity(),
                     new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -541,7 +551,6 @@ public class EditEnvironment extends ActionBarActivity {
                     });
 
             bluetoothCard.addCardHeader(bluetoothCardHeader);
-            bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
             bluetoothCardView.setCard(bluetoothCard);
         }
 
@@ -591,6 +600,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             wifiCard.setViewToClickToExpand(viewToClickToExpand);
 
+            wifiCard.addCardExpand(new CardWifiExpand(getActivity()));
             EnableDisableCardHeader wifiCardHeader = new EnableDisableCardHeader(getActivity(),
                     new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -621,8 +631,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                     });
             wifiCard.addCardHeader(wifiCardHeader);
-            wifiCard.addCardExpand(new CardWifiExpand(getActivity()));
-
             wifiCardView.setCard(wifiCard);
         }
 
@@ -710,6 +718,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             locationCard.setViewToClickToExpand(viewToClickToExpand);
 
+            locationCard.addCardExpand(new CardLocationExpand(getActivity()));
             EnableDisableCardHeader locationCardHeader = new EnableDisableCardHeader(getActivity(),
                     new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -735,8 +744,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                     });
             locationCard.addCardHeader(locationCardHeader);
-            locationCard.addCardExpand(new CardLocationExpand(getActivity()));
-
             locationCardView.setCard(locationCard);
         }
 
@@ -772,6 +779,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             passphraseCard.setViewToClickToExpand(viewToClickToExpand);
 
+            passphraseCard.addCardExpand(new CardPassphraseExpand(getActivity()));
             PassphraseCardHeader passphraseCardHeader = new PassphraseCardHeader(getActivity(),
                     new PassphraseCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -848,8 +856,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                     });
             passphraseCard.addCardHeader(passphraseCardHeader);
-            passphraseCard.addCardExpand(new CardPassphraseExpand(getActivity()));
-
             passphraseCardView.setCard(passphraseCard);
         }
 

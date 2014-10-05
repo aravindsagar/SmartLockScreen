@@ -22,6 +22,8 @@ import com.readystatesoftware.systembartint.SystemBarTintManager;
 public class SmartLockScreenSettings extends ActionBarActivity {
     private static final String LOG_TAG = SmartLockScreenSettings.class.getSimpleName();
 
+    private static int mPaddingTop = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,12 +39,13 @@ public class SmartLockScreenSettings extends ActionBarActivity {
                     getResources().getColor(R.color.action_bar_settings_main)));
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_settings_main));
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
         }
     }
 
@@ -87,6 +90,8 @@ public class SmartLockScreenSettings extends ActionBarActivity {
                     startActivity(new Intent(getActivity(), ManageEnvironment.class));
                 }
             });
+            rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
+                    rootView.getPaddingRight(), rootView.getPaddingBottom());
             return rootView;
         }
     }

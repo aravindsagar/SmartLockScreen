@@ -96,6 +96,7 @@ public class AddEnvironment extends ActionBarActivity {
 
     private PlaceholderFragment placeholderFragment;
 
+    private static int mPaddingTop = 0, mPaddingBottom = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,12 +110,14 @@ public class AddEnvironment extends ActionBarActivity {
                     .commit();
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_add_environment));
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
     }
 
@@ -235,6 +238,9 @@ public class AddEnvironment extends ActionBarActivity {
             View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
 
             /* Variable Initialization */
+            LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.add_environment_card_layout);
+            layout.setPadding(layout.getPaddingLeft(), layout.getPaddingTop() + mPaddingTop,
+                    layout.getPaddingRight(), layout.getPaddingBottom() + mPaddingBottom);
             //Environment details
             environmentCardView = (CardView) rootView.findViewById(R.id.card_environment_basic);
             //Bluetooth
