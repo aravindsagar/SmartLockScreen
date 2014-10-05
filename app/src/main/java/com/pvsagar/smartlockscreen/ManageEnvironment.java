@@ -46,10 +46,6 @@ public class ManageEnvironment extends ActionBarActivity {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-            SystemBarTintManager tintManager = new SystemBarTintManager(this);
-            tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
         }
         startService(BaseService.getServiceIntent(this, null, null));
     }
@@ -89,6 +85,8 @@ public class ManageEnvironment extends ActionBarActivity {
         List<String> environmentHints = new ArrayList<String>();
         ListView environmentsListView;
 
+        private SystemBarTintManager tintManager;
+
         public PlaceholderFragment() {
         }
 
@@ -97,6 +95,9 @@ public class ManageEnvironment extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
             environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
+            tintManager = new SystemBarTintManager(getActivity());
+            tintManager.setStatusBarTintEnabled(true);
+            tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
             //Init
             init();
             return rootView;
@@ -132,7 +133,7 @@ public class ManageEnvironment extends ActionBarActivity {
                     // Capture total checked items
                     final int checkedCount = environmentsListView.getCheckedItemCount();
                     // Set the CAB title according to total checked items
-                    mode.setTitle(checkedCount + " Selected");
+                    mode.setTitle(checkedCount + " selected");
                     // Calls toggleSelection method from ListViewAdapter Class
                     listAdapter.toggleSelection(position);
 
@@ -140,6 +141,7 @@ public class ManageEnvironment extends ActionBarActivity {
                 @Override
                 public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                     mode.getMenuInflater().inflate(R.menu.multi_select_cab_menu,menu);
+                    tintManager.setTintColor(getResources().getColor(R.color.action_mode));
                     return true;
                 }
 
@@ -178,6 +180,7 @@ public class ManageEnvironment extends ActionBarActivity {
                 @Override
                 public void onDestroyActionMode(ActionMode mode) {
                     listAdapter.removeSelection();
+                    tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
                 }
             });
             /* End of adapter code */

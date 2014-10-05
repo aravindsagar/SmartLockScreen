@@ -9,4 +9,5 @@
     <color name="action_bar_settings_main">#ffa50f66</color>
     <color name="action_bar_setup">#ff08a6d2</color>
     <color name="action_bar_location">#ff3a3a3c</color>
+    <color name="action_mode">#ff0d4661</color>
 </resources>

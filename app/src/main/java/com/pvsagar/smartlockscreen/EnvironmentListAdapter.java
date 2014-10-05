@@ -12,6 +12,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.List;
 
@@ -54,6 +55,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Environment.setEnabledInDatabase(context,environmentNames.get(position),
                         isChecked);
+                context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_DETECT_ENVIRONMENT));
             }
         });
         return rootView;

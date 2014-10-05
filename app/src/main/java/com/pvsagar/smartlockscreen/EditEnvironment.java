@@ -473,6 +473,7 @@ public class EditEnvironment extends ActionBarActivity {
                     builder.setPositiveButton(R.string.ok,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            mSelectedBluetoothDevices.clear();
                             for (Integer mSelectedItem : mSelectedBluetoothItems) {
                                 mSelectedBluetoothDevices.add(bluetoothDevices.get(mSelectedItem));
                             }

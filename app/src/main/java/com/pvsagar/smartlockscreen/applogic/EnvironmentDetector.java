@@ -34,7 +34,7 @@ public class EnvironmentDetector {
      * environment runs at a time. Async tasks can be run in parallel in Android versions 1.6 to <3.0,
      * but are sequential in other Android versions.
      */
-    private static final Semaphore manageEnvironmentDetectionCriticalSection = new Semaphore(1);
+    public static final Semaphore manageEnvironmentDetectionCriticalSection = new Semaphore(1);
 
     /**
      * Detects the current environment based on the current values of the environment variables.
@@ -146,6 +146,9 @@ public class EnvironmentDetector {
             for(Environment e: potentialEnvironments){
                 Environment environment = Environment.getFullEnvironment(context, e.getName());
                 if(Utility.checkForNullAndWarn(environment, LOG_TAG)){
+                    continue;
+                }
+                if(!environment.isEnabled()){
                     continue;
                 }
                 if(environment.hasBluetoothDevices &&

@@ -39,7 +39,7 @@
         <activity
             android:name=".ManageEnvironment"
             android:label="@string/title_activity_manage_environment"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:theme="@style/HoloWithActionMode"
             android:parentActivityName=".SmartLockScreenSettings">
         </activity>
         <activity

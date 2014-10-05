@@ -35,4 +35,8 @@
         <item name="android:background">@color/card_background</item>
         <item name="android:padding">@dimen/card_expand_layout_padding</item>
     </style>
+
+    <style name="HoloWithActionMode" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:actionModeBackground">@color/action_mode</item>
+    </style>
 </resources>

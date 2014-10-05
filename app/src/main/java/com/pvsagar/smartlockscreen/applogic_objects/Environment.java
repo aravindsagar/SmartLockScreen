@@ -475,6 +475,8 @@ public class Environment {
                     new EnvironmentVariable[environmentVariables.size()];
             environmentVariables.toArray(environmentVariableArray);
             e.addEnvironmentVariables(environmentVariableArray);
+            e.setBluetoothAllOrAny(envCursor.getInt(envCursor.getColumnIndex(
+                    EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY)) == 1);
             envCursor.close();
             bluetoothCursor.close();
             wifiCursor.close();
