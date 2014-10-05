@@ -26,7 +26,7 @@ public class PatternLockOverlay extends Overlay {
 
     private static final int COLOR_INVALID_PATTERN = Color.rgb(255, 80, 50);
     private static final int COLOR_VALID_PATTERN = Color.rgb(80, 200, 70);
-
+    boolean mIsInputEnabled = true;
     public PatternLockOverlay(Context context, WindowManager windowManager) {
         super(context, windowManager);
     }
@@ -54,6 +54,15 @@ public class PatternLockOverlay extends Overlay {
         final PatternGridView patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
 
         enterPatternLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        enterPatternLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mIsInputEnabled && !(v instanceof PatternGridView)){
+                    context.startService(BaseService.getServiceIntent(context, null,
+                            BaseService.ACTION_DISMISS_PATTERN_OVERLAY_ONLY));
+                }
+            }
+        });
         patternGridView.setPatternListener(new PatternInterface.PatternListener() {
             Timer mClearTimer;
             @Override
@@ -68,6 +77,7 @@ public class PatternLockOverlay extends Overlay {
                     context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
                     patternGridView.setRingColor(COLOR_VALID_PATTERN);
                     patternGridView.setInputEnabled(false);
+                    mIsInputEnabled = false;
                 } else {
                     patternGridView.setRingColor(COLOR_INVALID_PATTERN);
                     statusView.setText("Wrong pattern");

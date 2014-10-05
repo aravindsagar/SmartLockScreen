@@ -72,6 +72,7 @@ public class BaseService extends Service implements
     public static final String ACTION_START_PATTERN_OVERLAY = PACKAGE_NAME + ".START_PATTERN_OVERLAY";
     public static final String ACTION_DISMISS_LOCKSCREEN_OVERLAY = PACKAGE_NAME + ".DISMISS_LOCKSCREEN_OVERLAY";
     public static final String ACTION_DISMISS_PATTERN_OVERLAY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY";
+    public static final String ACTION_DISMISS_PATTERN_OVERLAY_ONLY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY_ONLY";
     public static final String ACTION_UNLOCK = PACKAGE_NAME + ".UNLOCK";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
@@ -188,6 +189,8 @@ public class BaseService extends Service implements
                     if(intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, false)){
                         mIsInCall = true;
                     }
+                } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY_ONLY)) {
+                    mPatternLockOverlay.remove();
                 }
                 //Additional action handling to be done here when more actions are added
             }
