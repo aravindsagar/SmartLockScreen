@@ -21,6 +21,7 @@ import java.util.Timer;
 
 /**
  * Created by aravind on 23/9/14.
+ * Helper class for showing a pattern lock screen.
  */
 public class PatternLockOverlay extends Overlay {
 
@@ -95,5 +96,11 @@ public class PatternLockOverlay extends Overlay {
             }
         });
         return enterPatternLayout;
+    }
+
+    @Override
+    public void execute() {
+        mIsInputEnabled = true;
+        super.execute();
     }
 }
