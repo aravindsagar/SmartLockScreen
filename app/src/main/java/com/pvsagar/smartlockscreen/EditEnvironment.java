@@ -94,8 +94,6 @@ public class EditEnvironment extends ActionBarActivity {
 
     private static List<Integer> pattern;
 
-    private static int mPaddingTop = 0, mPaddingBottom;
-
     PlaceholderFragment placeholderFragment;
 
     @Override
@@ -109,14 +107,11 @@ public class EditEnvironment extends ActionBarActivity {
                     .commit();
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-
+            int flags = getWindow().getAttributes().flags | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+            getWindow().setFlags(flags,flags);
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_edit_environment));
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
-            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
     }
 
@@ -222,9 +217,6 @@ public class EditEnvironment extends ActionBarActivity {
             environment = Environment.getFullEnvironment(getActivity(),environmentName);
 
             /* Variable Initialization */
-            LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.add_environment_card_layout);
-            layout.setPadding(layout.getPaddingLeft(), layout.getPaddingTop() + mPaddingTop,
-                    layout.getPaddingRight(), layout.getPaddingBottom() + mPaddingBottom);
             //Environment details
             environmentCardView = (CardView) rootView.findViewById(R.id.card_environment_basic);
             //Bluetooth
@@ -796,7 +788,6 @@ public class EditEnvironment extends ActionBarActivity {
                             passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                 @Override
                                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                    passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
                                     passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
                                     selectedPassphrasetype = position;
                                     if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {

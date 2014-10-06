@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 
 /**
  * Created by aravind on 24/9/14.
+ * Helper class to expand the notification area
  */
 public class NotificationAreaHelper {
     public static void expand(Context context){

@@ -45,7 +45,8 @@
         <activity
             android:name=".AddEnvironment"
             android:label="@string/title_activity_add_environment"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:windowSoftInputMode="stateVisible|adjustResize" >
         </activity>
         <activity
             android:name=".SelectLocation"
@@ -55,7 +56,8 @@
         <activity
             android:name=".EditEnvironment"
             android:label="@string/title_activity_edit_environment"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:windowSoftInputMode="stateVisible|adjustResize" >
         </activity>
         <activity
             android:name=".SearchLocation"
