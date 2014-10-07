@@ -1,4 +1,4 @@
-package com.pvsagar.smartlockscreen;
+package com.pvsagar.smartlockscreen.adapters;
 
 import android.content.Context;
 import android.util.SparseBooleanArray;
@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 
 import java.util.List;

@@ -3,4 +3,15 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="card_spacing">8dp</dimen>
+    <dimen name="drawer_width">300dp</dimen>
+    <dimen name="user_picture_dimen">48dp</dimen>
+    <dimen name="nav_bar_picture_padding">8dp</dimen>
+    <dimen name="nav_bar_add_button">24dp</dimen>
+    <dimen name="nav_bar_add_button_padding">20dp</dimen>
+    <dimen name="nav_bar_icon_dimen">32dp</dimen>
+    <dimen name="nav_bar_icon_padding">16dp</dimen>
+    <dimen name="nav_bar_text_size">17sp</dimen>
+    <dimen name="nav_bar_secondary_icon_dimen">20dp</dimen>
+    <dimen name="nav_bar_secondary_icon_padding">22dp</dimen>
+    <dimen name="nav_bar_secondary_text_size">13sp</dimen>
 </resources>

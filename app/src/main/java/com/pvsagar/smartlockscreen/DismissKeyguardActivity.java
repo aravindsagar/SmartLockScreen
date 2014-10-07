@@ -52,8 +52,8 @@ public class DismissKeyguardActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DETECT_ENVIRONMENT));
-            finish();
-            overridePendingTransition(0, 0);
+            /*finish();
+            overridePendingTransition(0, 0);*/
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
 
         }
@@ -61,6 +61,7 @@ public class DismissKeyguardActivity extends Activity {
         @Override
         protected void onCancelled(Void aVoid) {
             EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
+            startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
         }
     }
 }

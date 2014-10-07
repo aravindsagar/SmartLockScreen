@@ -2,6 +2,7 @@
 <resources>
     <color name="card_background_grey">#ffe9e9e9</color>
     <color name="text_view_touched">#ffeeeeee</color>
+    <color name="list_item_touched">#8ceeeeee</color>
 
     <color name="action_bar_manage_environment">#2346a4</color>
     <color name="action_bar_add_environment">#ff1a713f</color>
@@ -11,4 +12,8 @@
     <color name="action_bar_location">#803a3a3c</color>
     <color name="action_bar_location_search">#ff3a3a3c</color>
     <color name="action_mode">#ff0d4661</color>
+    <color name="user_profiles_background">#ff716061</color>
+    <color name="nav_bar_add_new_profile_background">#ff282121</color>
+    <color name="nav_bar_list_background">#fff5f5f5</color>
+    <color name="nav_bar_main_item_background">#8cffffff</color>
 </resources>
