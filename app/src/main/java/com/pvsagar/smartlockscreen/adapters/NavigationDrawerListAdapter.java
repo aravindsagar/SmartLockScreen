@@ -3,7 +3,7 @@ package com.pvsagar.smartlockscreen.adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +24,11 @@ import java.util.List;
 public class NavigationDrawerListAdapter extends BaseAdapter{
     private static final String LOG_TAG = NavigationDrawerListAdapter.class.getSimpleName();
 
-    private static final int ITEM_TYPE_PROFILE = 0;
-    private static final int ITEM_TYPE_NEW_PROFILE = 1;
-    private static final int ITEM_TYPE_MAIN = 2;
-    private static final int ITEM_TYPE_SECONDARY = 3;
-    private static final int ITEM_TYPE_SEPARATOR = 4;
+    public static final int ITEM_TYPE_PROFILE = 0;
+    public static final int ITEM_TYPE_NEW_PROFILE = 1;
+    public static final int ITEM_TYPE_MAIN = 2;
+    public static final int ITEM_TYPE_SECONDARY = 3;
+    public static final int ITEM_TYPE_SEPARATOR = 4;
 
     private List<User> mUsers;
     private List<String> mMainItems;
@@ -39,6 +39,8 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
 
     private int selectedProfileIndex = -1, selectedMainItemIndex = -1;
 
+    private Typeface selectedItemTypeface;
+
     public NavigationDrawerListAdapter(Context context, List<User> users, List<String> mainItems,
             List<Integer> mainItemImageRIds, List<String> secondaryItems, List<Integer> secondaryItemImageRIds) {
         mContext = context;
@@ -47,6 +49,8 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         mMainItemImageRIds = mainItemImageRIds;
         mSecondaryItems = secondaryItems;
         mSecondaryItemImageRIds = secondaryItemImageRIds;
+
+        selectedItemTypeface = Typeface.DEFAULT_BOLD;
     }
 
     private Context getContext(){
@@ -68,7 +72,6 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         //TODO use convertView to recycle views. See http://stackoverflow.com/questions/3514548/creating-viewholders-for-listviews-with-different-item-layouts
         switch (getItemViewType(position)){
             case ITEM_TYPE_PROFILE:
-                Log.d(LOG_TAG, "inflating profile");
                 convertView = inflater.inflate(R.layout.nav_drawer_list_item_profile, null);
                 arrayIndex = position;
                 User user = mUsers.get(arrayIndex);
@@ -118,7 +121,7 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
                 TextView itemName = (TextView) convertView.findViewById(R.id.list_item_text_view);
                 itemName.setText(mMainItems.get(arrayIndex));
                 if(arrayIndex == selectedMainItemIndex){
-                    convertView.setBackgroundColor(getContext().getResources().getColor(R.color.text_view_touched));
+                    itemName.setTypeface(selectedItemTypeface);
                 }
                 break;
 
@@ -177,7 +180,7 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
                 arrayIndex = position;
                 return mUsers.get(arrayIndex);
             case ITEM_TYPE_MAIN:
-                arrayIndex = position - mUsers.size() - mMainItems.size() - 3;
+                arrayIndex = position - mUsers.size() - 2;
                 return mMainItems.get(arrayIndex);
             case ITEM_TYPE_SECONDARY:
                 arrayIndex = position - mUsers.size() - mMainItems.size() - 3;
@@ -190,5 +193,18 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    public int getItemArrayIndex(int position) {
+        switch (getItemViewType(position)){
+            case ITEM_TYPE_PROFILE:
+                return position;
+            case ITEM_TYPE_MAIN:
+                return position - mUsers.size() - 2;
+            case ITEM_TYPE_SECONDARY:
+                return position - mUsers.size() - mMainItems.size() - 3;
+            default:
+                return -1;
+        }
     }
 }

@@ -7,8 +7,11 @@
     <color name="action_bar_manage_environment">#2346a4</color>
     <color name="action_bar_add_environment">#ff1a713f</color>
     <color name="action_bar_edit_environment">#ffa5840d</color>
-    <color name="action_bar_settings_main">#ffe37b1e</color>
-    <color name="action_bar_setup">#ff08a6d2</color>
+    <color name="action_bar_setup">#ffaf6814</color>
+
+    <color name="action_bar_unused1">#ffe37b1e</color>
+    <color name="action_bar_unused2">#ff08a6d2</color>
+
     <color name="action_bar_location">#803a3a3c</color>
     <color name="action_bar_location_search">#ff3a3a3c</color>
     <color name="action_mode">#ff0d4661</color>

@@ -72,10 +72,12 @@ public class SetMasterPasswordFragment extends Fragment {
 
     MasterPasswordSetListener mMasterPasswordSetListener;
 
+    int mPaddintTop, mPaddingBottom;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.activity_set_master_password, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_set_master_password, container, false);
 
         passphraseCardView = (CardView) rootView.findViewById(R.id.card_passphrase);
 
@@ -89,13 +91,21 @@ public class SetMasterPasswordFragment extends Fragment {
         doneButton = (Button) rootView.findViewById(R.id.button_confirm);
         cancelButton = (Button) rootView.findViewById(R.id.button_cancel);
 
+        setUpActionBar();
+        setUpPassphraseElements();
+        setUpButtons();
+
+        rootView.setPadding(rootView.getPaddingLeft(), rootView.getTop() + mPaddintTop,
+                rootView.getPaddingRight(), rootView.getBottom() + mPaddingBottom);
+        return rootView;
+    }
+
+    private void setUpActionBar(){
         ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
         if(!Utility.checkForNullAndWarn(actionBar, LOG_TAG)) {
             actionBar.setBackgroundDrawable(new ColorDrawable(
                     getResources().getColor(R.color.action_bar_setup)));
         }
-        setUpPassphraseElements();
-        setUpButtons();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
@@ -103,9 +113,9 @@ public class SetMasterPasswordFragment extends Fragment {
             SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_setup));
+            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
+            mPaddintTop = tintManager.getConfig().getPixelInsetTop(true);
         }
-
-        return rootView;
     }
 
     @Override

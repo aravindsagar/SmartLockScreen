@@ -99,5 +99,7 @@
         <item>Help</item>
         <item>About</item>
     </string-array>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
 
 </resources>
