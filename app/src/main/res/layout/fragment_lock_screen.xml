@@ -39,6 +39,13 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/button_unlock"
             android:id="@+id/unlock_button"/>
+        <ListView
+            android:id="@+id/list_view_notifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:layout_marginRight="@dimen/activity_vertical_margin"
+            />
 
     </LinearLayout>
 </RelativeLayout>

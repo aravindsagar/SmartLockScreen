@@ -11,9 +11,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.adapters.NotificationListAdapter;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
@@ -25,6 +27,7 @@ import com.pvsagar.smartlockscreen.services.BaseService;
  */
 public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();
+    private NotificationListAdapter notificationListAdapter;
 
     public LockScreenOverlayHelper(Context context, WindowManager windowManager){
         super(context, windowManager);
@@ -70,7 +73,19 @@ public class LockScreenOverlayHelper extends Overlay{
                 }
             }
         });
+
+        ListView notificationsListView = (ListView) rLayout.findViewById(R.id.list_view_notifications);
+        notificationListAdapter = new NotificationListAdapter(context);
+        notificationsListView.setAdapter(notificationListAdapter);
+
         return (View) rLayout;
+    }
+
+    public void notificationChanged(){
+        //NotificationListAdapter.currentNotifications.add(lsn);
+        if(notificationListAdapter != null) {
+            notificationListAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

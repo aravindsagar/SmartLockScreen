@@ -12,6 +12,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelUuid;
@@ -74,6 +75,7 @@ public class BaseService extends Service implements
     public static final String ACTION_DISMISS_PATTERN_OVERLAY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY";
     public static final String ACTION_DISMISS_PATTERN_OVERLAY_ONLY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY_ONLY";
     public static final String ACTION_UNLOCK = PACKAGE_NAME + ".UNLOCK";
+    public static final String ACTION_NOTIFICATION_CHANGED = PACKAGE_NAME + ".NOTIFICATION_CHANGED";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
@@ -119,6 +121,12 @@ public class BaseService extends Service implements
         WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mLockScreenOverlayHelper = new LockScreenOverlayHelper(this, windowManager);
         mPatternLockOverlay = new PatternLockOverlay(this, windowManager);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+            Intent intent = new Intent(this,NotificationService.class);
+            Log.d(LOG_TAG,"Starting service");
+            startService(intent);
+        }
 
         super.onCreate();
     }
@@ -191,6 +199,12 @@ public class BaseService extends Service implements
                     }
                 } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY_ONLY)) {
                     mPatternLockOverlay.remove();
+                } else if (action.equals(ACTION_NOTIFICATION_CHANGED)) {
+                    // Add to the list view
+                    //Bundle extras = intent.getExtras();
+                    //LockScreenNotification lsn = (LockScreenNotification)
+                    //        extras.getParcelable(NotificationService.EXTRAS_LOCK_SCREEN_NOTIFICATION);
+                    mLockScreenOverlayHelper.notificationChanged();
                 }
                 //Additional action handling to be done here when more actions are added
             }

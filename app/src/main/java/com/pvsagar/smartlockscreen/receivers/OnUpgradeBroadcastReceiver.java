@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.PowerManager;
 
 import com.pvsagar.smartlockscreen.services.BaseService;
+import com.pvsagar.smartlockscreen.services.NotificationService;
 
 /**
  * Created by aravind on 17/9/14.
@@ -22,5 +23,7 @@ public class OnUpgradeBroadcastReceiver extends BroadcastReceiver {
         if(!powerManager.isScreenOn()){
             context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_OVERLAY));
         }
+        //Starting Notification Listener Service
+        context.startService(new Intent(context, NotificationService.class));
     }
 }
