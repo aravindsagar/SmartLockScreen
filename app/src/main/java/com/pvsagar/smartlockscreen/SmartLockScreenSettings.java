@@ -104,7 +104,7 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
         ActionBar actionBar = getSupportActionBar();
         if(!Utility.checkForNullAndWarn(actionBar, LOG_TAG)){
             actionBar.setBackgroundDrawable(new ColorDrawable(
-                    getResources().getColor(R.color.action_bar_settings_main)));
+                    getResources().getColor(R.color.action_bar_manage_environment)));
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
         }

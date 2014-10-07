@@ -19,4 +19,13 @@
     <color name="nav_bar_add_new_profile_background">#ff282121</color>
     <color name="nav_bar_list_background">#fff5f5f5</color>
     <color name="nav_bar_main_item_background">#8cffffff</color>
+
+    <color name="user_pic_background1">#ff624b90</color>
+    <color name="user_pic_background2">#ff9fa73d</color>
+    <color name="user_pic_background3">#ff825115</color>
+    <color name="user_pic_background4">#ffa34018</color>
+    <color name="user_pic_background5">#ff2f3790</color>
+    <color name="user_pic_background6">#ff537890</color>
+    <color name="user_pic_background7">#ffb7a709</color>
+    <color name="user_pic_background8">#ff31a76f</color>
 </resources>

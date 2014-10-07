@@ -1,12 +1,20 @@
 package com.pvsagar.smartlockscreen.backend_helpers;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
+
+import com.pvsagar.smartlockscreen.R;
+
+import java.util.Date;
+import java.util.Random;
 
 /**
  * Created by aravind on 10/9/14.
@@ -77,5 +85,36 @@ public class Utility {
         //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
         //return _bmp;
         return output;
+    }
+
+    private static final int[] colors = {
+            R.color.user_pic_background1,
+            R.color.user_pic_background2,
+            R.color.user_pic_background3,
+            R.color.user_pic_background4,
+            R.color.user_pic_background5,
+            R.color.user_pic_background6,
+            R.color.user_pic_background7,
+            R.color.user_pic_background8,
+    };
+
+    public static int getRandomColor(Context context){
+        Random r = new Random();
+        r.setSeed(new Date().getTime());
+        int index = r.nextInt(colors.length);
+        return context.getResources().getColor(colors[index]);
+    }
+
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }
