@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;

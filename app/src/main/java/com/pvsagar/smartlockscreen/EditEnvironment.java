@@ -107,9 +107,8 @@ public class EditEnvironment extends ActionBarActivity {
                     .commit();
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
+            int flags = getWindow().getAttributes().flags | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+            getWindow().setFlags(flags,flags);
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_edit_environment));
@@ -149,6 +148,8 @@ public class EditEnvironment extends ActionBarActivity {
                 }
             }
         } else if(requestCode == REQUEST_LOCATION_SELECT){
+            if(data == null)
+                return;
             Bundle bundle = data.getExtras();
             Location location = (Location)bundle.get(AddEnvironment.INTENT_EXTRA_SELECTED_LOCATION);
             placeholderFragment.latLocationEditText.setText(""+location.getLatitude());
@@ -492,6 +493,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             bluetoothCard.setViewToClickToExpand(viewToClickToExpand);
 
+            bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
             EnableDisableCardHeader bluetoothCardHeader = new EnableDisableCardHeader(getActivity(),
                     new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -541,7 +543,6 @@ public class EditEnvironment extends ActionBarActivity {
                     });
 
             bluetoothCard.addCardHeader(bluetoothCardHeader);
-            bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
             bluetoothCardView.setCard(bluetoothCard);
         }
 
@@ -591,6 +592,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             wifiCard.setViewToClickToExpand(viewToClickToExpand);
 
+            wifiCard.addCardExpand(new CardWifiExpand(getActivity()));
             EnableDisableCardHeader wifiCardHeader = new EnableDisableCardHeader(getActivity(),
                     new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -621,8 +623,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                     });
             wifiCard.addCardHeader(wifiCardHeader);
-            wifiCard.addCardExpand(new CardWifiExpand(getActivity()));
-
             wifiCardView.setCard(wifiCard);
         }
 
@@ -710,6 +710,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             locationCard.setViewToClickToExpand(viewToClickToExpand);
 
+            locationCard.addCardExpand(new CardLocationExpand(getActivity()));
             EnableDisableCardHeader locationCardHeader = new EnableDisableCardHeader(getActivity(),
                     new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -735,8 +736,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                     });
             locationCard.addCardHeader(locationCardHeader);
-            locationCard.addCardExpand(new CardLocationExpand(getActivity()));
-
             locationCardView.setCard(locationCard);
         }
 
@@ -772,6 +771,7 @@ public class EditEnvironment extends ActionBarActivity {
             ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
             passphraseCard.setViewToClickToExpand(viewToClickToExpand);
 
+            passphraseCard.addCardExpand(new CardPassphraseExpand(getActivity()));
             PassphraseCardHeader passphraseCardHeader = new PassphraseCardHeader(getActivity(),
                     new PassphraseCardHeader.InnerViewElementsSetUpListener() {
                         @Override
@@ -788,7 +788,6 @@ public class EditEnvironment extends ActionBarActivity {
                             passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                 @Override
                                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                    passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
                                     passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
                                     selectedPassphrasetype = position;
                                     if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
@@ -848,8 +847,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                     });
             passphraseCard.addCardHeader(passphraseCardHeader);
-            passphraseCard.addCardExpand(new CardPassphraseExpand(getActivity()));
-
             passphraseCardView.setCard(passphraseCard);
         }
 

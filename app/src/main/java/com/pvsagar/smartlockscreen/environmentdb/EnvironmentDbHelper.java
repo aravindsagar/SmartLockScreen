@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.AppWhitelistEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
@@ -151,22 +152,27 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
 
     }
 
-    public static void insertDefaultUser(SQLiteDatabase db){
+    public static long insertDefaultUser(SQLiteDatabase db){
         //Checking whether the default user is present
         Cursor userCursor = db.query(UsersEntry.TABLE_NAME, null, UsersEntry.COLUMN_USER_NAME + " = ? ",
                 new String[]{UsersEntry.DEFAULT_USER_NAME}, null, null, null);
         if(userCursor.getCount() > 0){
+            userCursor.moveToFirst();
+            long id = userCursor.getLong(userCursor.getColumnIndex(UsersEntry._ID));
             userCursor.close();
-            return;
+            return id;
         }
         userCursor.close();
         ContentValues userValues = new ContentValues();
         userValues.put(UsersEntry.COLUMN_USER_NAME, UsersEntry.DEFAULT_USER_NAME);
-        db.insert(UsersEntry.TABLE_NAME, null, userValues);
+        return db.insert(UsersEntry.TABLE_NAME, null, userValues);
     }
 
     public static void insertDefaultUser(Context context){
-        insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase());
+        long id = insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase());
+        if(id >= 0){
+            SharedPreferencesHelper.setDeviceOwnerUserId(context, id);
+        }
     }
 
     private static EnvironmentDbHelper mInstance = null;

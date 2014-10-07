@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
@@ -225,10 +226,10 @@ public class Environment {
      * Inserts the environment into the database
      * @param context Activity/ service context
      */
-    public void insertIntoDatabase(Context context){
+    public void insertIntoDatabase(final Context context){
         Utility.checkForNullAndThrowException(context);
 
-        Environment e = this;
+        Environment e = Environment.this;
         Utility.checkForNullAndThrowException(e.getName());
         Utility.checkForNullAndThrowException(e.getHint());
         ContentValues environmentValues = new ContentValues();
@@ -290,14 +291,13 @@ public class Environment {
      * finding the records to update
      * @param context activity/service context
      * @param oldName The name of the environment to be modified
-     * @return success code
      */
-    public boolean updateInDatabase(Context context, String oldName){
+    public void updateInDatabase(final Context context, String oldName){
         if(oldName == null || oldName.isEmpty()){
             oldName = getName();
         }
         Environment oldEnvironment = getFullEnvironment(context, oldName);
-        if(oldEnvironment == null) return false;
+        if(oldEnvironment == null) return;
         ContentValues environmentValues = new ContentValues();
         environmentValues.put(EnvironmentEntry.COLUMN_NAME, getName());
         environmentValues.put(EnvironmentEntry.COLUMN_BLUETOOTH_ALL_OR_ANY,
@@ -324,7 +324,7 @@ public class Environment {
                     oldEnvironment.locationEnvironmentVariable.equals(locationEnvironmentVariable)){
                 int updatedEntries = context.getContentResolver().update(
                         EnvironmentEntry.buildEnvironmentUriWithIdAndLocation(oldEnvironment.id),
-                                locationEnvironmentVariable.getContentValues(), null, null);
+                        locationEnvironmentVariable.getContentValues(), null, null);
                 if(updatedEntries > 1){
                     removeFromCurrentGeofences(oldEnvironment.getLocationEnvironmentVariable(), context);
                 }
@@ -338,7 +338,7 @@ public class Environment {
             }
         } else if(hasLocation) {
             context.getContentResolver().insert(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndLocation(oldEnvironment.id),
+                            buildEnvironmentUriWithIdAndLocation(oldEnvironment.id),
                     locationEnvironmentVariable.getContentValues());
         }
 
@@ -374,7 +374,6 @@ public class Environment {
                 context.getContentResolver().insert(insertUri, bluetoothValues);
             }
         }
-        return true;
     }
 
     /**
@@ -383,20 +382,31 @@ public class Environment {
      * @param environmentName Name of the environment whose enabled flag should b changed
      * @param enabled The new enabled value
      */
-    public static void setEnabledInDatabase(Context context, String environmentName,
-                                               boolean enabled){
+    public static void setEnabledInDatabase(final Context context, final String environmentName,
+                                               final boolean enabled){
         if(Utility.checkForNullAndWarn(environmentName, LOG_TAG)){
             return;
         }
-        ContentValues environmentValues = new ContentValues();
-        environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, enabled);
-        Environment e = getBareboneEnvironment(context, environmentName);
-        long id;
-        if(e != null) {
-            id = e.id;
-            context.getContentResolver().update(EnvironmentEntry.buildEnvironmentUriWithId(id),
-                    environmentValues, null, null);
-        }
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                ContentValues environmentValues = new ContentValues();
+                environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, enabled);
+                Environment e = getBareboneEnvironment(context, environmentName);
+                long id;
+                if(e != null) {
+                    id = e.id;
+                    context.getContentResolver().update(EnvironmentEntry.buildEnvironmentUriWithId(id),
+                            environmentValues, null, null);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_DETECT_ENVIRONMENT));
+            }
+        }.execute();
     }
 
     /**
@@ -585,22 +595,34 @@ public class Environment {
      * @param context Activity/ service context
      * @param environmentName Name of the environment to be deleted
      */
-    public static void deleteEnvironmentFromDatabase(Context context, String environmentName){
-        Environment e = getFullEnvironment(context, environmentName);
+    public static void deleteEnvironmentFromDatabase(final Context context, final String environmentName){
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                Environment e = getFullEnvironment(context, environmentName);
 
-        if(e != null){
-            context.getContentResolver().delete(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndBluetooth(e.id), null, null);
-            context.getContentResolver().delete(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndWifi(e.id), null, null);
-            int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
-                    buildEnvironmentUriWithIdAndLocation(e.id), null, null);
-            context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
-                    e.id), null, null);
-            if(deletedEntries > 0){
-                removeFromCurrentGeofences(e.getLocationEnvironmentVariable(), context);
+                if(e != null){
+                    context.getContentResolver().delete(EnvironmentEntry.
+                            buildEnvironmentUriWithIdAndBluetooth(e.id), null, null);
+                    context.getContentResolver().delete(EnvironmentEntry.
+                            buildEnvironmentUriWithIdAndWifi(e.id), null, null);
+                    int deletedEntries = context.getContentResolver().delete(EnvironmentEntry.
+                            buildEnvironmentUriWithIdAndLocation(e.id), null, null);
+                    context.getContentResolver().delete(EnvironmentEntry.buildEnvironmentUriWithId(
+                            e.id), null, null);
+                    if(deletedEntries > 0){
+                        removeFromCurrentGeofences(e.getLocationEnvironmentVariable(), context);
+                    }
+                }
+                return null;
             }
-        }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                context.startService(BaseService.getServiceIntent(context, null,
+                        BaseService.ACTION_DETECT_ENVIRONMENT));
+            }
+        }.execute();
     }
 
     private static void removeFromCurrentGeofences(LocationEnvironmentVariable variable, Context context){

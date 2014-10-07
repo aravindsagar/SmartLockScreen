@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<it.gmariotti.cardslib.library.view.component.CardShadowView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/card.shadow_outer_layout"
+    android:id="@+id/card_header_shadow_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>

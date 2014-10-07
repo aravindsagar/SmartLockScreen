@@ -12,6 +12,7 @@ public class SharedPreferencesHelper {
     private static final String PACKAGE_NAME = SharedPreferencesHelper.class.getPackage().getName();
     private static final String KEY_MASTER_PASSWORD = PACKAGE_NAME + ".MASTER_PASSWORD";
     private static final String KEY_MASTER_PASSWORD_TYPE = PACKAGE_NAME + ".MASTER_PASSWORD_TYPE";
+    private static final String KEY_DEVICE_OWNER_USER_ID = PACKAGE_NAME + ".DEVICE_OWNER_USER_ID";
 
     private static SharedPreferences preferences;
 
@@ -39,6 +40,18 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(KEY_MASTER_PASSWORD, passwordString);
         editor.putString(KEY_MASTER_PASSWORD_TYPE, passwordType);
+        editor.apply();
+    }
+
+    public static long getDeviceOwnerUserId(Context context){
+        initPreferences(context);
+        return preferences.getLong(KEY_DEVICE_OWNER_USER_ID, 1);
+    }
+
+    public static void setDeviceOwnerUserId(Context context, long id){
+        initPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(KEY_DEVICE_OWNER_USER_ID, id);
         editor.apply();
     }
 }

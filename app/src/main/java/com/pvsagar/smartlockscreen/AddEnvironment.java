@@ -21,7 +21,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,7 +95,6 @@ public class AddEnvironment extends ActionBarActivity {
 
     private PlaceholderFragment placeholderFragment;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,9 +107,8 @@ public class AddEnvironment extends ActionBarActivity {
                     .commit();
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
+            int flags = getWindow().getAttributes().flags | WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+            getWindow().setFlags(flags,flags);
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_add_environment));
@@ -171,20 +168,6 @@ public class AddEnvironment extends ActionBarActivity {
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -234,7 +217,6 @@ public class AddEnvironment extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_add_environment, container, false);
 
-            /* Variable Initialization */
             //Environment details
             environmentCardView = (CardView) rootView.findViewById(R.id.card_environment_basic);
             //Bluetooth

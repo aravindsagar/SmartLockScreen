@@ -39,4 +39,5 @@
     <style name="HoloWithActionMode" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionModeBackground">@color/action_mode</item>
     </style>
+
 </resources>

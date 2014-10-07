@@ -1,8 +1,19 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
+<android.support.v4.widget.DrawerLayout
     android:layout_height="match_parent"
-    tools:context="com.pvsagar.smartlockscreen.SmartLockScreenSettings"
-    tools:ignore="MergeRootFrame"
-    android:fitsSystemWindows="true" />
+    android:layout_width="match_parent"
+    android:id="@+id/drawer_layout_main_settings"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/container"/>
+    <ListView
+        android:layout_width="@dimen/drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:id="@+id/drawer_list_view"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:choiceMode="singleChoice"
+        android:background="@color/nav_bar_list_background"/>
+</android.support.v4.widget.DrawerLayout>

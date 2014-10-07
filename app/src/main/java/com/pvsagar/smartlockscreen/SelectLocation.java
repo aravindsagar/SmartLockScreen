@@ -43,6 +43,7 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
     private Location selectedLocation;
     private LocationClient mLocationClient;
 
+    private int paddingTop = 0, paddingBottom = 0;
 
     //Intent
     Intent intent;
@@ -56,15 +57,17 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
         intent = getIntent();
         //Init
         setUpActionBar();
-        setUpGoogleMap();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_location));
+            paddingBottom = tintManager.getConfig().getNavigationBarHeight();
+            paddingTop = tintManager.getConfig().getPixelInsetTop(true);
         }
+        setUpGoogleMap();
     }
 
     @Override
@@ -104,8 +107,9 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
                 public void onClick(View v) {
                     //On search button click
                     Intent searchActivityIntent = new Intent(getBaseContext(),SearchLocation.class);
-                    searchActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//                    searchActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivityForResult(searchActivityIntent, REQUEST_SEARCH_LOCATION);
+                    overridePendingTransition(R.anim.abc_fade_in, 0);
                 }
         });
 
@@ -125,6 +129,7 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
 
     private void setUpGoogleMap(){
         googleMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.map_select_location)).getMap();
+        googleMap.setPadding(0, paddingTop, 0, paddingBottom);
         googleMap.setMyLocationEnabled(true);
         googleMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override

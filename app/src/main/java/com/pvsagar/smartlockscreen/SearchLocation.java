@@ -14,8 +14,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -101,33 +99,13 @@ public class SearchLocation extends ActionBarActivity {
             }
         });
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS  | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(getResources().getColor(R.color.action_bar_location));
+            tintManager.setTintColor(getResources().getColor(R.color.action_bar_location_search));
         }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.search_location, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void setUpActionBar(){
@@ -177,7 +155,7 @@ public class SearchLocation extends ActionBarActivity {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
         actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(
-                R.color.action_bar_location)));
+                R.color.action_bar_location_search)));
             /* End of Action Bar Code */
     }
 
@@ -198,6 +176,7 @@ public class SearchLocation extends ActionBarActivity {
                 Log.v(LOG_TAG,""+resultIntent.getExtras().getDouble(SelectLocation.INTENT_EXTRA_SELECTED_LATITUDE));
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
+                overridePendingTransition(0, R.anim.abc_fade_out);
             }
         });
     }
@@ -221,5 +200,6 @@ public class SearchLocation extends ActionBarActivity {
         Intent resultIntent = new Intent();
         setResult(RESULT_CANCELED,resultIntent);
         finish();
+        overridePendingTransition(0, R.anim.abc_fade_out);
     }
 }

@@ -31,6 +31,10 @@ public class User {
         this.userName = userName;
     }
 
+    public long getId(){
+        return id;
+    }
+
     public static User getDefaultUser(Context context){
         Cursor userCursor = context.getContentResolver().query(UsersEntry.CONTENT_URI, null,
                 UsersEntry.COLUMN_USER_NAME + " = ? ", new String[]{UsersEntry.DEFAULT_USER_NAME},

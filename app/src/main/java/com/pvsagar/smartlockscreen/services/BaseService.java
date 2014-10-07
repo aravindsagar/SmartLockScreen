@@ -79,6 +79,8 @@ public class BaseService extends Service implements
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
+    private static List<Environment> currentEnvironments;
+
     private LocationClient mLocationClient;
     // Defines the allowable request types.
     public enum REQUEST_TYPE {ADD_GEOFENCES, REMOVE_GEOFENCES}
@@ -400,8 +402,9 @@ public class BaseService extends Service implements
     }
 
     @Override
-    public void onEnvironmentDetected(Environment current) {
-        if (current == null) {
+    public void onEnvironmentDetected(List<Environment> currentList) {
+        currentEnvironments = currentList;
+        if (currentList == null) {
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
             Passphrase masterPassphrase = Passphrase.getMasterPassword(this);
@@ -413,6 +416,7 @@ public class BaseService extends Service implements
                 }
             }
         } else {
+            Environment current = currentList.get(0); //TODO replace with a proper algorithm
             User user = User.getCurrentUser(this);
             if(user != null) {
                 Passphrase passphrase = user.getPassphraseForEnvironment(this, current);

@@ -2,10 +2,9 @@
 <resources>
 
     <string name="app_name">SmartLockScreen</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="button_unlock">Unlock</string>
-    <string name="title_activity_manage_environment">Manage Environment</string>
+    <string name="title_activity_manage_environment">Manage Environments</string>
     <string name="action_add_environment">Add Environment</string>
     <string name="title_activity_add_environment">AddEnvironment</string>
     <string name="edit_text_environment_name">Environment Name</string>
@@ -28,7 +27,7 @@
     <string name="done">Done</string>
     <string name="cancel">Cancel</string>
     <string name="edit_text_location_name">Location Name</string>
-    <string name="alert_environment_name_title">Invalid Environment Name</string>
+    <string name="alert_environment_name_title">Invalid environment name</string>
     <string name="alert_environment_name_message">Please check your environment name.</string>
     <string name="alert_environment_name_unique_title">Invalid Environment Name</string>
     <string name="alert_environment_name_unique_message">Environment name already exists.</string>
@@ -39,7 +38,7 @@
     <string name="alert_wifi_connection_selection_title">No WiFi connection selected</string>
     <string name="alert_wifi_connection_selection_message">Please select a WiFi connection.</string>
     <string name="alert_cancel_edit_environment_title">Warning</string>
-    <string name="alert_cancel_edit_environment_message">do you really want to exit?</string>
+    <string name="alert_cancel_edit_environment_message">Do you really want to exit?</string>
     <string name="alert_name_location_title">Invalid Location name</string>
     <string name="alert_name_location_selection_message">Please Enter a valid Location name.</string>
     <string name="alert_lat_location_title">Invalid Latitude</string>
@@ -85,5 +84,20 @@
     <string name="title_activity_set_master_password">Set Master Password</string>
     <string name="master_password_set">Master password set</string>
     <string name="title_activity_smart_lock_screen_settings">SmartLockScreen Settings</string>
+    <string name="user_picture_content_description">User Picture</string>
+    <string name="drop_down_pic_content_description">Choose Profile</string>
+    <string name="add_new_profile_text">Add new profile</string>
+    <string name="user_type_device_owner">Device Owner</string>
+    <string name="user_type_restricted_profile">Restricted Profile</string>
+    <string-array name="nav_drawer_main_items">
+        <item>Manage Environments</item>
+        <item>Environment Overlap</item>
+        <item>Set Master Password</item>
+    </string-array>
+    <string-array name="nav_drawer_secondary_items">
+        <item>General Settings</item>
+        <item>Help</item>
+        <item>About</item>
+    </string-array>
 
 </resources>
