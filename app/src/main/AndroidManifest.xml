@@ -37,12 +37,6 @@
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name=".ManageEnvironment"
-            android:label="@string/title_activity_manage_environment"
-            android:theme="@style/HoloWithActionMode"
-            android:parentActivityName=".SmartLockScreenSettings">
-        </activity>
-        <activity
             android:name=".AddEnvironment"
             android:label="@string/title_activity_add_environment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
@@ -83,7 +77,7 @@
         <activity
             android:name=".SmartLockScreenSettings"
             android:label="@string/title_activity_smart_lock_screen_settings"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/HoloWithActionMode">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

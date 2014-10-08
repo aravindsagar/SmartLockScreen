@@ -7,11 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.TypedValue;
@@ -20,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -34,7 +30,6 @@ import android.widget.Toast;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.StorePattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
-import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -101,18 +96,18 @@ public class SetMasterPasswordFragment extends Fragment {
     }
 
     private void setUpActionBar(){
-        ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+        /*ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
         if(!Utility.checkForNullAndWarn(actionBar, LOG_TAG)) {
             actionBar.setBackgroundDrawable(new ColorDrawable(
                     getResources().getColor(R.color.action_bar_setup)));
-        }
+        }*/
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            /*getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);*/
 
             SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
-            tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(getResources().getColor(R.color.action_bar_setup));
+            /*tintManager.setStatusBarTintEnabled(true);
+            tintManager.setTintColor(getResources().getColor(R.color.action_bar_setup));*/
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
             mPaddintTop = tintManager.getConfig().getPixelInsetTop(true);
         }

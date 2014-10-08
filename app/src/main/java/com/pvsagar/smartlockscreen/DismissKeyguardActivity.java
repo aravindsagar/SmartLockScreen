@@ -1,17 +1,21 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 
 public class DismissKeyguardActivity extends Activity {
+    private static final String LOG_TAG = DismissKeyguardActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +45,28 @@ public class DismissKeyguardActivity extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                Thread.sleep(50);
+                Thread.sleep(100);
+                while (true){
+                    KeyguardManager keyguardManager = (KeyguardManager) DismissKeyguardActivity.this.getSystemService(KEYGUARD_SERVICE);
+                    if(keyguardManager.isKeyguardSecure()){
+                        Log.d(LOG_TAG, "keyguard locked");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(DismissKeyguardActivity.this, "keyguard locked", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Log.d(LOG_TAG, "keyguard unlocked");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(DismissKeyguardActivity.this, "keyguard unlocked", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        break;
+                    }
+                }
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -52,8 +77,8 @@ public class DismissKeyguardActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DETECT_ENVIRONMENT));
-            /*finish();
-            overridePendingTransition(0, 0);*/
+            finish();
+            overridePendingTransition(0, 0);
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
 
         }

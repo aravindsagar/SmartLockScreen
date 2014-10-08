@@ -34,7 +34,9 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class SmartLockScreenSettings extends ActionBarActivity implements SetMasterPasswordFragment.MasterPasswordSetListener{
+public class SmartLockScreenSettings extends ActionBarActivity
+        implements SetMasterPasswordFragment.MasterPasswordSetListener,
+        ManageEnvironmentFragment.ActionModeListener{
     private static final String LOG_TAG = SmartLockScreenSettings.class.getSimpleName();
 
     private static final int INDEX_MANAGE_ENVIRONMENTS = 0;
@@ -52,6 +54,7 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
     ListView navDrawerListView;
     NavigationDrawerListAdapter listAdapter;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    int actionBarColor;
 
     List<String> mainItemList;
 
@@ -102,9 +105,9 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
 
     private void setUpActionBar(){
         ActionBar actionBar = getSupportActionBar();
+        actionBarColor = getResources().getColor(R.color.action_bar_settings);
         if(!Utility.checkForNullAndWarn(actionBar, LOG_TAG)){
-            actionBar.setBackgroundDrawable(new ColorDrawable(
-                    getResources().getColor(R.color.action_bar_manage_environment)));
+            actionBar.setBackgroundDrawable(new ColorDrawable(actionBarColor));
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
         }
@@ -114,7 +117,7 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
 
             tintManager = new SystemBarTintManager(this);
             tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
+            tintManager.setTintColor(actionBarColor);
             mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
@@ -138,12 +141,9 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
         View footerView = new View(this);
         footerView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
         footerView.setBackgroundColor(Color.TRANSPARENT);
-        footerView.setFocusable(false);
-        View headerView = new View(this);
-        headerView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mPaddingTop));
-        headerView.setBackgroundColor(Color.TRANSPARENT);
-        navDrawerListView.addFooterView(footerView);
-        navDrawerListView.addHeaderView(headerView);
+        navDrawerListView.addFooterView(footerView, null, false);
+        navDrawerListView.setPadding(navDrawerListView.getPaddingLeft(), navDrawerListView.getPaddingTop() + mPaddingTop,
+                navDrawerListView.getPaddingRight(), navDrawerListView.getPaddingBottom());
         navDrawerListView.setAdapter(listAdapter);
 
         navDrawerListView.setSelection(userList.size() + 2);
@@ -164,10 +164,21 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
         drawerLayout.openDrawer(Gravity.START);
     }
 
+    @Override
+    public void onActionModeDestroyed() {
+        tintManager.setTintColor(actionBarColor);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+    }
+
+    @Override
+    public void onActionModeCreated() {
+        tintManager.setTintColor(getResources().getColor(R.color.action_mode));
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            position--; //Due to the header view
             switch (listAdapter.getItemViewType(position)){
                 case NavigationDrawerListAdapter.ITEM_TYPE_PROFILE:
                     listAdapter.setSelectedProfileIndex(listAdapter.getItemArrayIndex(position));
@@ -176,8 +187,6 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
                     //TODO after user profiles are enabled
                     break;
                 case NavigationDrawerListAdapter.ITEM_TYPE_MAIN:
-                    navDrawerListView.setSelection(position);
-                    navDrawerListView.setItemChecked(position, true);
                     FragmentManager fragmentManager = getFragmentManager();
                     boolean isValid = true;
                     int itemArrayIndex = listAdapter.getItemArrayIndex(position);
@@ -203,6 +212,7 @@ public class SmartLockScreenSettings extends ActionBarActivity implements SetMas
                     if(isValid){
                         mTitle = mainItemList.get(itemArrayIndex);
                         listAdapter.setSelectedMainItemIndex(itemArrayIndex);
+                        listAdapter.notifyDataSetChanged();
                     }
                     break;
                 case NavigationDrawerListAdapter.ITEM_TYPE_SECONDARY:

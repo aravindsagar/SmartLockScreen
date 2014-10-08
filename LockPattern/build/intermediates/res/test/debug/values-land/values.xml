@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <!-- From: file:/home/aravind/Android/workspace/SmartLockScreen/LockPattern/build/intermediates/bundles/debug/res/values-land/values.xml -->
-    <eat-comment />
-
-    <item name="alp_42447968_lock_pattern_activity" type="layout">@layout/alp_42447968_lock_pattern_activity_land</item>
-
-</resources>

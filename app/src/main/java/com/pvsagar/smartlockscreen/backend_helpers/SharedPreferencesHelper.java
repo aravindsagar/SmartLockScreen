@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by aravind on 19/9/14.
  */
@@ -13,6 +16,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_MASTER_PASSWORD = PACKAGE_NAME + ".MASTER_PASSWORD";
     private static final String KEY_MASTER_PASSWORD_TYPE = PACKAGE_NAME + ".MASTER_PASSWORD_TYPE";
     private static final String KEY_DEVICE_OWNER_USER_ID = PACKAGE_NAME + ".DEVICE_OWNER_USER_ID";
+    private static final String KEY_PREFIX_OVERLAP_CHOICE = PACKAGE_NAME + ".OVERLAP_CHOICE_AMONG";
 
     private static SharedPreferences preferences;
 
@@ -53,5 +57,25 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(KEY_DEVICE_OWNER_USER_ID, id);
         editor.apply();
+    }
+
+    public static void setEnvironmentOverlapChoice(List<Long> overlappingEnvironmentIds,
+                                                   long chosenEnvironmentId, Context context){
+        initPreferences(context);
+        if(overlappingEnvironmentIds == null || overlappingEnvironmentIds.size() < 1){
+            return;
+        }
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(buildKeyForEnvironmentIds(overlappingEnvironmentIds), chosenEnvironmentId);
+        editor.apply();
+    }
+
+    private static String buildKeyForEnvironmentIds(List<Long> environmentIds){
+        Collections.sort(environmentIds);
+        String key = String.copyValueOf(KEY_PREFIX_OVERLAP_CHOICE.toCharArray());
+        for(long i:environmentIds){
+            key = key.concat("_" + i);
+        }
+        return key;
     }
 }

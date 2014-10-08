@@ -1,6 +1,8 @@
 package com.pvsagar.smartlockscreen.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +28,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     private List<Boolean> enabledValues;
     private List<String> environmentHints;
 
+    private ColorDrawable switchOn, switchOff;
+
     public EnvironmentListAdapter(Context context, List<String> environmentNames,
                                   List<Boolean> enabledValues, List<String> environmentHints){
         super(context, R.layout.list_view_environments,environmentNames);
@@ -34,6 +38,9 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         this.mSelectedItemsIds = new SparseBooleanArray();
         this.enabledValues = enabledValues;
         this.environmentHints = environmentHints;
+
+        switchOn = new ColorDrawable(context.getResources().getColor(R.color.switch_color));
+        switchOff = new ColorDrawable(Color.LTGRAY);
     }
 
     @Override
@@ -41,7 +48,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.linear_layout_list_items);
-        Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
+        final Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
         textView.setText(environmentNames.get(position));
         TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
@@ -50,11 +57,19 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
             linearLayout.setBackgroundColor(context.getResources().getColor(R.color.wallet_holo_blue_light));
         }
         mSwitch.setChecked(enabledValues.get(position));
+        if(!mSwitch.isChecked()){
+            mSwitch.setThumbDrawable(switchOff);
+        }
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Environment.setEnabledInDatabase(context,environmentNames.get(position),
                         isChecked);
+                if(isChecked){
+                    mSwitch.setThumbDrawable(switchOn);
+                } else {
+                    mSwitch.setThumbDrawable(switchOff);
+                }
             }
         });
         return rootView;
@@ -82,7 +97,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
 
     public void selectView(int position, boolean value){
         if(value){
-            mSelectedItemsIds.put(position,value);
+            mSelectedItemsIds.put(position,true);
         }
         else{
             mSelectedItemsIds.delete(position);

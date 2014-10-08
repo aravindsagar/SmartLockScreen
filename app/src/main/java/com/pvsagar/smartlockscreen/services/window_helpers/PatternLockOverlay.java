@@ -9,7 +9,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
-import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
@@ -37,10 +36,9 @@ public class PatternLockOverlay extends Overlay {
     protected WindowManager.LayoutParams getLayoutParams() {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
                         WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                         WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                PixelFormat.TRANSLUCENT);
+                PixelFormat.TRANSPARENT);
         params.dimAmount = 0.5f;
         params.x = 0;
         params.y = 0;

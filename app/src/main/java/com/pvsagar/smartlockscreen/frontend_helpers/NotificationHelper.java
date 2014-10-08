@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
-import com.pvsagar.smartlockscreen.ManageEnvironment;
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.SmartLockScreenSettings;
 
 /**
  * Created by aravind on 25/8/14.
@@ -17,7 +17,7 @@ public class NotificationHelper {
     public static Notification getAppNotification(Context context, String text){
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setPriority(Notification.PRIORITY_MIN);
-        Intent notificationIntent = new Intent(context, ManageEnvironment.class);
+        Intent notificationIntent = new Intent(context, SmartLockScreenSettings.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
         notificationBuilder.setContentIntent(pendingIntent);
