@@ -9,17 +9,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 
 import java.util.List;
 
 /**
  * Created by PV on 9/2/2014.
+ * A list adapter which populates items of the list shown in ManageEnvironmentFragment
  */
 public class EnvironmentListAdapter extends ArrayAdapter<String> {
     private Context context;
@@ -50,7 +54,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.linear_layout_list_items);
         final Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
-        textView.setText(environmentNames.get(position));
+        String environmentName = environmentNames.get(position);
+        textView.setText(environmentName);
         TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
         hintTextView.setText(environmentHints.get(position));
         if(mSelectedItemsIds.get(position)){
@@ -72,6 +77,9 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
                 }
             }
         });
+        ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
+        environmentPicture.setImageDrawable(new CharacterDrawable(
+                Character.toUpperCase(environmentName.charAt(0)), Utility.getRandomColor(getContext())));
         return rootView;
     }
 

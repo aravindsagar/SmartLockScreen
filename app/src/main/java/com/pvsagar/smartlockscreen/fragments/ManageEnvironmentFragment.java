@@ -3,7 +3,9 @@ package com.pvsagar.smartlockscreen.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
@@ -29,6 +31,7 @@ import java.util.List;
 
 /**
  * Created by aravind on 7/10/14.
+ * Fragment which shows a list of added Environments.
  */
 public class ManageEnvironmentFragment extends Fragment {
     private static final String LOG_TAG = ManageEnvironmentFragment.class.getSimpleName();
@@ -39,6 +42,8 @@ public class ManageEnvironmentFragment extends Fragment {
     List<String> environmentHints = new ArrayList<String>();
     ListView environmentsListView;
 
+    private int mPaddingTop, mPaddingBottom;
+
     private ActionModeListener actionModeListener;
 
     public ManageEnvironmentFragment() {
@@ -47,28 +52,31 @@ public class ManageEnvironmentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        /*((ActionBarActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(
-                new ColorDrawable(getResources().getColor(R.color.action_bar_manage_environment)));
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }*/
-
         setHasOptionsMenu(true);
 
         View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
         environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
         SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
-        /*tintManager.setStatusBarTintEnabled(true);
-        tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));*/
-        rootView.setPadding(rootView.getPaddingLeft(),
-                rootView.getPaddingTop() + tintManager.getConfig().getPixelInsetTop(true),
-                rootView.getPaddingRight(), rootView.getPaddingBottom());
-        View bottomPaddingView = new View(getActivity());
-        bottomPaddingView.setBackgroundColor(Color.TRANSPARENT);
-        bottomPaddingView.setLayoutParams(new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, tintManager.getConfig().getNavigationBarHeight()));
-        environmentsListView.addFooterView(bottomPaddingView, null, false);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+        }
+        switch (getActivity().getResources().getConfiguration().orientation){
+            case Configuration.ORIENTATION_UNDEFINED:
+            case Configuration.ORIENTATION_PORTRAIT:
+                rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
+                        rootView.getPaddingRight(), rootView.getPaddingBottom());
+                View bottomPaddingView = new View(getActivity());
+                bottomPaddingView.setBackgroundColor(Color.TRANSPARENT);
+                bottomPaddingView.setLayoutParams(new AbsListView.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
+                environmentsListView.addFooterView(bottomPaddingView, null, false);
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
+                        rootView.getPaddingRight() + mPaddingBottom, rootView.getPaddingBottom());
+                break;
+        }
 
         //Init
         init();

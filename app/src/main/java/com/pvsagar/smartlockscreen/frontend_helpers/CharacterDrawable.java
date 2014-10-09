@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 
 /**
  * Created by aravind on 8/10/14.
+ * Creates a drawable with a character in the center enclosed in a circular colored region
  */
 public class CharacterDrawable extends Drawable {
 
@@ -63,7 +64,7 @@ public class CharacterDrawable extends Drawable {
 
         // draw border
         canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
-                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2, borderPaint);
+                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2.0f, borderPaint);
 
         // draw text
         int width = canvas.getWidth();

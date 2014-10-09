@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import it.gmariotti.cardslib.library.view.CardView;
 
 /**
  * Created by aravind on 7/10/14.
+ * Fragment which gives user a UI to set/change the master password
  */
 public class SetMasterPasswordFragment extends Fragment {
     private static final String LOG_TAG = SetMasterPasswordFragment.class.getSimpleName();
@@ -90,24 +92,23 @@ public class SetMasterPasswordFragment extends Fragment {
         setUpPassphraseElements();
         setUpButtons();
 
-        rootView.setPadding(rootView.getPaddingLeft(), rootView.getTop() + mPaddintTop,
-                rootView.getPaddingRight(), rootView.getBottom() + mPaddingBottom);
+        switch (getActivity().getResources().getConfiguration().orientation){
+            case Configuration.ORIENTATION_UNDEFINED:
+            case Configuration.ORIENTATION_PORTRAIT:
+                rootView.setPadding(rootView.getPaddingLeft(), rootView.getTop() + mPaddintTop,
+                        rootView.getPaddingRight(), rootView.getBottom() + mPaddingBottom);
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                rootView.setPadding(rootView.getPaddingLeft(), rootView.getTop() + mPaddintTop,
+                        rootView.getPaddingRight() + mPaddingBottom, rootView.getBottom());
+                break;
+        }
         return rootView;
     }
 
     private void setUpActionBar(){
-        /*ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
-        if(!Utility.checkForNullAndWarn(actionBar, LOG_TAG)) {
-            actionBar.setBackgroundDrawable(new ColorDrawable(
-                    getResources().getColor(R.color.action_bar_setup)));
-        }*/
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            /*getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);*/
-
             SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
-            /*tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(getResources().getColor(R.color.action_bar_setup));*/
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
             mPaddintTop = tintManager.getConfig().getPixelInsetTop(true);
         }

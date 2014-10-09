@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentEntry;
@@ -47,7 +48,7 @@ public class Environment {
     public boolean hasLocation, hasBluetoothDevices, hasWiFiNetwork, hasNoiseLevel;
 
     /**
-     * Defaut constructor. Sets the boolean values.
+     * Default constructor. Sets the boolean values.
      */
     public Environment(){
         hasLocation = hasNoiseLevel = hasWiFiNetwork = hasBluetoothDevices = false;
@@ -516,6 +517,24 @@ public class Environment {
     }
 
     /**
+     * Returns an environment instance of the environment specified by its id. Only name, hint, id
+     * and enabled flag are populated. The environment variables are not populated
+     * @param context Activity/ service context
+     * @param environmentId Id of the environment whose details are required
+     * @return Instance of environment with specified fields populated.
+     */
+    public static Environment getBareboneEnvironment(Context context, long environmentId){
+        String selection = EnvironmentEntry._ID + " = ? ";
+        String[] selectionArgs = new String[]{"" + environmentId};
+        Cursor envCursor = context.getContentResolver().query(EnvironmentEntry.CONTENT_URI, null,
+                selection, selectionArgs, null);
+        envCursor.moveToFirst();
+        Environment returnEnvironment = buildEnvironmentBareboneFromCursor(envCursor);
+        envCursor.close();
+        return returnEnvironment;
+    }
+
+    /**
      * Gets all the environment barebones for given location
      * @param context Activity/ service context
      * @param location Environments having this location will be returned. id of the location should
@@ -613,6 +632,7 @@ public class Environment {
                     if(deletedEntries > 0){
                         removeFromCurrentGeofences(e.getLocationEnvironmentVariable(), context);
                     }
+                    SharedPreferencesHelper.removeEnvironmentFromOverlapPreferences(e.id, context);
                 }
                 return null;
             }
@@ -634,5 +654,10 @@ public class Environment {
                 geofencesToRemove);
         GeoFenceIntentService.removeFromCurrentGeofences(variable);
         context.startService(intentToRemoveOldGeofenceMonitor);
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

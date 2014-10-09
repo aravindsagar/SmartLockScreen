@@ -24,6 +24,7 @@ import com.pvsagar.smartlockscreen.adapters.NavigationDrawerListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.fragments.ManageEnvironmentFragment;
+import com.pvsagar.smartlockscreen.fragments.OverlappingEnvironmentsFragment;
 import com.pvsagar.smartlockscreen.fragments.SetMasterPasswordFragment;
 import com.pvsagar.smartlockscreen.frontend_helpers.OneTimeInitializer;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -114,10 +115,12 @@ public class SmartLockScreenSettings extends ActionBarActivity
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
 
-            tintManager = new SystemBarTintManager(this);
-            tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintColor(actionBarColor);
+        tintManager = new SystemBarTintManager(this);
+        tintManager.setStatusBarTintEnabled(true);
+        tintManager.setTintColor(actionBarColor);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
@@ -138,10 +141,15 @@ public class SmartLockScreenSettings extends ActionBarActivity
         listAdapter = new NavigationDrawerListAdapter(this, userList, mainItemList, mainItemRIds, secondaryItemList, secondaryItemIds);
 
         navDrawerListView = (ListView) findViewById(R.id.drawer_list_view);
-        View footerView = new View(this);
-        footerView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
-        footerView.setBackgroundColor(Color.TRANSPARENT);
-        navDrawerListView.addFooterView(footerView, null, false);
+        switch (getResources().getConfiguration().orientation){
+            case Configuration.ORIENTATION_UNDEFINED:
+            case Configuration.ORIENTATION_PORTRAIT:
+                View footerView = new View(this);
+                footerView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
+                footerView.setBackgroundColor(Color.TRANSPARENT);
+                navDrawerListView.addFooterView(footerView, null, false);
+                break;
+        }
         navDrawerListView.setPadding(navDrawerListView.getPaddingLeft(), navDrawerListView.getPaddingTop() + mPaddingTop,
                 navDrawerListView.getPaddingRight(), navDrawerListView.getPaddingBottom());
         navDrawerListView.setAdapter(listAdapter);
@@ -197,9 +205,9 @@ public class SmartLockScreenSettings extends ActionBarActivity
                                     .commit();
                             break;
                         case INDEX_ENVIRONMENT_OVERLAP:
-                            /*fragmentManager.beginTransaction()
-                                    .replace(R.id.container, )
-                                    .commit();*/
+                            fragmentManager.beginTransaction()
+                                    .replace(R.id.container, new OverlappingEnvironmentsFragment())
+                                    .commit();
                             break;
                         case INDEX_MASTER_PASSWORD:
                             fragmentManager.beginTransaction()

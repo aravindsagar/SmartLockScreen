@@ -8,6 +8,13 @@
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
     >
+    <ImageView
+        android:layout_width="@dimen/user_picture_dimen"
+        android:layout_height="@dimen/user_picture_dimen"
+        android:id="@+id/image_view_environment_picture"
+        android:layout_gravity="center_vertical"
+        android:scaleType="fitCenter"
+        android:layout_margin="@dimen/nav_bar_picture_padding"/>
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -23,7 +30,6 @@
             android:ellipsize="marquee"
             android:singleLine="true"
             android:paddingRight="0dp"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
         <TextView
@@ -34,21 +40,19 @@
             android:ellipsize="marquee"
             android:singleLine="true"
             android:paddingRight="0dp"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="akjdzkjscblkdchsKDcizHckjZNXckjbzc"
             />
     </LinearLayout>
     <Switch
         android:id="@+id/switch_environment_list"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:focusable="false"
         android:layout_gravity="right|center_vertical"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:paddingLeft="0dp"
         android:thumb="@color/switch_color"
-        android:layout_weight="1"
         />
 
 </LinearLayout>
