@@ -60,6 +60,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
     List<String> mainItemList;
 
     String mTitle;
+    int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +87,57 @@ public class SmartLockScreenSettings extends ActionBarActivity
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
+                switch (listAdapter.getItemViewType(position)){
+                    case NavigationDrawerListAdapter.ITEM_TYPE_PROFILE:
+                        listAdapter.setSelectedProfileIndex(listAdapter.getItemArrayIndex(position));
+                        break;
+                    case NavigationDrawerListAdapter.ITEM_TYPE_NEW_PROFILE:
+                        //TODO after user profiles are enabled
+                        break;
+                    case NavigationDrawerListAdapter.ITEM_TYPE_MAIN:
+                        FragmentManager fragmentManager = getFragmentManager();
+                        boolean isValid = true;
+                        int itemArrayIndex = listAdapter.getItemArrayIndex(position);
+                        switch (itemArrayIndex){
+                            case INDEX_MANAGE_ENVIRONMENTS:
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.container, new ManageEnvironmentFragment())
+                                        .commit();
+                                break;
+                            case INDEX_ENVIRONMENT_OVERLAP:
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.container, new OverlappingEnvironmentsFragment())
+                                        .commit();
+                                break;
+                            case INDEX_MASTER_PASSWORD:
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.container, new SetMasterPasswordFragment())
+                                        .commit();
+                                break;
+                            default:
+                                isValid = false;
+                        }
+                        if(isValid){
+                            mTitle = mainItemList.get(itemArrayIndex);
+                            listAdapter.setSelectedMainItemIndex(itemArrayIndex);
+                            listAdapter.notifyDataSetChanged();
+                        }
+                        break;
+                    case NavigationDrawerListAdapter.ITEM_TYPE_SECONDARY:
+                        fragmentManager = getFragmentManager();
+                        switch (listAdapter.getItemArrayIndex(position)){
+                            //TODO launch appropriate activities
+                            default:
+                                Toast.makeText(SmartLockScreenSettings.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    default:
+                        return;
+                }
                 if(mTitle != null) {
                     setTitle(mTitle);
                 }
+                position = -1;
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -187,53 +236,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
     private class DrawerItemClickListener implements ListView.OnItemClickListener{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            switch (listAdapter.getItemViewType(position)){
-                case NavigationDrawerListAdapter.ITEM_TYPE_PROFILE:
-                    listAdapter.setSelectedProfileIndex(listAdapter.getItemArrayIndex(position));
-                    break;
-                case NavigationDrawerListAdapter.ITEM_TYPE_NEW_PROFILE:
-                    //TODO after user profiles are enabled
-                    break;
-                case NavigationDrawerListAdapter.ITEM_TYPE_MAIN:
-                    FragmentManager fragmentManager = getFragmentManager();
-                    boolean isValid = true;
-                    int itemArrayIndex = listAdapter.getItemArrayIndex(position);
-                    switch (itemArrayIndex){
-                        case INDEX_MANAGE_ENVIRONMENTS:
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.container, new ManageEnvironmentFragment())
-                                    .commit();
-                            break;
-                        case INDEX_ENVIRONMENT_OVERLAP:
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.container, new OverlappingEnvironmentsFragment())
-                                    .commit();
-                            break;
-                        case INDEX_MASTER_PASSWORD:
-                            fragmentManager.beginTransaction()
-                                    .replace(R.id.container, new SetMasterPasswordFragment())
-                                    .commit();
-                            break;
-                        default:
-                            isValid = false;
-                    }
-                    if(isValid){
-                        mTitle = mainItemList.get(itemArrayIndex);
-                        listAdapter.setSelectedMainItemIndex(itemArrayIndex);
-                        listAdapter.notifyDataSetChanged();
-                    }
-                    break;
-                case NavigationDrawerListAdapter.ITEM_TYPE_SECONDARY:
-                    fragmentManager = getFragmentManager();
-                    switch (listAdapter.getItemArrayIndex(position)){
-                        //TODO launch appropriate activities
-                        default:
-                            Toast.makeText(SmartLockScreenSettings.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                default:
-                    return;
-            }
+            SmartLockScreenSettings.this.position = position;
             drawerLayout.closeDrawers();
         }
     }

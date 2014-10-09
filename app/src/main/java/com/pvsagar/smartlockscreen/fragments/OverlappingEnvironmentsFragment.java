@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.adapters.RadioButtonListAdapter;
@@ -32,6 +34,7 @@ public class OverlappingEnvironmentsFragment extends Fragment {
 
     private LinearLayout mLinearLayout;
     private int mListPreferredItemHeight, mVerticalPadding, mHorizontalPadding;
+    private boolean isEmpty = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,9 +52,19 @@ public class OverlappingEnvironmentsFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         mLinearLayout.setOrientation(LinearLayout.VERTICAL);
         rootView.setBackgroundColor(getResources().getColor(R.color.card_background_grey));
-        rootView.addView(mLinearLayout);
 
         addRadioButtonLists(inflater);
+        if(isEmpty){
+            TextView textView = new TextView(getActivity());
+            textView.setText(getString(R.string.no_overlap_detected));
+            textView.setGravity(Gravity.CENTER);
+            textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+            return textView;
+        }
+
+        rootView.addView(mLinearLayout);
 
         SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
         int mPaddingBottom, mPaddingTop;
@@ -88,6 +101,10 @@ public class OverlappingEnvironmentsFragment extends Fragment {
     private void addRadioButtonLists(LayoutInflater inflater){
         final List<OverlappingEnvironmentIdsWithResolved> environmentIdsWithResolved =
                 SharedPreferencesHelper.getAllEnvironmentOverlaps(getActivity());
+        if(environmentIdsWithResolved == null || environmentIdsWithResolved.size() == 0){
+            isEmpty = true;
+            return;
+        }
         for (final OverlappingEnvironmentIdsWithResolved resolved : environmentIdsWithResolved) {
             ListView listView = new ListView(getActivity());
             AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener() {

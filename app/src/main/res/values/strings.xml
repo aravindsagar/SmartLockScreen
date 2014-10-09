@@ -101,5 +101,6 @@
     </string-array>
     <string name="drawer_open">Drawer Open</string>
     <string name="drawer_close">Drawer Close</string>
+    <string name="no_overlap_detected">No overlap detected so far</string>
 
 </resources>

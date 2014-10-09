@@ -8,7 +8,7 @@ import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
  */
 public class NoSecurity extends Passphrase<Void> {
     public NoSecurity(){
-        super(Passphrase.TYPE_NONE);
+        super(Passphrase.TYPE_NONE, null);
     }
 
     @Override

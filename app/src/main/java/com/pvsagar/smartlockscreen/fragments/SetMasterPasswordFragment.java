@@ -26,13 +26,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.StorePattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
+import com.pvsagar.smartlockscreen.services.BaseService;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.List;
@@ -307,8 +307,10 @@ public class SetMasterPasswordFragment extends Fragment {
                 Passphrase masterPassphrase = PassphraseFactory.getPassphraseInstance(
                         selectedPassphrasetype, passphraseEditText.getText().toString(),
                         passphraseEditText.getText().toString(), pattern);
+
                 Passphrase.setMasterPassword(masterPassphrase, getActivity());
-                Toast.makeText(getActivity(), getString(R.string.master_password_set), Toast.LENGTH_SHORT).show();
+                getActivity().startService(BaseService.getServiceIntent(getActivity(),
+                        null, BaseService.ACTION_DETECT_ENVIRONMENT));
                 mMasterPasswordSetListener.onMasterPasswordSet();
             }
         });

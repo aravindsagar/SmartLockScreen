@@ -52,6 +52,7 @@ public class SharedPreferencesHelper {
         editor.putString(KEY_MASTER_PASSWORD, passwordString);
         editor.putString(KEY_MASTER_PASSWORD_TYPE, passwordType);
         editor.apply();
+        preferences = null;
     }
 
     public static long getDeviceOwnerUserId(Context context){
@@ -64,6 +65,7 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(KEY_DEVICE_OWNER_USER_ID, id);
         editor.apply();
+        preferences = null;
     }
 
     public static void setEnvironmentOverlapChoice(List<Environment> overlappingEnvironments ,
@@ -75,6 +77,7 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(buildKeyForEnvironments(overlappingEnvironments), chosenEnvironmentId);
         editor.apply();
+        preferences = null;
     }
 
     public static long getEnvironmentOverlapChoice(List<Environment> overlappingEnvironments, Context context){
@@ -142,6 +145,7 @@ public class SharedPreferencesHelper {
                 }
             }
         }
+        preferences = null;
     }
 
     private static List<Long> getEnvironmentIdsFromKey(String key){
