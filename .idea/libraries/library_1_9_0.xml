@@ -5,8 +5,6 @@
       <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.github.gabrielemariotti.cards/library/1.9.0/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="file://$PROJECT_DIR$/../cardslib/library/src/main/java" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

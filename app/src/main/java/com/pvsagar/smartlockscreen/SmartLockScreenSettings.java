@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class SmartLockScreenSettings extends ActionBarActivity
         implements SetMasterPasswordFragment.MasterPasswordSetListener,
         ManageEnvironmentFragment.ActionModeListener{
