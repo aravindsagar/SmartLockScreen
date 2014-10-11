@@ -50,6 +50,7 @@
     <string name="alert_cancel_add_environment_title">Warning</string>
     <string name="alert_cancel_add_environment_message">Do you want to cancel adding environment?</string>
     <string name="alert_cancel_master_password_message">Do you want to cancel setting Master password?</string>
+    <string name="alert_cancel_unknows_password_message">Do you want to cancel setting password?</string>
     <string name="alert_no_variables_title">No Variables Selected</string>
     <string name="alert_no_variables_message">At least select one variable</string>
     <string name="title_activity_select_location">Select Location</string>

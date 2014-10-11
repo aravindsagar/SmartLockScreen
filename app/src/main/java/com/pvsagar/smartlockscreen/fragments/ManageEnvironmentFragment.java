@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -51,6 +52,8 @@ public class ManageEnvironmentFragment extends Fragment {
 
     private int mPaddingTop, mPaddingBottom;
 
+    int textViewTouchedColor, textViewNormalColor;
+
     private ActionModeListener actionModeListener;
 
     public ManageEnvironmentFragment() {
@@ -60,6 +63,8 @@ public class ManageEnvironmentFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        textViewNormalColor = Color.argb(0,0,0,0);
+        textViewTouchedColor = getResources().getColor(R.color.text_view_touched);
 
         View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
         environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
@@ -183,6 +188,8 @@ public class ManageEnvironmentFragment extends Fragment {
         TextView textView = (TextView) layout.findViewById(R.id.text_view_environment_list);
         textView.setText("Unknown Environment");
 
+        layout.setOnTouchListener(new TextViewTouchListener());
+
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -232,5 +239,20 @@ public class ManageEnvironmentFragment extends Fragment {
     public interface ActionModeListener{
         public void onActionModeDestroyed();
         public void onActionModeCreated();
+    }
+
+    public class TextViewTouchListener implements View.OnTouchListener{
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    v.setBackgroundColor(textViewTouchedColor);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.setBackgroundColor(textViewNormalColor);
+            }
+            return false;
+        }
     }
 }

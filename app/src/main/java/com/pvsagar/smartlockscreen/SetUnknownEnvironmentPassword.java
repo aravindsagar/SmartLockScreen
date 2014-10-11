@@ -14,7 +14,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -57,7 +56,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
 
     private Button doneButton, cancelButton;
 
-    private int cardHeight, buttonHeight;
+    private final int collapsedHeight = 120, expandedHeight = 240;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,31 +78,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
         setUpPassphraseElements();
         setUpButtons();
 
-        ViewTreeObserver viewTreeObserver = passphraseCardView.getViewTreeObserver();
-        if (viewTreeObserver.isAlive()) {
-            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-//                    passphraseCardView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    cardHeight = passphraseCardView.getHeight();
-                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
-                            cardHeight + buttonHeight + convertDipToPx(20));
-                }
-            });
-        }
-
-        ViewTreeObserver buttonViewTreeObserver = doneButton.getViewTreeObserver();
-        if (buttonViewTreeObserver.isAlive()) {
-            buttonViewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    doneButton.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    buttonHeight = doneButton.getHeight();
-                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
-                            cardHeight + buttonHeight + convertDipToPx(20));
-                }
-            });
-        }
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(240));
     }
 
     protected Activity getActivity(){
@@ -170,6 +145,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
                                     passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                                     pattern = null;
                                     passphraseCard.doExpand();
+                                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(expandedHeight));
                                 } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
                                     setPassphraseItemsEnabled(true);
                                     setPassphraseItemsVisible(true);
@@ -182,17 +158,20 @@ public class SetUnknownEnvironmentPassword extends Activity {
                                     passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                                     pattern = null;
                                     passphraseCard.doExpand();
+                                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(expandedHeight));
                                 } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
                                     setPassphraseItemsEnabled(false);
                                     setPassphraseItemsVisible(false);
                                     setPatternTextViewVisible(true);
                                     passphraseCard.doExpand();
+                                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(expandedHeight));
                                 } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE) {
                                     setPassphraseItemsEnabled(false);
                                     setPassphraseItemsVisible(false);
                                     setPatternTextViewVisible(false);
                                     pattern = null;
                                     passphraseCard.doCollapse();
+                                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(collapsedHeight));
                                 }
                             }
 
@@ -304,7 +283,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_master_password_message);
+                builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_unknows_password_message);
                 builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

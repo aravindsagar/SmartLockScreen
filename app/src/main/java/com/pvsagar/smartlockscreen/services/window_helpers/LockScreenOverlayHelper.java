@@ -77,8 +77,13 @@ public class LockScreenOverlayHelper extends Overlay{
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                 PixelFormat.OPAQUE);
+        if(AdminActions.getCurrentPassphraseType().equals(Passphrase.TYPE_NONE)) {
+            params.dimAmount = 1;
+        } else {
+            params.dimAmount = 0;
+        }
         params.x = 0;
         params.y = 0;
         return params;
