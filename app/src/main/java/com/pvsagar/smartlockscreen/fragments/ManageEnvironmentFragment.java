@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,13 +19,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.AddEnvironment;
 import com.pvsagar.smartlockscreen.EditEnvironment;
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.SetUnknownEnvironmentPassword;
 import com.pvsagar.smartlockscreen.adapters.EnvironmentListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
@@ -61,6 +68,7 @@ public class ManageEnvironmentFragment extends Fragment {
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
             mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
         }
+        environmentsListView.addFooterView(getUnknownEnvironmentLayout(inflater));
         switch (getActivity().getResources().getConfiguration().orientation){
             case Configuration.ORIENTATION_UNDEFINED:
             case Configuration.ORIENTATION_PORTRAIT:
@@ -162,6 +170,26 @@ public class ManageEnvironmentFragment extends Fragment {
             }
         });
             /* End of adapter code */
+    }
+
+    private LinearLayout getUnknownEnvironmentLayout(LayoutInflater inflater){
+        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.list_item_unknown_environment,
+                environmentsListView, false);
+
+        ImageView imageView = (ImageView) layout.findViewById(R.id.image_view_environment_picture);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.andquestionsag);
+        imageView.setImageBitmap(Utility.getCroppedBitmap(bitmap, Color.DKGRAY));
+
+        TextView textView = (TextView) layout.findViewById(R.id.text_view_environment_list);
+        textView.setText("Unknown Environment");
+
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), SetUnknownEnvironmentPassword.class));
+            }
+        });
+        return layout;
     }
 
     @Override

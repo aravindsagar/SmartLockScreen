@@ -56,7 +56,7 @@
         <activity
             android:name=".SearchLocation"
             android:label="@string/title_activity_search_location"
-            android:theme="@style/TransparentTheme">
+            android:theme="@style/TransparentTheme" >
         </activity>
         <activity
             android:name=".StorePattern"
@@ -77,12 +77,17 @@
         <activity
             android:name=".SmartLockScreenSettings"
             android:label="@string/title_activity_smart_lock_screen_settings"
-            android:theme="@style/HoloWithActionMode">
+            android:theme="@style/HoloWithActionMode" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".SetUnknownEnvironmentPassword"
+            android:label="@string/title_activity_set_unknown_environment_password"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth">
         </activity>
 
         <provider

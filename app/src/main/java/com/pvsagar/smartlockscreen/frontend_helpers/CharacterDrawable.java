@@ -17,7 +17,7 @@ public class CharacterDrawable extends Drawable {
     private final Paint textPaint;
     private final Paint borderPaint;
     private final Paint backgroundPaint;
-    private static final int STROKE_WIDTH = 5;
+    private static final int STROKE_WIDTH = 2;
     private static final float SHADE_FACTOR = 0.9f;
 
     public CharacterDrawable(char character, int color) {
@@ -60,11 +60,11 @@ public class CharacterDrawable extends Drawable {
     public void draw(Canvas canvas) {
         //draw background
         canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
-                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f), backgroundPaint);
+                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH * 2, backgroundPaint);
 
         // draw border
         canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
-                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2.0f, borderPaint);
+                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH * 2, borderPaint);
 
         // draw text
         int width = canvas.getWidth();

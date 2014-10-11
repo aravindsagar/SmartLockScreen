@@ -16,6 +16,8 @@ import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 public class User {
     private static final String LOG_TAG = User.class.getSimpleName();
 
+    public static final long UNKNOWN_ENVIRONMENT_ID = 0;
+
     private String userName;
     private long id;
 
@@ -108,6 +110,33 @@ public class User {
             }
             Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
                     buildUserUriWithIdEnvironmentAndPassword(id, environment.getId()),
+                    null, null, null, null);
+            if(passwordCursor != null && passwordCursor.moveToFirst()){
+                Passphrase returnPassphrase = Passphrase.getPassphraseFromCursor(passwordCursor);
+                passwordCursor.close();
+                return returnPassphrase;
+            }
+            Log.w(LOG_TAG, "Empty cursor returned for password query.");
+            return null;
+        }
+        Log.w(LOG_TAG, "User has id 0.");
+        return null;
+    }
+
+    public void setPassphraseForUnknownEnvironment(Context context, Passphrase passphrase){
+        if(id>0) {
+            context.getContentResolver().update(UsersEntry.buildUserUriWithIdEnvironmentAndPassword
+                    (id, UNKNOWN_ENVIRONMENT_ID), passphrase.getContentValues(), null, null);
+        } else {
+            insertIntoDatabase(context);
+            setPassphraseForUnknownEnvironment(context, passphrase);
+        }
+    }
+
+    public Passphrase getPassphraseForUnknownEnvironment(Context context){
+        if(id>0) {
+            Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
+                            buildUserUriWithIdEnvironmentAndPassword(id, UNKNOWN_ENVIRONMENT_ID),
                     null, null, null, null);
             if(passwordCursor != null && passwordCursor.moveToFirst()){
                 Passphrase returnPassphrase = Passphrase.getPassphraseFromCursor(passwordCursor);

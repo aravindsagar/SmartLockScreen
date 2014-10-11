@@ -1,23 +1,20 @@
-package com.pvsagar.smartlockscreen.fragments;
+package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -27,13 +24,11 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.pvsagar.smartlockscreen.R;
-import com.pvsagar.smartlockscreen.StorePattern;
+import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
-import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.List;
 
@@ -42,13 +37,8 @@ import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.view.CardView;
 
-/**
- * Created by aravind on 7/10/14.
- * Fragment which gives user a UI to set/change the master password
- */
-public class SetMasterPasswordFragment extends Fragment {
-    private static final String LOG_TAG = SetMasterPasswordFragment.class.getSimpleName();
 
+public class SetUnknownEnvironmentPassword extends Activity {
     private static final int REQUEST_CREATE_PATTERN = 32;
 
     private static ArrayAdapter<String> passphraseAdapter;
@@ -67,16 +57,14 @@ public class SetMasterPasswordFragment extends Fragment {
 
     private Button doneButton, cancelButton;
 
-    MasterPasswordSetListener mMasterPasswordSetListener;
-
-    int mPaddingTop, mPaddingBottom;
+    private int cardHeight, buttonHeight;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_set_unknown_environment_password);
 
-        View rootView = inflater.inflate(R.layout.fragment_set_master_password, container, false);
-
-        passphraseCardView = (CardView) rootView.findViewById(R.id.card_passphrase);
+        passphraseCardView = (CardView) findViewById(R.id.card_passphrase);
 
         listPreferredItemHeight = (int) getListPreferredItemHeight();
         textViewNormalColor = Color.argb(0, 0, 0, 0);
@@ -85,44 +73,41 @@ public class SetMasterPasswordFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         marginTopLayoutParams.topMargin = convertDipToPx(8);
 
-        doneButton = (Button) rootView.findViewById(R.id.button_confirm);
-        cancelButton = (Button) rootView.findViewById(R.id.button_cancel);
+        doneButton = (Button) findViewById(R.id.button_confirm);
+        cancelButton = (Button) findViewById(R.id.button_cancel);
 
-        setUpActionBar();
         setUpPassphraseElements();
         setUpButtons();
 
-        switch (getActivity().getResources().getConfiguration().orientation){
-            case Configuration.ORIENTATION_UNDEFINED:
-            case Configuration.ORIENTATION_PORTRAIT:
-                rootView.setPadding(rootView.getPaddingLeft(), rootView.getTop() + mPaddingTop,
-                        rootView.getPaddingRight(), rootView.getBottom() + mPaddingBottom);
-                break;
-            case Configuration.ORIENTATION_LANDSCAPE:
-                rootView.setPadding(rootView.getPaddingLeft(), rootView.getTop() + mPaddingTop,
-                        rootView.getPaddingRight() + mPaddingBottom, rootView.getBottom());
-                break;
+        ViewTreeObserver viewTreeObserver = passphraseCardView.getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+//                    passphraseCardView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    cardHeight = passphraseCardView.getHeight();
+                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                            cardHeight + buttonHeight + convertDipToPx(20));
+                }
+            });
         }
-        return rootView;
+
+        ViewTreeObserver buttonViewTreeObserver = doneButton.getViewTreeObserver();
+        if (buttonViewTreeObserver.isAlive()) {
+            buttonViewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    doneButton.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    buttonHeight = doneButton.getHeight();
+                    getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                            cardHeight + buttonHeight + convertDipToPx(20));
+                }
+            });
+        }
     }
 
-    private void setUpActionBar(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
-            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mMasterPasswordSetListener = (MasterPasswordSetListener) activity;
-        } catch (ClassCastException e){
-            throw new InstantiationException("Activity using " + LOG_TAG + " should implement "
-                    + MasterPasswordSetListener.class.getSimpleName(), e);
-        }
+    protected Activity getActivity(){
+        return this;
     }
 
     public void setUpPassphraseElements(){
@@ -304,14 +289,14 @@ public class SetMasterPasswordFragment extends Fragment {
                         return;
                     }
                 }
-                Passphrase masterPassphrase = PassphraseFactory.getPassphraseInstance(
+                Passphrase passphrase = PassphraseFactory.getPassphraseInstance(
                         selectedPassphrasetype, passphraseEditText.getText().toString(),
                         passphraseEditText.getText().toString(), pattern);
 
-                Passphrase.setMasterPassword(masterPassphrase, getActivity());
+                User.getDefaultUser(getActivity()).setPassphraseForUnknownEnvironment(getActivity(), passphrase);
                 getActivity().startService(BaseService.getServiceIntent(getActivity(),
                         null, BaseService.ACTION_DETECT_ENVIRONMENT));
-                mMasterPasswordSetListener.onMasterPasswordSet();
+                finish();
             }
         });
 
@@ -323,7 +308,7 @@ public class SetMasterPasswordFragment extends Fragment {
                 builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mMasterPasswordSetListener.onCancelSetMasterPassword();
+                        finish();
                     }
                 });
                 builder.setNegativeButton(R.string.cancel,null);
@@ -354,6 +339,11 @@ public class SetMasterPasswordFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        doCancelButtonPress();
+    }
+
     public void doCancelButtonPress(){
         cancelButton.callOnClick();
     }
@@ -376,11 +366,5 @@ public class SetMasterPasswordFragment extends Fragment {
             }
             return false;
         }
-    }
-
-    public interface MasterPasswordSetListener{
-        public void onMasterPasswordSet();
-
-        public void onCancelSetMasterPassword();
     }
 }
