@@ -393,16 +393,19 @@ public class BaseService extends Service implements
         if (currentList == null) {
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
-            Passphrase masterPassphrase = Passphrase.getMasterPassword(this);
-            if(!masterPassphrase.setAsCurrentPassword()){
+            Passphrase unknownPassphase = User.getCurrentUser(this).getPassphraseForUnknownEnvironment(this);
+            if(unknownPassphase == null) {
+                unknownPassphase = Passphrase.getMasterPassword(this);
+            }
+            if(!unknownPassphase.setAsCurrentPassword()){
                 AdminActions.initializeAdminObjects(this);
-                if(!masterPassphrase.setAsCurrentPassword()){
+                if(!unknownPassphase.setAsCurrentPassword()){
                     startService(BaseService.getServiceIntent(this,
                             "Please enable administrator for the app.", null));
                 }
             }
         } else {
-            Environment current = currentList.get(0); //TODO replace with a proper algorithm
+            Environment current = currentList.get(0);
             User user = User.getCurrentUser(this);
             if(user != null) {
                 Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
