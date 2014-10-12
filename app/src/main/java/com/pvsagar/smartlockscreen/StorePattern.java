@@ -78,6 +78,7 @@ public class StorePattern extends Activity {
                     if(mPattern.equals(pattern)){
                         mPatternGridView.setInputEnabled(false);
                         mContinueButton.setEnabled(true);
+                        mResetButton.setEnabled(false);
                         mPatternGridView.setRingColor(COLOR_VALID_PATTERN);
                         mStatusView.setText("Your new pattern");
                     } else {

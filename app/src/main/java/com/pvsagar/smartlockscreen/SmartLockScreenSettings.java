@@ -63,7 +63,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
     List<String> mainItemList;
 
     String mTitle;
-    int position;
+    int position, prevPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +88,12 @@ public class SmartLockScreenSettings extends ActionBarActivity
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
+                if(position == prevPosition){
+                    if(mTitle != null) {
+                        setTitle(mTitle);
+                    }
+                    return;
+                }
                 switch (listAdapter.getItemViewType(position)){
                     case NavigationDrawerListAdapter.ITEM_TYPE_PROFILE:
                         listAdapter.setSelectedProfileIndex(listAdapter.getItemArrayIndex(position));
@@ -138,7 +144,10 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 if(mTitle != null) {
                     setTitle(mTitle);
                 }
-                position = -1;
+                if(position != -1) {
+                    prevPosition = position;
+                    position = -1;
+                }
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -209,6 +218,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
         listAdapter.setSelectedProfileIndex(0);
         listAdapter.setSelectedMainItemIndex(0);
         mTitle = mainItemList.get(0);
+        position = prevPosition = navDrawerListView.getSelectedItemPosition();
+
     }
 
     @Override

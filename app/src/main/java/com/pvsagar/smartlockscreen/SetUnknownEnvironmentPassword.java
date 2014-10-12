@@ -233,8 +233,8 @@ public class SetUnknownEnvironmentPassword extends Activity {
 
     private float getListPreferredItemHeight(){
         android.util.TypedValue value = new android.util.TypedValue();
-        boolean b = getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
-        String s = TypedValue.coerceToString(value.type, value.data);
+        getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+        TypedValue.coerceToString(value.type, value.data);
         android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         return value.getDimension(metrics);

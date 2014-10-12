@@ -64,7 +64,7 @@ public class ManageEnvironmentFragment extends Fragment {
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         textViewNormalColor = Color.argb(0,0,0,0);
-        textViewTouchedColor = getResources().getColor(R.color.text_view_touched);
+        textViewTouchedColor = getResources().getColor(R.color.text_view_touched_darker);
 
         View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
         environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
@@ -178,25 +178,25 @@ public class ManageEnvironmentFragment extends Fragment {
     }
 
     private LinearLayout getUnknownEnvironmentLayout(LayoutInflater inflater){
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.list_item_unknown_environment,
+        LinearLayout unknownLayout = (LinearLayout) inflater.inflate(R.layout.list_item_unknown_environment,
                 environmentsListView, false);
 
-        ImageView imageView = (ImageView) layout.findViewById(R.id.image_view_environment_picture);
+        ImageView imageView = (ImageView) unknownLayout.findViewById(R.id.image_view_environment_picture);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.andquestionsag);
         imageView.setImageBitmap(Utility.getCroppedBitmap(bitmap, Color.DKGRAY));
 
-        TextView textView = (TextView) layout.findViewById(R.id.text_view_environment_list);
+        TextView textView = (TextView) unknownLayout.findViewById(R.id.text_view_environment_list);
         textView.setText("Unknown Environment");
 
-        layout.setOnTouchListener(new TextViewTouchListener());
+        unknownLayout.setOnTouchListener(new TextViewTouchListener());
 
-        layout.setOnClickListener(new View.OnClickListener() {
+        unknownLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getActivity(), SetUnknownEnvironmentPassword.class));
             }
         });
-        return layout;
+        return unknownLayout;
     }
 
     @Override
@@ -251,6 +251,7 @@ public class ManageEnvironmentFragment extends Fragment {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     v.setBackgroundColor(textViewNormalColor);
+                    break;
             }
             return false;
         }

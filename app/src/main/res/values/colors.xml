@@ -2,6 +2,7 @@
 <resources>
     <color name="card_background_grey">#ffe9e9e9</color>
     <color name="text_view_touched">#ffeeeeee</color>
+    <color name="text_view_touched_darker">#ffd7d7d7</color>
     <color name="list_item_touched">#8ceeeeee</color>
 
     <color name="action_bar_add_environment">#ff1a713f</color>
