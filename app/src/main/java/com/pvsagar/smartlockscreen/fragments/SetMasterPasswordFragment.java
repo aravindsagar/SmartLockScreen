@@ -50,6 +50,8 @@ public class SetMasterPasswordFragment extends Fragment {
     private EditText passphraseEditText;
     private EditText passphraseConfirmationEditText;
 
+    private static int currentPassphraseTypeIndex;
+
     int listPreferredItemHeight;
     int textViewTouchedColor, textViewNormalColor;
     LinearLayout.LayoutParams marginTopLayoutParams;
@@ -142,10 +144,14 @@ public class SetMasterPasswordFragment extends Fragment {
                         passphraseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
                                 passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
                                 selectedPassphrasetype = position;
                                 if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
+                                    if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                                        passphraseEditText.setHint("(Unchanged)");
+                                    } else {
+                                        passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                    }
                                     setPassphraseItemsEnabled(true);
                                     setPassphraseItemsVisible(true);
                                     passphraseEditText.setText("");
@@ -156,6 +162,11 @@ public class SetMasterPasswordFragment extends Fragment {
                                     passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                                     passphraseCard.doExpand();
                                 } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
+                                    if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                                        passphraseEditText.setHint("(Unchanged)");
+                                    } else {
+                                        passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                    }
                                     setPassphraseItemsEnabled(true);
                                     setPassphraseItemsVisible(true);
                                     passphraseEditText.setText("");
@@ -194,16 +205,17 @@ public class SetMasterPasswordFragment extends Fragment {
 
     private void initPassphraseElements(){
         Passphrase passphrase = Passphrase.getMasterPassword(getActivity());
-        if(passphrase != null){
-            passphraseEditText.setHint("(Unchanged)");
-            if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
-            } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PIN);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
-            }
+        if(passphrase == null){
+            currentPassphraseTypeIndex = -1;
+            return;
         }
+        if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
+            currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+        } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
+            currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
+        }
+        passphraseTypeSpinner.setSelection(currentPassphraseTypeIndex);
+        selectedPassphrasetype = currentPassphraseTypeIndex;
     }
     private float getListPreferredItemHeight(){
         android.util.TypedValue value = new android.util.TypedValue();

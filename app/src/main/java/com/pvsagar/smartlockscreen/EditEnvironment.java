@@ -91,6 +91,8 @@ public class EditEnvironment extends ActionBarActivity {
 
     private static List<Integer> pattern;
 
+    private static int currentPassphraseTypeIndex;
+
     PlaceholderFragment placeholderFragment;
 
     @Override
@@ -375,21 +377,22 @@ public class EditEnvironment extends ActionBarActivity {
 
         private void initPassphraseElements(){
             Passphrase passphrase = User.getCurrentUser(getActivity()).getPassphraseForEnvironment(getActivity(), environment);
-            passphraseEditText.setHint("(Unchanged)");
+            if(passphrase == null){
+                currentPassphraseTypeIndex = -1;
+                return;
+            }
             if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
             } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PATTERN)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN;
                 passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
             } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PIN);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
             } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_NONE)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_NONE);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_NONE;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_NONE;
             }
+            passphraseTypeSpinner.setSelection(currentPassphraseTypeIndex);
+            selectedPassphrasetype = currentPassphraseTypeIndex;
         }
 
         private void setupEnvironmentBasic(){
@@ -788,6 +791,11 @@ public class EditEnvironment extends ActionBarActivity {
                                     passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
                                     selectedPassphrasetype = position;
                                     if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
+                                        if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                                            passphraseEditText.setHint("(Unchanged)");
+                                        } else {
+                                            passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                        }
                                         setPassphraseItemsEnabled(true);
                                         setPassphraseItemsVisible(true);
                                         setPatternTextViewVisible(false);
@@ -800,6 +808,11 @@ public class EditEnvironment extends ActionBarActivity {
                                         pattern = null;
                                         passphraseCard.doExpand();
                                     } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
+                                        if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                                            passphraseEditText.setHint("(Unchanged)");
+                                        } else {
+                                            passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                        }
                                         setPassphraseItemsEnabled(true);
                                         setPassphraseItemsVisible(true);
                                         setPatternTextViewVisible(false);
