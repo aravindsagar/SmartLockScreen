@@ -408,6 +408,9 @@ public class EnvironmentProvider extends ContentProvider {
             case BLUETOOTH_DEVICE:
                 returnValue = deleteAllUnusedBluetoothEnvironmentVariables(db);
                 break;
+            case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
+                returnValue = deleteUserPasswordForEnvironment(db, uri);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -489,6 +492,22 @@ public class EnvironmentProvider extends ContentProvider {
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/#/" +
                 PasswordEntry.TABLE_NAME, USER_WITH_ID_ENVIRONMENT_AND_PASSWORD);
         return matcher;
+    }
+
+    private int deleteUserPasswordForEnvironment(SQLiteDatabase db, Uri uri){
+        long environmentId = Long.parseLong(uri.getPathSegments().get(2));
+        long userId = Long.parseLong(uri.getPathSegments().get(1));
+        String selection = UserPasswordsEntry.COLUMN_ENVIRONMENT_ID + " = ? AND " +
+                UserPasswordsEntry.COLUMN_USER_ID + " = ? ";
+        String[] selectionArgs = new String[]{String.valueOf(environmentId), String.valueOf(userId)};
+        Cursor passwordCursor = db.query(UserPasswordsEntry.TABLE_NAME, null, selection,
+                selectionArgs, null, null, null);
+        if(passwordCursor.moveToFirst()){
+            db.delete(PasswordEntry.TABLE_NAME, PasswordEntry._ID + " = ? ", new String[]{
+                    String.valueOf(passwordCursor.getLong(
+                            passwordCursor.getColumnIndex(UserPasswordsEntry.COLUMN_PASSWORD_ID)))});
+        }
+        return db.delete(UserPasswordsEntry.TABLE_NAME, selection, selectionArgs);
     }
 
     private int deleteEnvironment(SQLiteDatabase db, String selection, String[] selectionArgs){

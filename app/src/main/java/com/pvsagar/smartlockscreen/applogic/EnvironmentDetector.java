@@ -114,14 +114,15 @@ public class EnvironmentDetector {
                 currentEnvironments.addAll(checkWifiAndBluetoothOfPotentialEnvironments(context,
                         potentialEnvironments));
             }
-            manageEnvironmentDetectionCriticalSection.release();
             if(currentEnvironments.size() == 0) {
                 Log.v(LOG_TAG, "No stored environment matched current environment.");
+                manageEnvironmentDetectionCriticalSection.release();
                 return null;
             } else if(currentEnvironments.size() > 1){
                 Log.v(LOG_TAG, "Environment Overlap.");
                 EnvironmentOverlapResolver.setPreferredEnvironmentFirst(currentEnvironments, context);
             }
+            manageEnvironmentDetectionCriticalSection.release();
             return currentEnvironments;
         }
 

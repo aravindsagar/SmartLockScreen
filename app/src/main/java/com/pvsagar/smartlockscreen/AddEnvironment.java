@@ -41,10 +41,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
@@ -973,19 +970,11 @@ public class AddEnvironment extends ActionBarActivity {
             environment.setHint(environmentHint);
             environment.insertIntoDatabase(getActivity());
             /* Setting passphrase */
-            if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
-                Password password = new Password(passphraseEditText.getText().toString());
-                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,environment);
-            } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                Pin pin = new Pin(passphraseEditText.getText().toString());
-                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,environment);
-            } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
-                NoSecurity noSecurity = new NoSecurity();
-                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),noSecurity,environment);
-            } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
-                Pattern pattern1 = new Pattern(pattern);
-                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pattern1,environment);
-            }
+            Passphrase passphrase = PassphraseFactory.getPassphraseInstance(selectedPassphrasetype,
+                    passphraseEditText.getText().toString(), passphraseEditText.getText().toString(),
+                    pattern);
+            User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),
+                    passphrase, environment);
             /* done with setting passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_ADD_GEOFENCES));

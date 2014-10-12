@@ -50,7 +50,6 @@
     <string name="alert_cancel_add_environment_title">Warning</string>
     <string name="alert_cancel_add_environment_message">Do you want to cancel adding environment?</string>
     <string name="alert_cancel_master_password_message">Do you want to cancel setting Master password?</string>
-    <string name="alert_cancel_unknows_password_message">Do you want to cancel setting password?</string>
     <string name="alert_no_variables_title">No Variables Selected</string>
     <string name="alert_no_variables_message">At least select one variable</string>
     <string name="title_activity_select_location">Select Location</string>
@@ -82,6 +81,8 @@
     <string name="title_activity_store_pattern">Store Pattern</string>
     <string name="pattern_continue">Continue</string>
     <string name="pattern_confirm">Confirm</string>
+    <string name="reset">Reset</string>
+    <string name="use_master_password">Use master passphrase</string>
     <string name="title_activity_set_master_password">Set Master Password</string>
     <string name="master_password_set">Master password set</string>
     <string name="title_activity_smart_lock_screen_settings">SmartLockScreen Settings</string>

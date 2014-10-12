@@ -375,6 +375,11 @@ public class BaseService extends Service implements
     private class DetermineConnectedWifiNetwork extends AsyncTask<Void, Void, WiFiEnvironmentVariable>{
         @Override
         protected WiFiEnvironmentVariable doInBackground(Void... params) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return getConnectedWifiNetwork();
         }
 
@@ -395,16 +400,16 @@ public class BaseService extends Service implements
     @Override
     public void onEnvironmentDetected(List<Environment> currentList) {
         currentEnvironments = currentList;
-        if (currentList == null) {
+        if (currentList == null || currentList.size() == 0) {
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
-            Passphrase unknownPassphase = User.getCurrentUser(this).getPassphraseForUnknownEnvironment(this);
-            if(unknownPassphase == null) {
-                unknownPassphase = Passphrase.getMasterPassword(this);
+            Passphrase unknownPassphrase = User.getCurrentUser(this).getPassphraseForUnknownEnvironment(this);
+            if(unknownPassphrase == null) {
+                unknownPassphrase = Passphrase.getMasterPassword(this);
             }
-            if(!unknownPassphase.setAsCurrentPassword()){
+            if(!unknownPassphrase.setAsCurrentPassword()){
                 AdminActions.initializeAdminObjects(this);
-                if(!unknownPassphase.setAsCurrentPassword()){
+                if(!unknownPassphrase.setAsCurrentPassword()){
                     startService(BaseService.getServiceIntent(this,
                             "Please enable administrator for the app.", null));
                 }

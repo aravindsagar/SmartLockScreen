@@ -3,7 +3,6 @@ package com.pvsagar.smartlockscreen;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -22,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
@@ -54,7 +54,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
     int textViewTouchedColor, textViewNormalColor;
     LinearLayout.LayoutParams marginTopLayoutParams;
 
-    private Button doneButton, cancelButton;
+    private Button doneButton, resetButton;
 
     private final int collapsedHeight = 120, expandedHeight = 240;
 
@@ -73,9 +73,10 @@ public class SetUnknownEnvironmentPassword extends Activity {
         marginTopLayoutParams.topMargin = convertDipToPx(8);
 
         doneButton = (Button) findViewById(R.id.button_confirm);
-        cancelButton = (Button) findViewById(R.id.button_cancel);
+        resetButton = (Button) findViewById(R.id.button_reset);
 
         setUpPassphraseElements();
+        initPassphraseElements();
         setUpButtons();
 
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(240));
@@ -85,7 +86,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
         return this;
     }
 
-    public void setUpPassphraseElements(){
+    private void setUpPassphraseElements(){
 
         passphraseEditText = new EditText(getActivity());
         passphraseEditText.setLayoutParams(marginTopLayoutParams);
@@ -199,6 +200,28 @@ public class SetUnknownEnvironmentPassword extends Activity {
         passphraseCardView.setCard(passphraseCard);
     }
 
+    private void initPassphraseElements(){
+        Passphrase passphrase = User.getDefaultUser(this).getPassphraseForUnknownEnvironment(this);
+        if(passphrase == null){
+            return;
+        }
+        passphraseEditText.setHint("(Unchanged)");
+        if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
+            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+        } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PATTERN)){
+            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN);
+            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN;
+            passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
+        } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
+            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PIN);
+            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
+        } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_NONE)){
+            passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_NONE);
+            selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_NONE;
+        }
+    }
+
     private float getListPreferredItemHeight(){
         android.util.TypedValue value = new android.util.TypedValue();
         boolean b = getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
@@ -279,19 +302,14 @@ public class SetUnknownEnvironmentPassword extends Activity {
             }
         });
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_unknows_password_message);
-                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-                builder.setNegativeButton(R.string.cancel,null);
-                builder.create().show();
+                User.getDefaultUser(getActivity()).removePassphraseForUnknownEnvironment(getActivity());
+                Toast.makeText(getActivity(), "Using master password for unknown environment", Toast.LENGTH_SHORT).show();
+                finish();
+                getActivity().startService(BaseService.getServiceIntent(getActivity(),
+                        null, BaseService.ACTION_DETECT_ENVIRONMENT));
             }
         });
     }
@@ -316,15 +334,6 @@ public class SetUnknownEnvironmentPassword extends Activity {
             parent.addView(relativeLayout);
             return layout;
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        doCancelButtonPress();
-    }
-
-    public void doCancelButtonPress(){
-        cancelButton.callOnClick();
     }
 
     private int convertDipToPx(int pixel){

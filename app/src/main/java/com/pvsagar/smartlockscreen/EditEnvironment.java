@@ -41,10 +41,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
@@ -339,8 +336,8 @@ public class EditEnvironment extends ActionBarActivity {
             bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
             Vector<BluetoothEnvironmentVariable> bluetoothVariables =  environment.getBluetoothEnvironmentVariables();
             for(int i = 0; i < bluetoothDevices.size(); i++){
-                for(int j = 0; j < bluetoothVariables.size(); j++){
-                    if(bluetoothVariables.get(j).getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())){
+                for (BluetoothEnvironmentVariable bluetoothVariable : bluetoothVariables) {
+                    if (bluetoothVariable.getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())) {
                         Log.d(LOG_TAG, "Adding " + bluetoothDevices.get(i).getName() + " to mSelectedBluetoothDevices.");
                         mSelectedBluetoothDevices.add(bluetoothDevices.get(i));
                         mSelectedBluetoothItems.add(i);
@@ -1042,20 +1039,11 @@ public class EditEnvironment extends ActionBarActivity {
                     pattern != null){
                 //Password changed
                 Log.d(LOG_TAG, "Password changed. Updating in db.");
-                if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
-                    Password password = new Password(passphraseEditText.getText().toString());
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,newEnvironment);
-                }
-                else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                    Pin pin = new Pin(passphraseEditText.getText().toString());
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
-                    NoSecurity noSecurity = new NoSecurity();
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(), noSecurity, newEnvironment);
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN){
-                    Pattern pattern1 = new Pattern(pattern);
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(), pattern1, newEnvironment);
-                }
+                Passphrase passphrase = PassphraseFactory.getPassphraseInstance(selectedPassphrasetype,
+                        passphraseEditText.getText().toString(), passphraseEditText.getText().toString(),
+                        pattern);
+                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),
+                        passphrase, environment);
             }
             /* done with updating passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,

@@ -42,8 +42,6 @@ import it.gmariotti.cardslib.library.view.CardView;
 public class SetMasterPasswordFragment extends Fragment {
     private static final String LOG_TAG = SetMasterPasswordFragment.class.getSimpleName();
 
-    private static final int REQUEST_CREATE_PATTERN = 32;
-
     private static ArrayAdapter<String> passphraseAdapter;
     private static int selectedPassphrasetype;
 
@@ -56,7 +54,7 @@ public class SetMasterPasswordFragment extends Fragment {
     int textViewTouchedColor, textViewNormalColor;
     LinearLayout.LayoutParams marginTopLayoutParams;
 
-    private Button doneButton, cancelButton;
+    private Button doneButton, resetButton;
 
     MasterPasswordSetListener mMasterPasswordSetListener;
 
@@ -77,10 +75,11 @@ public class SetMasterPasswordFragment extends Fragment {
         marginTopLayoutParams.topMargin = convertDipToPx(8);
 
         doneButton = (Button) rootView.findViewById(R.id.button_confirm);
-        cancelButton = (Button) rootView.findViewById(R.id.button_cancel);
+        resetButton = (Button) rootView.findViewById(R.id.button_reset);
 
         setUpActionBar();
         setUpPassphraseElements();
+        initPassphraseElements();
         setUpButtons();
 
         switch (getActivity().getResources().getConfiguration().orientation){
@@ -116,15 +115,12 @@ public class SetMasterPasswordFragment extends Fragment {
         }
     }
 
-    public void setUpPassphraseElements(){
+    private void setUpPassphraseElements(){
 
         passphraseEditText = new EditText(getActivity());
         passphraseEditText.setLayoutParams(marginTopLayoutParams);
         passphraseConfirmationEditText = new EditText(getActivity());
         passphraseConfirmationEditText.setLayoutParams(marginTopLayoutParams);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         final Card passphraseCard = new Card(getActivity());
         ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
@@ -196,6 +192,19 @@ public class SetMasterPasswordFragment extends Fragment {
         passphraseCardView.setCard(passphraseCard);
     }
 
+    private void initPassphraseElements(){
+        Passphrase passphrase = Passphrase.getMasterPassword(getActivity());
+        if(passphrase != null){
+            passphraseEditText.setHint("(Unchanged)");
+            if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
+                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
+                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+            } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
+                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PIN);
+                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
+            }
+        }
+    }
     private float getListPreferredItemHeight(){
         android.util.TypedValue value = new android.util.TypedValue();
         boolean b = getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
@@ -251,19 +260,12 @@ public class SetMasterPasswordFragment extends Fragment {
             }
         });
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_master_password_message);
-                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mMasterPasswordSetListener.onCancelSetMasterPassword();
-                    }
-                });
-                builder.setNegativeButton(R.string.cancel,null);
-                builder.create().show();
+                passphraseEditText.setText("");
+                passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[passphraseTypeSpinner.getSelectedItemPosition()]);
+                passphraseConfirmationEditText.setText("");
             }
         });
     }
@@ -290,7 +292,16 @@ public class SetMasterPasswordFragment extends Fragment {
     }
 
     public void doCancelButtonPress(){
-        cancelButton.callOnClick();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.alert_cancel_add_environment_title).setMessage(R.string.alert_cancel_master_password_message);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mMasterPasswordSetListener.onCancelSetMasterPassword();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.create().show();
     }
 
     private int convertDipToPx(int pixel){

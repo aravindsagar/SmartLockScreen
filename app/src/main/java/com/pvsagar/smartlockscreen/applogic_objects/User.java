@@ -133,6 +133,13 @@ public class User {
         }
     }
 
+    public void removePassphraseForUnknownEnvironment(Context context){
+        if(id>0) {
+            context.getContentResolver().delete(UsersEntry.buildUserUriWithIdEnvironmentAndPassword(
+                    id, UNKNOWN_ENVIRONMENT_ID), null, null);
+        }
+    }
+
     public Passphrase getPassphraseForUnknownEnvironment(Context context){
         if(id>0) {
             Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
@@ -143,7 +150,6 @@ public class User {
                 passwordCursor.close();
                 return returnPassphrase;
             }
-            Log.w(LOG_TAG, "Empty cursor returned for password query.");
             return null;
         }
         Log.w(LOG_TAG, "User has id 0.");

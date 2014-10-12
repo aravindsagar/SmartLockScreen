@@ -124,5 +124,6 @@ public class EnvironmentOverlapResolver {
         });
         SharedPreferencesHelper.setEnvironmentOverlapChoice(overlappingEnvironments,
                 overlappingEnvironments.get(0).getId(), context);
+        setPreferredEnvironmentFirst(overlappingEnvironments, context);
     }
 }
