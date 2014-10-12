@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
@@ -13,9 +12,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -25,17 +22,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
-import com.pvsagar.smartlockscreen.StorePattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
-
-import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardExpand;
@@ -55,11 +48,9 @@ public class SetMasterPasswordFragment extends Fragment {
     private static int selectedPassphrasetype;
 
     private CardView passphraseCardView;
-    private static List<Integer> pattern;
     private Spinner passphraseTypeSpinner;
     private EditText passphraseEditText;
     private EditText passphraseConfirmationEditText;
-    private TextView passphraseEnterPatternTextView;
 
     int listPreferredItemHeight;
     int textViewTouchedColor, textViewNormalColor;
@@ -134,21 +125,6 @@ public class SetMasterPasswordFragment extends Fragment {
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        passphraseEnterPatternTextView = new TextView(getActivity());
-        passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern));
-        passphraseEnterPatternTextView.setMinHeight(listPreferredItemHeight);
-        passphraseEnterPatternTextView.setGravity(Gravity.CENTER_VERTICAL);
-        passphraseEnterPatternTextView.setPadding((int) getResources().getDimension(R.dimen.activity_vertical_margin), 0, 0, 0);
-        passphraseEnterPatternTextView.setTextAppearance(getActivity(), android.R.style.TextAppearance_DeviceDefault_Medium);
-        passphraseEnterPatternTextView.setLayoutParams(params);
-        passphraseEnterPatternTextView.setOnTouchListener(new TextViewTouchListener());
-        passphraseEnterPatternTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent patternIntent = new Intent(getActivity(), StorePattern.class);
-                startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
-            }
-        });
 
         final Card passphraseCard = new Card(getActivity());
         ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
@@ -162,7 +138,7 @@ public class SetMasterPasswordFragment extends Fragment {
                         passphraseTypeSpinner = header.getSpinner();
                         //Adapter for spinner
                         passphraseAdapter = new ArrayAdapter<String>(getActivity(),
-                                android.R.layout.simple_spinner_dropdown_item, Passphrase.passphraseTypes);
+                                android.R.layout.simple_spinner_dropdown_item, Passphrase.masterPassphraseTypes);
 
                         passphraseTypeSpinner.setAdapter(passphraseAdapter);
                         passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
@@ -176,38 +152,23 @@ public class SetMasterPasswordFragment extends Fragment {
                                 if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
                                     setPassphraseItemsEnabled(true);
                                     setPassphraseItemsVisible(true);
-                                    setPatternTextViewVisible(false);
                                     passphraseEditText.setText("");
                                     passphraseConfirmationEditText.setText("");
                                     passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                                     passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                                     passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                                     passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                                    pattern = null;
                                     passphraseCard.doExpand();
                                 } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
                                     setPassphraseItemsEnabled(true);
                                     setPassphraseItemsVisible(true);
-                                    setPatternTextViewVisible(false);
                                     passphraseEditText.setText("");
                                     passphraseConfirmationEditText.setText("");
                                     passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
                                     passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER);
                                     passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                                     passphraseConfirmationEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                                    pattern = null;
                                     passphraseCard.doExpand();
-                                } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN) {
-                                    setPassphraseItemsEnabled(false);
-                                    setPassphraseItemsVisible(false);
-                                    setPatternTextViewVisible(true);
-                                    passphraseCard.doExpand();
-                                } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE) {
-                                    setPassphraseItemsEnabled(false);
-                                    setPassphraseItemsVisible(false);
-                                    setPatternTextViewVisible(false);
-                                    pattern = null;
-                                    passphraseCard.doCollapse();
                                 }
                             }
 
@@ -260,43 +221,18 @@ public class SetMasterPasswordFragment extends Fragment {
         }
     }
 
-    public void setPatternTextViewVisible(boolean flag){
-        if(flag){
-            passphraseEnterPatternTextView.setVisibility(View.VISIBLE);
-        }
-        else {
-            passphraseEnterPatternTextView.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_CREATE_PATTERN){
-            if (resultCode == Activity.RESULT_OK) {
-                pattern = data.getIntegerArrayListExtra(StorePattern.EXTRA_PATTERN);
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     public void setUpButtons(){
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if((selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
-                        selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
-                        passphraseEditText.getText().toString().equals("")) ||
-                        selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
-                                pattern == null){
+                if(passphraseEditText.getText().toString().equals("")){
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(R.string.alert_no_passphrase_title).setMessage(R.string.alert_no_passphrase_message);
                     builder.setPositiveButton(R.string.ok,null);
                     builder.create().show();
                     return;
                 } else{
-                    if (selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
-                            selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
-                            !passphraseEditText.getText().toString().equals(passphraseConfirmationEditText.getText().toString())){
+                    if (!passphraseEditText.getText().toString().equals(passphraseConfirmationEditText.getText().toString())){
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setTitle(R.string.alert_no_passphrase_match_title).setMessage(R.string.alert_no_passphrase_match_message);
                         builder.setPositiveButton(R.string.ok,null);
@@ -306,7 +242,7 @@ public class SetMasterPasswordFragment extends Fragment {
                 }
                 Passphrase masterPassphrase = PassphraseFactory.getPassphraseInstance(
                         selectedPassphrasetype, passphraseEditText.getText().toString(),
-                        passphraseEditText.getText().toString(), pattern);
+                        passphraseEditText.getText().toString(), null);
 
                 Passphrase.setMasterPassword(masterPassphrase, getActivity());
                 getActivity().startService(BaseService.getServiceIntent(getActivity(),
@@ -348,7 +284,6 @@ public class SetMasterPasswordFragment extends Fragment {
             layout.addView(passphraseEditText);
             layout.addView(passphraseConfirmationEditText);
             relativeLayout.addView(layout);
-            relativeLayout.addView(passphraseEnterPatternTextView);
             parent.addView(relativeLayout);
             return layout;
         }
@@ -361,21 +296,6 @@ public class SetMasterPasswordFragment extends Fragment {
     private int convertDipToPx(int pixel){
         float scale = getResources().getDisplayMetrics().density;
         return (int) ((pixel * scale) + 0.5f);
-    }
-
-    public class TextViewTouchListener implements View.OnTouchListener{
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    v.setBackgroundColor(textViewTouchedColor);
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    v.setBackgroundColor(textViewNormalColor);
-            }
-            return false;
-        }
     }
 
     public interface MasterPasswordSetListener{

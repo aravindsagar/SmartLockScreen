@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -27,6 +28,7 @@ import com.pvsagar.smartlockscreen.fragments.ManageEnvironmentFragment;
 import com.pvsagar.smartlockscreen.fragments.OverlappingEnvironmentsFragment;
 import com.pvsagar.smartlockscreen.fragments.SetMasterPasswordFragment;
 import com.pvsagar.smartlockscreen.frontend_helpers.OneTimeInitializer;
+import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
@@ -45,6 +47,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
     private static final int INDEX_SETTINGS = 0;
     private static final int INDEX_HELP = 1;
     private static final int INDEX_ABOUT = 2;
+
+    private static final int MASTER_PASSWORD_REQUEST = 41;
 
     private static int mPaddingTop = 0, mPaddingBottom = 0;
 
@@ -70,9 +74,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
                     .add(R.id.container, new ManageEnvironmentFragment())
                     .commit();
         }
-        if(!OneTimeInitializer.initialize(this)){
-            finish();
-        }
+        OneTimeInitializer.initialize(this, MASTER_PASSWORD_REQUEST);
 
         startService(BaseService.getServiceIntent(this, null, null));
 
@@ -269,5 +271,15 @@ public class SmartLockScreenSettings extends ActionBarActivity
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == MASTER_PASSWORD_REQUEST){
+            if(!(resultCode == RESULT_OK && AdminActions.isAdminEnabled())){
+                finish();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

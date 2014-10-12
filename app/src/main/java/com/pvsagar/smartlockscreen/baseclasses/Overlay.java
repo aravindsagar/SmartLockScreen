@@ -45,12 +45,10 @@ public abstract class Overlay {
         if(layout == null){
             layout = getLayout();
         }
-        if(params == null){
-            params = getLayoutParams();
-        }
         try {
             windowManager.removeView(layout);
             layout = null;
+            params = null;
         } catch (Exception e){
             //Do nothing
         }

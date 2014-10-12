@@ -27,6 +27,7 @@ public abstract class Passphrase<PassphraseRepresentation> {
 
     //User friendly password type strings
     public static final String[] passphraseTypes = {"Password","Pin","Pattern","None"};
+    public static final String[] masterPassphraseTypes = {"Password","Pin"};
     public static final int INDEX_PASSPHRASE_TYPE_PASSWORD = 0;
     public static final int INDEX_PASSPHRASE_TYPE_PIN = 1;
     public static final int INDEX_PASSPHRASE_TYPE_PATTERN = 2;

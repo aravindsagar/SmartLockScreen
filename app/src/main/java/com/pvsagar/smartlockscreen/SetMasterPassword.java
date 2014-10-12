@@ -50,11 +50,13 @@ public class SetMasterPassword extends ActionBarActivity implements SetMasterPas
 
     @Override
     public void onMasterPasswordSet() {
+        setResult(RESULT_OK);
         finish();
     }
 
     @Override
     public void onCancelSetMasterPassword() {
+        setResult(RESULT_CANCELED);
         finish();
     }
 }

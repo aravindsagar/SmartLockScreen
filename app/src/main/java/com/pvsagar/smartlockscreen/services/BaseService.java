@@ -80,6 +80,11 @@ public class BaseService extends Service implements
     private static List<Environment> currentEnvironments;
 
     private LocationClient mLocationClient;
+
+    public static List<Environment> getCurrentEnvironments() {
+        return currentEnvironments;
+    }
+
     // Defines the allowable request types.
     public enum REQUEST_TYPE {ADD_GEOFENCES, REMOVE_GEOFENCES}
     private REQUEST_TYPE mRequestType;
