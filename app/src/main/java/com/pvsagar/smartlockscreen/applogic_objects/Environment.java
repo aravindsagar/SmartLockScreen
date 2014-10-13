@@ -4,10 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
@@ -46,6 +48,8 @@ public class Environment {
     private boolean isEnabled;
 
     public boolean hasLocation, hasBluetoothDevices, hasWiFiNetwork, hasNoiseLevel;
+
+    private Picture environmentPicture;
 
     /**
      * Default constructor. Sets the boolean values.
@@ -243,6 +247,14 @@ public class Environment {
         environmentValues.put(EnvironmentEntry.COLUMN_IS_ENABLED, e.isEnabled()?1:0);
         environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_HINT, e.getHint());
 
+        if(environmentPicture == null){
+            environmentPicture = new Picture(Picture.PICTURE_TYPE_COLOR,
+                    String.valueOf(Utility.getRandomColor(context)), null);
+        }
+        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_TYPE, environmentPicture.getPictureType());
+        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION, environmentPicture.getPictureDescription());
+        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE, environmentPicture.getImage());
+
         if(e.hasNoiseLevel && e.getNoiseLevelEnvironmentVariable() != null){
             environmentValues.put(EnvironmentEntry.COLUMN_IS_MAX_NOISE_ENABLED,
                     e.getNoiseLevelEnvironmentVariable().hasUpperLimit);
@@ -289,7 +301,8 @@ public class Environment {
     /**
      * Update the environment entry in database. Old name of the environment should be passed if
      * name has changed. If oldName is null, current name of the environment is taken and used for
-     * finding the records to update
+     * finding the records to update.
+     * Note: this does not update the environment picture in db. To do that, use updateEnvironmentPicture()
      * @param context activity/service context
      * @param oldName The name of the environment to be modified
      */
@@ -432,7 +445,7 @@ public class Environment {
 
     /**
      * Returns a list of Environment instances, without the environment variables populated,
-     * for all environments in the database. Useful for getting id, name, isEnabled and Hint
+     * for all environments in the database. Useful for getting id, name, isEnabled, Hint and picture
      * of all environments
      * @param context Activity/ service context
      * @return List of barebone Environment instances (without the Environment Variables populated)
@@ -597,9 +610,14 @@ public class Environment {
                     EnvironmentEntry._ID));
             boolean enabled = envCursor.getInt(envCursor.getColumnIndex(
                     EnvironmentEntry.COLUMN_IS_ENABLED)) == 1;
+            Picture picture = new Picture(
+                    envCursor.getString(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_TYPE)),
+                    envCursor.getString(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION)),
+                    envCursor.getBlob(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE)));
             e.setName(envName);
             e.setHint(envHint);
             e.setEnabled(enabled);
+            e.setEnvironmentPicture(picture);
             e.id = id;
 
             return e;
@@ -659,5 +677,21 @@ public class Environment {
     @Override
     public String toString() {
         return getName();
+    }
+
+    public Picture getEnvironmentPicture() {
+        return environmentPicture;
+    }
+
+    public void setEnvironmentPicture(Picture environmentPicture) {
+        this.environmentPicture = environmentPicture;
+    }
+
+    public Drawable getEnvironmentPictureDrawable(Context context){
+        return environmentPicture.getDrawable(getName().charAt(0), context);
+    }
+
+    public void updateEnvironmentPicture(){
+        //TODO code this
     }
 }

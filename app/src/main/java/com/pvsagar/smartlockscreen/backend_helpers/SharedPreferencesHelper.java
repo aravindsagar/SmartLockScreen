@@ -57,7 +57,7 @@ public class SharedPreferencesHelper {
 
     public static long getDeviceOwnerUserId(Context context){
         initPreferences(context);
-        return preferences.getLong(KEY_DEVICE_OWNER_USER_ID, 1);
+        return preferences.getLong(KEY_DEVICE_OWNER_USER_ID, -1);
     }
 
     public static void setDeviceOwnerUserId(Context context, long id){

@@ -553,10 +553,7 @@ public class EnvironmentProvider extends ContentProvider {
             db.delete(AppWhitelistEntry.TABLE_NAME, userSelection, userSelectionArgs);
         }
         userCursor.close();
-        int returnValue = db.delete(UsersEntry.TABLE_NAME, selection, selectionArgs);
-        //Insert default user if its missing
-        EnvironmentDbHelper.insertDefaultUser(db);
-        return returnValue;
+        return db.delete(UsersEntry.TABLE_NAME, selection, selectionArgs);
     }
 
     private void deletePasswordWithUserId(long userId, SQLiteDatabase db){
