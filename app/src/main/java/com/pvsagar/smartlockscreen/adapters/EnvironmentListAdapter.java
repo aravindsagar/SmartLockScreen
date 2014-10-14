@@ -3,6 +3,7 @@ package com.pvsagar.smartlockscreen.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +17,6 @@ import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.backend_helpers.Utility;
-import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 
 import java.util.List;
 
@@ -31,17 +30,19 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     private SparseBooleanArray mSelectedItemsIds;
     private List<Boolean> enabledValues;
     private List<String> environmentHints;
+    private List<Drawable> environmentPictures;
 
     private ColorDrawable switchOn, switchOff;
 
     public EnvironmentListAdapter(Context context, List<String> environmentNames,
-                                  List<Boolean> enabledValues, List<String> environmentHints){
+            List<Boolean> enabledValues, List<String> environmentHints, List<Drawable> environmentPictures){
         super(context, R.layout.list_view_environments,environmentNames);
         this.context = context;
         this.environmentNames = environmentNames;
         this.mSelectedItemsIds = new SparseBooleanArray();
         this.enabledValues = enabledValues;
         this.environmentHints = environmentHints;
+        this.environmentPictures = environmentPictures;
 
         switchOn = new ColorDrawable(context.getResources().getColor(R.color.switch_color));
         switchOff = new ColorDrawable(Color.LTGRAY);
@@ -78,8 +79,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
             }
         });
         ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
-        environmentPicture.setImageDrawable(new CharacterDrawable(
-                Character.toUpperCase(environmentName.charAt(0)), Utility.getRandomColor(getContext())));
+        environmentPicture.setImageDrawable(environmentPictures.get(position));
         return rootView;
     }
 

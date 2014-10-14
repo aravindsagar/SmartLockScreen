@@ -4,9 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
@@ -31,7 +30,7 @@ import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.SetUnknownEnvironmentPassword;
 import com.pvsagar.smartlockscreen.adapters.EnvironmentListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
@@ -48,6 +47,7 @@ public class ManageEnvironmentFragment extends Fragment {
     List<Environment> environments;
     List<Boolean> enabledValues = new ArrayList<Boolean>();
     List<String> environmentHints = new ArrayList<String>();
+    List<Drawable> environmentPictures = new ArrayList<Drawable>();
     ListView environmentsListView;
 
     private int mPaddingTop, mPaddingBottom;
@@ -102,14 +102,16 @@ public class ManageEnvironmentFragment extends Fragment {
         enabledValues.clear();
         environmentHints.clear();
         environmentNames.clear();
+        environmentPictures.clear();
         for(Environment e : environments){
             environmentNames.add(e.getName());
             environmentHints.add(e.getHint());
             enabledValues.add(e.isEnabled());
+            environmentPictures.add(e.getEnvironmentPictureDrawable(getActivity()));
         }
             /* Creating the adapter */
         final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),
-                environmentNames, enabledValues, environmentHints);
+                environmentNames, enabledValues, environmentHints, environmentPictures);
         environmentsListView.setAdapter(listAdapter);
         environmentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -182,8 +184,7 @@ public class ManageEnvironmentFragment extends Fragment {
                 environmentsListView, false);
 
         ImageView imageView = (ImageView) unknownLayout.findViewById(R.id.image_view_environment_picture);
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.andquestionsag);
-        imageView.setImageBitmap(Utility.getCroppedBitmap(bitmap, Color.DKGRAY));
+        imageView.setImageDrawable(new CharacterDrawable('?', Color.rgb(150, 150, 150)));
 
         TextView textView = (TextView) unknownLayout.findViewById(R.id.text_view_environment_list);
         textView.setText("Unknown Environment");

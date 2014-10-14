@@ -688,7 +688,7 @@ public class Environment {
     }
 
     public Drawable getEnvironmentPictureDrawable(Context context){
-        return environmentPicture.getDrawable(getName().charAt(0), context);
+        return environmentPicture.getDrawable(Character.toUpperCase(getName().charAt(0)), context);
     }
 
     public void updateEnvironmentPicture(){

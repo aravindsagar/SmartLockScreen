@@ -12,8 +12,6 @@ import android.widget.TextView;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
-import com.pvsagar.smartlockscreen.backend_helpers.Utility;
-import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 
 import java.util.List;
 
@@ -86,9 +84,7 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
                 }
 
                 ImageView userImage = (ImageView) convertView.findViewById(R.id.user_image_view);
-                //TODO implement user pics. Use letter when no pic available. Keep the background color for each user constant, choose random one at user creation
-                userImage.setImageDrawable(new CharacterDrawable(
-                        user.getUserName().charAt(0), Utility.getRandomColor(getContext())));
+                userImage.setImageDrawable(user.getUserPictureDrawable(getContext()));
 
                 ImageView tickImage = (ImageView) convertView.findViewById(R.id.user_selected_tick_image_view);
                 if(arrayIndex == selectedProfileIndex){

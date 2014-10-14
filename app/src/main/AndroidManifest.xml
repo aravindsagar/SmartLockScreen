@@ -141,6 +141,10 @@
         <receiver android:name=".receivers.PhoneStateReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="com.android.deskclock.ALARM_DONE" />
+                <action android:name="com.android.deskclock.ALARM_ALERT" />
+                <action android:name="com.android.deskclock.ALARM_DISMISS" />
+                <action android:name="com.android.deskclock.ALARM_SNOOZE" />
             </intent-filter>
         </receiver>
 

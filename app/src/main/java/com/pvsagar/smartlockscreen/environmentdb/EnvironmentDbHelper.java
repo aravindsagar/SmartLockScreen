@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.AppWhitelistEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
@@ -156,7 +158,8 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
 
     }
 
-    public static long insertDefaultUser(SQLiteDatabase db, String userName){
+    //Move the next two functions to User class, wrap it up in a single function
+    public static long insertDefaultUser(SQLiteDatabase db, String userName, Context context){
         if(userName == null || userName.isEmpty()){
             userName = UsersEntry.DEFAULT_USER_NAME;
         }
@@ -172,11 +175,13 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         userCursor.close();
         ContentValues userValues = new ContentValues();
         userValues.put(UsersEntry.COLUMN_USER_NAME, userName);
+        userValues.put(UsersEntry.COLUMN_USER_PICTURE_TYPE, Picture.PICTURE_TYPE_COLOR);
+        userValues.put(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION, Utility.getRandomColor(context));
         return db.insert(UsersEntry.TABLE_NAME, null, userValues);
     }
 
     public static void insertDefaultUser(Context context){
-        long id = insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase(), null);
+        long id = insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase(), null, context);
         if(id >= 0){
             SharedPreferencesHelper.setDeviceOwnerUserId(context, id);
         }

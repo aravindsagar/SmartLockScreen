@@ -66,7 +66,6 @@ public class Picture {
     }
 
     public void setPictureType(String pictureType) {
-
         this.pictureType = pictureType;
     }
 

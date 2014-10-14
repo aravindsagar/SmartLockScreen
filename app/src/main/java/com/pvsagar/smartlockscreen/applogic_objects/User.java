@@ -215,6 +215,6 @@ public class User {
     }
 
     public Drawable getUserPictureDrawable(Context context){
-        return userPicture.getDrawable(getUserName().charAt(0), context);
+        return userPicture.getDrawable(Character.toUpperCase(getUserName().charAt(0)), context);
     }
 }
