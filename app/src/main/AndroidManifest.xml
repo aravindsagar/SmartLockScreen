@@ -87,7 +87,16 @@
         <activity
             android:name=".SetUnknownEnvironmentPassword"
             android:label="@string/title_activity_set_unknown_environment_password"
-            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth">
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" >
+        </activity>
+        <activity
+            android:name=".ChoosePicture"
+            android:label="@string/title_activity_choose_picture"
+            android:parentActivityName=".SmartLockScreenSettings"
+            android:theme="@style/TransparentThemeNoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
         </activity>
 
         <provider

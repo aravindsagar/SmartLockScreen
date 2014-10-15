@@ -108,5 +108,6 @@
     <string name="no_overlap_detected">No overlap detected so far</string>
     <string name="title_activity_set_unknown_environment_password">Password for unknown environment</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_choose_picture">Choose Picture</string>
 
 </resources>
