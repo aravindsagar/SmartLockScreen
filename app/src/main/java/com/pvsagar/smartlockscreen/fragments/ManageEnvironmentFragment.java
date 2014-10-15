@@ -1,30 +1,36 @@
 package com.pvsagar.smartlockscreen.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.AddEnvironment;
 import com.pvsagar.smartlockscreen.EditEnvironment;
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.SetUnknownEnvironmentPassword;
 import com.pvsagar.smartlockscreen.adapters.EnvironmentListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
@@ -32,16 +38,23 @@ import java.util.List;
 
 /**
  * Created by aravind on 7/10/14.
+ * Fragment which shows a list of added Environments.
  */
 public class ManageEnvironmentFragment extends Fragment {
+    private static final String LOG_TAG = ManageEnvironmentFragment.class.getSimpleName();
 
     List<String> environmentNames = new ArrayList<String>();
     List<Environment> environments;
     List<Boolean> enabledValues = new ArrayList<Boolean>();
     List<String> environmentHints = new ArrayList<String>();
+    List<Drawable> environmentPictures = new ArrayList<Drawable>();
     ListView environmentsListView;
 
-    private SystemBarTintManager tintManager;
+    private int mPaddingTop, mPaddingBottom;
+
+    int textViewTouchedColor, textViewNormalColor;
+
+    private ActionModeListener actionModeListener;
 
     public ManageEnvironmentFragment() {
     }
@@ -49,28 +62,35 @@ public class ManageEnvironmentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(
-                new ColorDrawable(getResources().getColor(R.color.action_bar_manage_environment)));
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }
-
         setHasOptionsMenu(true);
+        textViewNormalColor = Color.argb(0,0,0,0);
+        textViewTouchedColor = getResources().getColor(R.color.text_view_touched_darker);
 
         View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
         environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
-        tintManager = new SystemBarTintManager(getActivity());
-        tintManager.setStatusBarTintEnabled(true);
-        tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
-        rootView.setPadding(rootView.getPaddingLeft(),
-                rootView.getPaddingTop() + tintManager.getConfig().getPixelInsetTop(true),
-                rootView.getPaddingRight(), rootView.getPaddingBottom());
-        View bottomPaddingView = new View(getActivity());
-        bottomPaddingView.setBackgroundColor(Color.TRANSPARENT);
-        bottomPaddingView.setLayoutParams(new AbsListView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, tintManager.getConfig().getNavigationBarHeight()));
-        environmentsListView.addFooterView(bottomPaddingView);
+        SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+        }
+        environmentsListView.addFooterView(getUnknownEnvironmentLayout(inflater));
+        switch (getActivity().getResources().getConfiguration().orientation){
+            case Configuration.ORIENTATION_UNDEFINED:
+            case Configuration.ORIENTATION_PORTRAIT:
+                rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
+                        rootView.getPaddingRight(), rootView.getPaddingBottom());
+                View bottomPaddingView = new View(getActivity());
+                bottomPaddingView.setBackgroundColor(Color.TRANSPARENT);
+                bottomPaddingView.setLayoutParams(new AbsListView.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
+                environmentsListView.addFooterView(bottomPaddingView, null, false);
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
+                        rootView.getPaddingRight() + mPaddingBottom, rootView.getPaddingBottom());
+                break;
+        }
+
         //Init
         init();
         return rootView;
@@ -82,14 +102,16 @@ public class ManageEnvironmentFragment extends Fragment {
         enabledValues.clear();
         environmentHints.clear();
         environmentNames.clear();
+        environmentPictures.clear();
         for(Environment e : environments){
             environmentNames.add(e.getName());
             environmentHints.add(e.getHint());
             enabledValues.add(e.isEnabled());
+            environmentPictures.add(e.getEnvironmentPictureDrawable(getActivity()));
         }
             /* Creating the adapter */
         final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),
-                environmentNames, enabledValues, environmentHints);
+                environmentNames, enabledValues, environmentHints, environmentPictures);
         environmentsListView.setAdapter(listAdapter);
         environmentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -113,8 +135,8 @@ public class ManageEnvironmentFragment extends Fragment {
             }
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.multi_select_cab_menu,menu);
-                tintManager.setTintColor(getResources().getColor(R.color.action_mode));
+                mode.getMenuInflater().inflate(R.menu.multi_select_cab_menu, menu);
+                actionModeListener.onActionModeCreated();
                 return true;
             }
 
@@ -151,16 +173,48 @@ public class ManageEnvironmentFragment extends Fragment {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 listAdapter.removeSelection();
-                tintManager.setTintColor(getResources().getColor(R.color.action_bar_manage_environment));
+                actionModeListener.onActionModeDestroyed();
             }
         });
             /* End of adapter code */
+    }
+
+    private LinearLayout getUnknownEnvironmentLayout(LayoutInflater inflater){
+        LinearLayout unknownLayout = (LinearLayout) inflater.inflate(R.layout.list_item_unknown_environment,
+                environmentsListView, false);
+
+        ImageView imageView = (ImageView) unknownLayout.findViewById(R.id.image_view_environment_picture);
+        imageView.setImageDrawable(new CharacterDrawable('?', Color.rgb(150, 150, 150)));
+
+        TextView textView = (TextView) unknownLayout.findViewById(R.id.text_view_environment_list);
+        textView.setText("Unknown Environment");
+
+        unknownLayout.setOnTouchListener(new TextViewTouchListener());
+
+        unknownLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), SetUnknownEnvironmentPassword.class));
+            }
+        });
+        return unknownLayout;
     }
 
     @Override
     public void onResume() {
         super.onResume();
         init();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            actionModeListener = (ActionModeListener) activity;
+        } catch (ClassCastException e){
+            throw new InstantiationException("Activity using " + LOG_TAG + " should implement "
+                    + ActionModeListener.class.getSimpleName(), e);
+        }
     }
 
     @Override
@@ -181,5 +235,26 @@ public class ManageEnvironmentFragment extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public interface ActionModeListener{
+        public void onActionModeDestroyed();
+        public void onActionModeCreated();
+    }
+
+    public class TextViewTouchListener implements View.OnTouchListener{
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    v.setBackgroundColor(textViewTouchedColor);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.setBackgroundColor(textViewNormalColor);
+                    break;
+            }
+            return false;
+        }
     }
 }

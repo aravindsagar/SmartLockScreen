@@ -59,8 +59,7 @@ public class LockScreenOverlayHelper extends Overlay{
         unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String currentPassphraseType = AdminActions.getCurrentPassphraseType(),
-                        currentPassphraseString = AdminActions.getCurrentPassphraseString();
+                String currentPassphraseType = AdminActions.getCurrentPassphraseType();
                 if (!Utility.checkForNullAndWarn(currentPassphraseType, LOG_TAG)){
                     if (currentPassphraseType.equals(Passphrase.TYPE_PATTERN) &&
                             AdminActions.getCurrentPassphraseString() != null) {
@@ -78,7 +77,7 @@ public class LockScreenOverlayHelper extends Overlay{
         notificationListAdapter = new NotificationListAdapter(context);
         notificationsListView.setAdapter(notificationListAdapter);
 
-        return (View) rLayout;
+        return rLayout;
     }
 
     public void notificationChanged(){
@@ -92,9 +91,15 @@ public class LockScreenOverlayHelper extends Overlay{
     protected WindowManager.LayoutParams getLayoutParams(){
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD,
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                 PixelFormat.OPAQUE);
+
+        if(AdminActions.getCurrentPassphraseType().equals(Passphrase.TYPE_NONE)) {
+            params.dimAmount = 1;
+        } else {
+            params.dimAmount = 0;
+        }
         params.x = 0;
         params.y = 0;
         return params;

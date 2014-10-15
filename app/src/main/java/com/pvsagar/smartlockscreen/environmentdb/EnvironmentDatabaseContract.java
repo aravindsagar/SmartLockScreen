@@ -125,6 +125,12 @@ public class EnvironmentDatabaseContract {
 
         public static final String COLUMN_ENVIRONMENT_HINT = "environment_hint";
 
+        public static final String COLUMN_ENVIRONMENT_PICTURE_TYPE = "environment_picture_type";
+
+        public static final String COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION = "environment_picture";
+
+        public static final String COLUMN_ENVIRONMENT_PICTURE = "environment_picture_blob";
+
         public static Uri buildEnvironmentUriWithId(long id){
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
         }
@@ -170,6 +176,12 @@ public class EnvironmentDatabaseContract {
         public static final String TABLE_NAME = "users";
 
         public static final String COLUMN_USER_NAME = "user_name";
+
+        public static final String COLUMN_USER_PICTURE_TYPE = "user_picture_type";
+
+        public static final String COLUMN_USER_PICTURE_DESCRIPTION = "user_picture";
+
+        public static final String COLUMN_USER_PICTURE = "user_picture_blob";
 
         public static Uri buildUserUriWithId(long id){
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();

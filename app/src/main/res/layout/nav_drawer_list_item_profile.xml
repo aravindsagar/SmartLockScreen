@@ -35,9 +35,9 @@
             android:id="@+id/user_type_text_view"/>
     </LinearLayout>
     <ImageView
-        android:layout_width="@dimen/user_picture_dimen"
-        android:layout_height="@dimen/user_picture_dimen"
-        android:layout_gravity="center_horizontal"
+        android:layout_width="@dimen/nav_bar_icon_dimen"
+        android:layout_height="@dimen/nav_bar_icon_dimen"
+        android:layout_gravity="center_vertical"
         android:contentDescription="@string/drop_down_pic_content_description"
         android:src="@drawable/ic_action_accept"
         android:background="@android:color/transparent"

@@ -82,6 +82,11 @@ public class BaseService extends Service implements
     private static List<Environment> currentEnvironments;
 
     private LocationClient mLocationClient;
+
+    public static List<Environment> getCurrentEnvironments() {
+        return currentEnvironments;
+    }
+
     // Defines the allowable request types.
     public enum REQUEST_TYPE {ADD_GEOFENCES, REMOVE_GEOFENCES}
     private REQUEST_TYPE mRequestType;
@@ -384,6 +389,11 @@ public class BaseService extends Service implements
     private class DetermineConnectedWifiNetwork extends AsyncTask<Void, Void, WiFiEnvironmentVariable>{
         @Override
         protected WiFiEnvironmentVariable doInBackground(Void... params) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return getConnectedWifiNetwork();
         }
 
@@ -404,19 +414,22 @@ public class BaseService extends Service implements
     @Override
     public void onEnvironmentDetected(List<Environment> currentList) {
         currentEnvironments = currentList;
-        if (currentList == null) {
+        if (currentList == null || currentList.size() == 0) {
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                     "Unknown Environment"));
-            Passphrase masterPassphrase = Passphrase.getMasterPassword(this);
-            if(!masterPassphrase.setAsCurrentPassword()){
+            Passphrase unknownPassphrase = User.getCurrentUser(this).getPassphraseForUnknownEnvironment(this);
+            if(unknownPassphrase == null) {
+                unknownPassphrase = Passphrase.getMasterPassword(this);
+            }
+            if(!unknownPassphrase.setAsCurrentPassword()){
                 AdminActions.initializeAdminObjects(this);
-                if(!masterPassphrase.setAsCurrentPassword()){
+                if(!unknownPassphrase.setAsCurrentPassword()){
                     startService(BaseService.getServiceIntent(this,
                             "Please enable administrator for the app.", null));
                 }
             }
         } else {
-            Environment current = currentList.get(0); //TODO replace with a proper algorithm
+            Environment current = currentList.get(0);
             User user = User.getCurrentUser(this);
             if(user != null) {
                 Passphrase passphrase = user.getPassphraseForEnvironment(this, current);

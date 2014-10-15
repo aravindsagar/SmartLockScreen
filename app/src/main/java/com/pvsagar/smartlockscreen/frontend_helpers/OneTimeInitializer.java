@@ -15,21 +15,15 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
 public class OneTimeInitializer {
     private static final String LOG_TAG = OneTimeInitializer.class.getSimpleName();
 
-    public static boolean initialize(Context activityContext){
-        boolean isMasterPasswordSet = false;
+    public static void initialize(Context activityContext, int requestCode){
         if(!(activityContext instanceof Activity)){
             Log.e(LOG_TAG, "Context passed should be an activity context");
-            return false;
+            return;
         }
         AdminActions.initAdmin(activityContext);
         if(SharedPreferencesHelper.getMasterPasswordType(activityContext) == null){
-            activityContext.startActivity(new Intent(activityContext, SetMasterPassword.class));
-        } else {
-            isMasterPasswordSet = true;
+            ((Activity) activityContext).startActivityForResult(
+                    new Intent(activityContext, SetMasterPassword.class), requestCode);
         }
-        if(!isMasterPasswordSet){
-            isMasterPasswordSet = SharedPreferencesHelper.getMasterPasswordType(activityContext) != null;
-        }
-        return isMasterPasswordSet && AdminActions.isAdminEnabled();
     }
 }

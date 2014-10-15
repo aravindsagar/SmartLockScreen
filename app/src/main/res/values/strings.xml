@@ -81,6 +81,8 @@
     <string name="title_activity_store_pattern">Store Pattern</string>
     <string name="pattern_continue">Continue</string>
     <string name="pattern_confirm">Confirm</string>
+    <string name="reset">Reset</string>
+    <string name="use_master_password">Use master passphrase</string>
     <string name="title_activity_set_master_password">Set Master Password</string>
     <string name="master_password_set">Master password set</string>
     <string name="title_activity_smart_lock_screen_settings">SmartLockScreen Settings</string>
@@ -89,6 +91,7 @@
     <string name="add_new_profile_text">Add new profile</string>
     <string name="user_type_device_owner">Device Owner</string>
     <string name="user_type_restricted_profile">Restricted Profile</string>
+
     <string-array name="nav_drawer_main_items">
         <item>Manage Environments</item>
         <item>Environment Overlap</item>
@@ -99,5 +102,12 @@
         <item>Help</item>
         <item>About</item>
     </string-array>
+
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+    <string name="no_overlap_detected">No overlap detected so far</string>
+    <string name="title_activity_set_unknown_environment_password">Password for unknown environment</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_choose_picture">Choose Picture</string>
 
 </resources>

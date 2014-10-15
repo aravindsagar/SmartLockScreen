@@ -41,10 +41,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.NoSecurity;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Password;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
-import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pin;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
@@ -93,6 +90,8 @@ public class EditEnvironment extends ActionBarActivity {
     private static int selectedPassphrasetype;
 
     private static List<Integer> pattern;
+
+    private static int currentPassphraseTypeIndex;
 
     PlaceholderFragment placeholderFragment;
 
@@ -245,8 +244,8 @@ public class EditEnvironment extends ActionBarActivity {
 
         private float getListPreferredItemHeight(){
             android.util.TypedValue value = new android.util.TypedValue();
-            boolean b = getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
-            String s = TypedValue.coerceToString(value.type, value.data);
+            getActivity().getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+            TypedValue.coerceToString(value.type, value.data);
             android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
             return value.getDimension(metrics);
@@ -339,8 +338,8 @@ public class EditEnvironment extends ActionBarActivity {
             bluetoothDevices = BluetoothEnvironmentVariable.getPairedBluetoothDevices(getActivity());
             Vector<BluetoothEnvironmentVariable> bluetoothVariables =  environment.getBluetoothEnvironmentVariables();
             for(int i = 0; i < bluetoothDevices.size(); i++){
-                for(int j = 0; j < bluetoothVariables.size(); j++){
-                    if(bluetoothVariables.get(j).getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())){
+                for (BluetoothEnvironmentVariable bluetoothVariable : bluetoothVariables) {
+                    if (bluetoothVariable.getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())) {
                         Log.d(LOG_TAG, "Adding " + bluetoothDevices.get(i).getName() + " to mSelectedBluetoothDevices.");
                         mSelectedBluetoothDevices.add(bluetoothDevices.get(i));
                         mSelectedBluetoothItems.add(i);
@@ -378,21 +377,22 @@ public class EditEnvironment extends ActionBarActivity {
 
         private void initPassphraseElements(){
             Passphrase passphrase = User.getCurrentUser(getActivity()).getPassphraseForEnvironment(getActivity(), environment);
-            passphraseEditText.setHint("(Unchanged)");
+            if(passphrase == null){
+                currentPassphraseTypeIndex = -1;
+                return;
+            }
             if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PASSWORD)) {
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD;
             } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PATTERN)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN;
                 passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
             } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_PIN);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_PIN;
             } else if(passphrase.getPassphraseType().equals(Passphrase.TYPE_NONE)){
-                passphraseTypeSpinner.setSelection(Passphrase.INDEX_PASSPHRASE_TYPE_NONE);
-                selectedPassphrasetype = Passphrase.INDEX_PASSPHRASE_TYPE_NONE;
+                currentPassphraseTypeIndex = Passphrase.INDEX_PASSPHRASE_TYPE_NONE;
             }
+            passphraseTypeSpinner.setSelection(currentPassphraseTypeIndex);
+            selectedPassphrasetype = currentPassphraseTypeIndex;
         }
 
         private void setupEnvironmentBasic(){
@@ -791,6 +791,11 @@ public class EditEnvironment extends ActionBarActivity {
                                     passphraseConfirmationEditText.setHint("Confirm " + Passphrase.passphraseTypes[position]);
                                     selectedPassphrasetype = position;
                                     if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD) {
+                                        if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
+                                            passphraseEditText.setHint("(Unchanged)");
+                                        } else {
+                                            passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                        }
                                         setPassphraseItemsEnabled(true);
                                         setPassphraseItemsVisible(true);
                                         setPatternTextViewVisible(false);
@@ -803,6 +808,11 @@ public class EditEnvironment extends ActionBarActivity {
                                         pattern = null;
                                         passphraseCard.doExpand();
                                     } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_PIN) {
+                                        if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
+                                            passphraseEditText.setHint("(Unchanged)");
+                                        } else {
+                                            passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[position]);
+                                        }
                                         setPassphraseItemsEnabled(true);
                                         setPassphraseItemsVisible(true);
                                         setPatternTextViewVisible(false);
@@ -1042,20 +1052,11 @@ public class EditEnvironment extends ActionBarActivity {
                     pattern != null){
                 //Password changed
                 Log.d(LOG_TAG, "Password changed. Updating in db.");
-                if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD){
-                    Password password = new Password(passphraseEditText.getText().toString());
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),password,newEnvironment);
-                }
-                else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PIN){
-                    Pin pin = new Pin(passphraseEditText.getText().toString());
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),pin,newEnvironment);
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE){
-                    NoSecurity noSecurity = new NoSecurity();
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(), noSecurity, newEnvironment);
-                } else if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN){
-                    Pattern pattern1 = new Pattern(pattern);
-                    User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(), pattern1, newEnvironment);
-                }
+                Passphrase passphrase = PassphraseFactory.getPassphraseInstance(selectedPassphrasetype,
+                        passphraseEditText.getText().toString(), passphraseEditText.getText().toString(),
+                        pattern);
+                User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),
+                        passphrase, environment);
             }
             /* done with updating passphrase */
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,

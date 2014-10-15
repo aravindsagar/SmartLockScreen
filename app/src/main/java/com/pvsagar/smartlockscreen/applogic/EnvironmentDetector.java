@@ -39,7 +39,9 @@ public class EnvironmentDetector {
     /**
      * Detects the current environment based on the current values of the environment variables.
      * @param context Activity/service context
-     *
+     * @param callback The callback is fired when environment detection is complete. The list of
+     *                 current environments wil be returned, with the first element being the one
+     *                 resolved using Overlap resolver
      */
     public void detectCurrentEnvironment(Context context, EnvironmentDetectedCallback callback){
         Utility.checkForNullAndThrowException(context);
@@ -58,7 +60,7 @@ public class EnvironmentDetector {
          * The function which is run in background. Checks for the stored environments which matches
          * the current variable values
          * @param params Activity/service context
-         * @return The detected environment list
+         * @return The detected environment list, with first element set as the overlap resolved one
          */
         @Override
         protected List<Environment> doInBackground(Context... params) {
@@ -112,11 +114,15 @@ public class EnvironmentDetector {
                 currentEnvironments.addAll(checkWifiAndBluetoothOfPotentialEnvironments(context,
                         potentialEnvironments));
             }
-            manageEnvironmentDetectionCriticalSection.release();
             if(currentEnvironments.size() == 0) {
                 Log.v(LOG_TAG, "No stored environment matched current environment.");
+                manageEnvironmentDetectionCriticalSection.release();
                 return null;
+            } else if(currentEnvironments.size() > 1){
+                Log.v(LOG_TAG, "Environment Overlap.");
+                EnvironmentOverlapResolver.setPreferredEnvironmentFirst(currentEnvironments, context);
             }
+            manageEnvironmentDetectionCriticalSection.release();
             return currentEnvironments;
         }
 

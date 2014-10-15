@@ -37,12 +37,6 @@
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name=".ManageEnvironment"
-            android:label="@string/title_activity_manage_environment"
-            android:theme="@style/HoloWithActionMode"
-            android:parentActivityName=".SmartLockScreenSettings">
-        </activity>
-        <activity
             android:name=".AddEnvironment"
             android:label="@string/title_activity_add_environment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
@@ -62,7 +56,7 @@
         <activity
             android:name=".SearchLocation"
             android:label="@string/title_activity_search_location"
-            android:theme="@style/TransparentTheme">
+            android:theme="@style/TransparentTheme" >
         </activity>
         <activity
             android:name=".StorePattern"
@@ -83,12 +77,26 @@
         <activity
             android:name=".SmartLockScreenSettings"
             android:label="@string/title_activity_smart_lock_screen_settings"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:theme="@style/HoloWithActionMode" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".SetUnknownEnvironmentPassword"
+            android:label="@string/title_activity_set_unknown_environment_password"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" >
+        </activity>
+        <activity
+            android:name=".ChoosePicture"
+            android:label="@string/title_activity_choose_picture"
+            android:parentActivityName=".SmartLockScreenSettings"
+            android:theme="@style/TransparentThemeNoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
         </activity>
 
         <provider
@@ -150,6 +158,10 @@
         <receiver android:name=".receivers.PhoneStateReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="com.android.deskclock.ALARM_DONE" />
+                <action android:name="com.android.deskclock.ALARM_ALERT" />
+                <action android:name="com.android.deskclock.ALARM_DISMISS" />
+                <action android:name="com.android.deskclock.ALARM_SNOOZE" />
             </intent-filter>
         </receiver>
 

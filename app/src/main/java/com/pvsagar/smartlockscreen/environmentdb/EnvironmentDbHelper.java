@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.AppWhitelistEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.BluetoothDevicesEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.EnvironmentBluetoothEntry;
@@ -81,6 +83,9 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 EnvironmentEntry.COLUMN_MIN_NOISE_LEVEL + " REAL, " +
                 EnvironmentEntry.COLUMN_IS_ENABLED + " INTEGER NOT NULL, " +
                 EnvironmentEntry.COLUMN_ENVIRONMENT_HINT + " TEXT, " +
+                EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION + " TEXT, " +
+                EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_TYPE + " TEXT, " +
+                EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE + " BLOB, " +
                 " FOREIGN KEY (" + EnvironmentEntry.COLUMN_GEOFENCE_ID + ") REFERENCES " +
                 GeoFenceEntry.TABLE_NAME + "(" + GeoFenceEntry._ID + "), " +
                 " FOREIGN KEY (" + EnvironmentEntry.COLUMN_WIFI_ID + ") REFERENCES " +
@@ -102,6 +107,9 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_USERS = "CREATE TABLE " + UsersEntry.TABLE_NAME + " ( " +
                 UsersEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 UsersEntry.COLUMN_USER_NAME + " TEXT NOT NULL, " +
+                UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION + " TEXT, " +
+                UsersEntry.COLUMN_USER_PICTURE_TYPE + " TEXT, " +
+                UsersEntry.COLUMN_USER_PICTURE + " BLOB, " +
                 "UNIQUE (" + UsersEntry.COLUMN_USER_NAME + ") ON CONFLICT IGNORE);";
 
         final String SQL_CREATE_PASSWORDS = "CREATE TABLE " + PasswordEntry.TABLE_NAME + " ( " +
@@ -143,8 +151,6 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_PASSWORDS);
         db.execSQL(SQL_CREATE_USER_PASSWORDS);
         db.execSQL(SQL_CREATE_APP_WHITELIST);
-
-        insertDefaultUser(db);
     }
 
     @Override
@@ -152,10 +158,14 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
 
     }
 
-    public static long insertDefaultUser(SQLiteDatabase db){
+    //Move the next two functions to User class, wrap it up in a single function
+    public static long insertDefaultUser(SQLiteDatabase db, String userName, Context context){
+        if(userName == null || userName.isEmpty()){
+            userName = UsersEntry.DEFAULT_USER_NAME;
+        }
         //Checking whether the default user is present
         Cursor userCursor = db.query(UsersEntry.TABLE_NAME, null, UsersEntry.COLUMN_USER_NAME + " = ? ",
-                new String[]{UsersEntry.DEFAULT_USER_NAME}, null, null, null);
+                new String[]{userName}, null, null, null);
         if(userCursor.getCount() > 0){
             userCursor.moveToFirst();
             long id = userCursor.getLong(userCursor.getColumnIndex(UsersEntry._ID));
@@ -164,12 +174,14 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
         }
         userCursor.close();
         ContentValues userValues = new ContentValues();
-        userValues.put(UsersEntry.COLUMN_USER_NAME, UsersEntry.DEFAULT_USER_NAME);
+        userValues.put(UsersEntry.COLUMN_USER_NAME, userName);
+        userValues.put(UsersEntry.COLUMN_USER_PICTURE_TYPE, Picture.PICTURE_TYPE_COLOR);
+        userValues.put(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION, Utility.getRandomColor(context));
         return db.insert(UsersEntry.TABLE_NAME, null, userValues);
     }
 
     public static void insertDefaultUser(Context context){
-        long id = insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase());
+        long id = insertDefaultUser(EnvironmentDbHelper.getInstance(context).getWritableDatabase(), null, context);
         if(id >= 0){
             SharedPreferencesHelper.setDeviceOwnerUserId(context, id);
         }

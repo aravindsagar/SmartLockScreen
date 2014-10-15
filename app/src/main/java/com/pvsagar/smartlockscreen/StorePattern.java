@@ -23,10 +23,10 @@ public class StorePattern extends Activity {
 
     PatternGridView mPatternGridView;
     TextView mStatusView;
-    Button mContinueButton, mCancelButton;
+    Button mContinueButton, mResetButton;
     List<Integer> mPattern;
 
-    private enum PatternEntryState {FIRST_TIME, CONFIRMATION};
+    private enum PatternEntryState {FIRST_TIME, CONFIRMATION}
     PatternEntryState mState = PatternEntryState.FIRST_TIME;
 
     @Override
@@ -53,12 +53,11 @@ public class StorePattern extends Activity {
                 }
             }
         });
-        mCancelButton = (Button) findViewById(R.id.button_cancel);
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
+        mResetButton = (Button) findViewById(R.id.button_reset);
+        mResetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(RESULT_CANCELED);
-                finish();
+                mPatternGridView.clearPattern();
             }
         });
 
@@ -79,6 +78,7 @@ public class StorePattern extends Activity {
                     if(mPattern.equals(pattern)){
                         mPatternGridView.setInputEnabled(false);
                         mContinueButton.setEnabled(true);
+                        mResetButton.setEnabled(false);
                         mPatternGridView.setRingColor(COLOR_VALID_PATTERN);
                         mStatusView.setText("Your new pattern");
                     } else {
@@ -100,5 +100,11 @@ public class StorePattern extends Activity {
                 mContinueButton.setEnabled(false);
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        finish();
     }
 }
