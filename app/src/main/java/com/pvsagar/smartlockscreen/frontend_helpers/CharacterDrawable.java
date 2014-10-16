@@ -12,6 +12,8 @@ import android.graphics.drawable.Drawable;
  * Creates a drawable with a character in the center enclosed in a circular colored region
  */
 public class CharacterDrawable extends Drawable {
+    public static final int BORDER_LIGHTER = 1000;
+    public static final int BORDER_DARKER = 1001;
 
     private final char character;
     private final Paint textPaint;
@@ -20,7 +22,7 @@ public class CharacterDrawable extends Drawable {
     private static final int STROKE_WIDTH = 2;
     private static final float SHADE_FACTOR = 0.9f;
 
-    public CharacterDrawable(char character, int color) {
+    public CharacterDrawable(char character, int color, int borderType) {
         super();
         this.character = character;
         this.textPaint = new Paint();
@@ -34,7 +36,11 @@ public class CharacterDrawable extends Drawable {
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         // border paint settings
-        borderPaint.setColor(getLighterShade(color));
+        if(borderType == BORDER_LIGHTER) {
+            borderPaint.setColor(getLighterShade(color));
+        } else {
+            borderPaint.setColor(getDarkerShade(color));
+        }
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setAntiAlias(true);
         borderPaint.setStrokeWidth(STROKE_WIDTH);
@@ -42,6 +48,10 @@ public class CharacterDrawable extends Drawable {
         backgroundPaint.setColor(color);
         backgroundPaint.setAntiAlias(true);
         backgroundPaint.setStyle(Paint.Style.FILL);
+    }
+
+    public CharacterDrawable(char character, int color){
+        this(character, color, BORDER_DARKER);
     }
 
     private int getDarkerShade(int color) {

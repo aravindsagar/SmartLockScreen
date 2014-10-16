@@ -13,6 +13,7 @@ import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
+import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,8 @@ public class User {
             user.setUserPicture(new Picture(
                     cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_TYPE)),
                     cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION)),
-                    cursor.getBlob(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE))));
+                    cursor.getBlob(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE)),
+                    CharacterDrawable.BORDER_LIGHTER));
             return user;
         } catch (Exception e){
             throw new IllegalArgumentException("Cursor should be populated with values from " +
@@ -96,7 +98,7 @@ public class User {
         if(userCursor.getCount() == 0) {
             if(userPicture == null){
                 userPicture = new Picture(Picture.PICTURE_TYPE_COLOR,
-                        String.valueOf(Utility.getRandomColor(context)), null);
+                        String.valueOf(Utility.getRandomColor(context)), null, CharacterDrawable.BORDER_LIGHTER);
             }
             Uri uri = context.getContentResolver().insert(UsersEntry.CONTENT_URI, getContentValues());
             id = UsersEntry.getUserIdFromUri(uri);
