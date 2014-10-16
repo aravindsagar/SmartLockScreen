@@ -85,8 +85,7 @@ public class Utility {
         //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
         //return _bmp;
         Paint borderPaint = new Paint();
-        Paint backgroundPaint;
-        final int STROKE_WIDTH = 2;
+        final int STROKE_WIDTH = 10;
         borderPaint.setColor(borderColor);
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setAntiAlias(true);

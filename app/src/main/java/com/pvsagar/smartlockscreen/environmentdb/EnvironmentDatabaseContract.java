@@ -203,7 +203,7 @@ public class EnvironmentDatabaseContract {
             return Long.parseLong(uri.getPathSegments().get(1));
         }
 
-        public static final String DEFAULT_USER_NAME = "device_owner";
+        public static final String DEFAULT_USER_NAME = "Main User";
     }
 
     public static final class PasswordEntry implements BaseColumns {

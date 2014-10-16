@@ -36,7 +36,6 @@ import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
-import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
@@ -114,7 +113,7 @@ public class BaseService extends Service implements
 
     @Override
     public void onCreate() {
-        EnvironmentDbHelper.insertDefaultUser(this);
+        User.setCurrentUser(User.getDefaultUser(this));
         startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
         AdminActions.initializeAdminObjects(this);
         mInProgress = false;
