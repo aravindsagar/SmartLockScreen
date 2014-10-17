@@ -1,16 +1,18 @@
 package com.pvsagar.smartlockscreen;
 
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.os.PersistableBundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -82,8 +84,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
         setUpNavDrawer();
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout_main_settings);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, 0, 0) {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
@@ -103,22 +104,26 @@ public class SmartLockScreenSettings extends ActionBarActivity
                         break;
                     case NavigationDrawerListAdapter.ITEM_TYPE_MAIN:
                         FragmentManager fragmentManager = getFragmentManager();
+                        FragmentTransaction ft;
                         boolean isValid = true;
                         int itemArrayIndex = listAdapter.getItemArrayIndex(position);
                         switch (itemArrayIndex){
                             case INDEX_MANAGE_ENVIRONMENTS:
-                                fragmentManager.beginTransaction()
-                                        .replace(R.id.container, new ManageEnvironmentFragment())
+                                ft = fragmentManager.beginTransaction();
+                                ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
+                                ft.replace(R.id.container, new ManageEnvironmentFragment())
                                         .commit();
                                 break;
                             case INDEX_ENVIRONMENT_OVERLAP:
-                                fragmentManager.beginTransaction()
-                                        .replace(R.id.container, new OverlappingEnvironmentsFragment())
+                                ft = fragmentManager.beginTransaction();
+                                ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
+                                ft.replace(R.id.container, new OverlappingEnvironmentsFragment())
                                         .commit();
                                 break;
                             case INDEX_MASTER_PASSWORD:
-                                fragmentManager.beginTransaction()
-                                        .replace(R.id.container, new SetMasterPasswordFragment())
+                                ft = fragmentManager.beginTransaction();
+                                ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
+                                ft.replace(R.id.container, new SetMasterPasswordFragment())
                                         .commit();
                                 break;
                             default:
@@ -163,6 +168,14 @@ public class SmartLockScreenSettings extends ActionBarActivity
         drawerLayout.openDrawer(Gravity.START);
     }
 
+    @Override
+    public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            super.onPostCreate(savedInstanceState, persistentState);
+        }
+        actionBarDrawerToggle.syncState();
+    }
+
     private void setUpActionBar(){
         ActionBar actionBar = getSupportActionBar();
         actionBarColor = getResources().getColor(R.color.action_bar_settings);
@@ -180,7 +193,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
         tintManager.setStatusBarTintEnabled(true);
         tintManager.setTintColor(actionBarColor);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 16;
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
     }
@@ -241,7 +254,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
     @Override
     public void onActionModeCreated() {
-        tintManager.setTintColor(getResources().getColor(R.color.action_mode));
+//        tintManager.setTintColor(getResources().getColor(R.color.action_mode));
+        tintManager.setTintColor(Color.DKGRAY); //TODO ActionMode color not working after updating to API 21. Will revert after finding a fix
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 

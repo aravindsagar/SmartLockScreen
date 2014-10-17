@@ -21,15 +21,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
             android:id="@+id/user_name_text_view"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/abc_action_bar_title_text_size"
+            android:textSize="@dimen/nav_bar_text_size"
             android:layout_gravity="start"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/abc_action_bar_subtitle_text_size"
+            android:textSize="@dimen/nav_bar_secondary_text_size"
             android:textColor="@android:color/white"
             android:layout_gravity="start"
             android:id="@+id/user_type_text_view"/>

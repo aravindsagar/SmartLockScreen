@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+
 /**
  * Created by aravind on 8/10/14.
  * Creates a drawable with a character in the center enclosed in a circular colored region
@@ -20,7 +22,6 @@ public class CharacterDrawable extends Drawable {
     private final Paint borderPaint;
     private final Paint backgroundPaint;
     private static final int STROKE_WIDTH = 4;
-    private static final float SHADE_FACTOR = 0.9f;
 
     public CharacterDrawable(char character, int color, int borderType) {
         super();
@@ -37,9 +38,9 @@ public class CharacterDrawable extends Drawable {
 
         // border paint settings
         if(borderType == BORDER_LIGHTER) {
-            borderPaint.setColor(getLighterShade(color));
+            borderPaint.setColor(Utility.getLighterShade(color));
         } else {
-            borderPaint.setColor(getDarkerShade(color));
+            borderPaint.setColor(Utility.getDarkerShade(color));
         }
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setAntiAlias(true);
@@ -52,18 +53,6 @@ public class CharacterDrawable extends Drawable {
 
     public CharacterDrawable(char character, int color){
         this(character, color, BORDER_DARKER);
-    }
-
-    private int getDarkerShade(int color) {
-        return Color.rgb((int)(SHADE_FACTOR * Color.red(color)),
-                (int)(SHADE_FACTOR * Color.green(color)),
-                (int)(SHADE_FACTOR * Color.blue(color)));
-    }
-
-    private int getLighterShade(int color) {
-        return Color.rgb((int)(Color.red(color) / SHADE_FACTOR),
-                (int)(Color.green(color) / SHADE_FACTOR),
-                (int)(Color.blue(color) / SHADE_FACTOR));
     }
 
     @Override

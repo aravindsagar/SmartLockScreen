@@ -3,6 +3,7 @@ package com.pvsagar.smartlockscreen.backend_helpers;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -124,5 +125,19 @@ public class Utility {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    private static final float SHADE_FACTOR = 0.9f;
+
+    public static int getDarkerShade(int color) {
+        return Color.rgb((int) (SHADE_FACTOR * Color.red(color)),
+                (int) (SHADE_FACTOR * Color.green(color)),
+                (int) (SHADE_FACTOR * Color.blue(color)));
+    }
+
+    public static int getLighterShade(int color) {
+        return Color.rgb((int)(Color.red(color) / SHADE_FACTOR),
+                (int)(Color.green(color) / SHADE_FACTOR),
+                (int)(Color.blue(color) / SHADE_FACTOR));
     }
 }

@@ -70,7 +70,7 @@ public class OverlappingEnvironmentsFragment extends Fragment {
         int mPaddingBottom, mPaddingTop;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 16;
             switch (getActivity().getResources().getConfiguration().orientation){
                 case Configuration.ORIENTATION_UNDEFINED:
                 case Configuration.ORIENTATION_PORTRAIT:
