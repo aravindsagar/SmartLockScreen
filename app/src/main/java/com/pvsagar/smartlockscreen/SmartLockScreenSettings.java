@@ -255,7 +255,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
     @Override
     public void onActionModeCreated() {
 //        tintManager.setTintColor(getResources().getColor(R.color.action_mode));
-        tintManager.setTintColor(Color.DKGRAY); //TODO ActionMode color not working after updating to API 21. Will revert after finding a fix
+        tintManager.setTintColor(Color.BLACK); //TODO ActionMode color not working after updating to API 21. Will revert after finding a fix
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
