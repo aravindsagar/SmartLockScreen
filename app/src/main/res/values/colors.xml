@@ -33,4 +33,6 @@
     <color name="user_pic_background6">#ff537890</color>
     <color name="user_pic_background7">#ffb7b66b</color>
     <color name="user_pic_background8">#ff6ca758</color>
+
+    <color name="card_background_with_alpha">#c8ffffff</color>
 </resources>

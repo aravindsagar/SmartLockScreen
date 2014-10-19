@@ -1,24 +1,27 @@
 package com.pvsagar.smartlockscreen.adapters;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.cards.CardAnimatorListener;
+import com.pvsagar.smartlockscreen.cards.CardTouchListener;
+import com.pvsagar.smartlockscreen.cards.EnvironmentListCardView;
 
 import java.util.List;
 import java.util.Vector;
@@ -28,7 +31,8 @@ import java.util.Vector;
  * A list adapter which populates items of the list shown in ManageEnvironmentFragment
  */
 public class EnvironmentListAdapter extends ArrayAdapter<String> {
-    private static final float ELEVATION_CHANGE = 1f;
+    private static final int ANIMATOR_DURATION = 150;
+
     private Context context;
     private List<String> environmentNames;
     private SparseBooleanArray mSelectedItemsIds;
@@ -54,7 +58,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         switchOff = new ColorDrawable(Color.LTGRAY);
 
         for (int i = 0; i < environmentNames.size(); i++) {
-            elevations.add(3f);
+            elevations.add(CardTouchListener.CARD_NORMAL_ELEVATION);
         }
     }
 
@@ -62,32 +66,41 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     public View getView(final int position, final View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
-        LinearLayout linearLayout = (LinearLayout)rootView.findViewById(R.id.linear_layout_list_items);
-        CardView cardView = (CardView) rootView.findViewById(R.id.manage_environment_card_view);
+        EnvironmentListCardView cardView = (EnvironmentListCardView) rootView.findViewById(R.id.manage_environment_card_view);
         final Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
         String environmentName = environmentNames.get(position);
         textView.setText(environmentName);
         TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
         hintTextView.setText(environmentHints.get(position));
-        float cardElevation = elevations.get(position);
-        boolean isInvalidateRequired = false;
+        cardView.setMaxCardElevation(elevations.get(position));
+        cardView.setCardElevation(elevations.get(position));
         if(mSelectedItemsIds.get(position)){
-//            linearLayout.setBackgroundColor(context.getResources().getColor(R.color.wallet_holo_blue_light));
-            if(cardElevation < 10){
-                cardElevation += ELEVATION_CHANGE;
-                elevations.set(position, cardElevation);
-                isInvalidateRequired = true;
-            }
+            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxElevation", CardTouchListener.CARD_SELECTED_ELEVATION);
+            maxAnimator.setDuration(ANIMATOR_DURATION);
+            maxAnimator.setInterpolator(new AccelerateInterpolator());
+            maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
+            maxAnimator.start();
+
+            ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "elevation", CardTouchListener.CARD_SELECTED_ELEVATION);
+            animator.setDuration(ANIMATOR_DURATION);
+            maxAnimator.setInterpolator(new AccelerateInterpolator());
+            maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
+            animator.start();
         } else {
-            if(cardElevation > 3){
-                cardElevation -= ELEVATION_CHANGE;
-                elevations.set(position, cardElevation);
-                isInvalidateRequired = true;
-            }
+            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
+            maxAnimator.setDuration(ANIMATOR_DURATION);
+            maxAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
+            maxAnimator.start();
+
+            ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "elevation", CardTouchListener.CARD_NORMAL_ELEVATION);
+            animator.setDuration(ANIMATOR_DURATION);
+            maxAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
+            animator.start();
         }
-        cardView.setMaxCardElevation(cardElevation);
-        cardView.setCardElevation(cardElevation - 0.5f);
+
         mSwitch.setChecked(enabledValues.get(position));
         if(!mSwitch.isChecked()){
             mSwitch.setThumbDrawable(switchOff);
@@ -106,15 +119,6 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         });
         ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
         environmentPicture.setImageDrawable(environmentPictures.get(position));
-        if(isInvalidateRequired){
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            }, 100);
-        }
         return rootView;
     }
 
@@ -155,5 +159,4 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     public SparseBooleanArray getSelectedIds(){
         return mSelectedItemsIds;
     }
-
 }
