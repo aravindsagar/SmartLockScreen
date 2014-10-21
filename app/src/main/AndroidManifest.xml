@@ -1,22 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pvsagar.smartlockscreen" >
-
+    <!-- Location can be used as a variable determining the current location, hence Location permission is required -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Bluetooth devices are also used to determine present environment -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <!-- Current Wifi networks are also used to determine present environment -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- To switch on Wifi when User wants to enter an environment with a wifi network attached to it -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <!-- The following three permissions are used by Maps, on which location selection and searching is possible -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- To start the service automatically after boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Required for restricting access to certain apps. This allows SmartLockScreen to determine the app open currently-->
     <uses-permission android:name="android.permission.GET_TASKS" />
+
+    <!-- For running environment detection and password setting in the background when phone is locked -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Used to draw lockscreen over the Android lock screen -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Required to expand the status bar programmatically -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+
+    <!-- Required to dismiss the lockscreen overlay during calls -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- Following 2 permissions are required to read the owner info from Contacts -->
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <uses-feature
         android:glEsVersion="0x00020000"

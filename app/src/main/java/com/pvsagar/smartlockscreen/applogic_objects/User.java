@@ -1,10 +1,17 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
@@ -12,8 +19,9 @@ import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
-import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDbHelper;
+import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +56,7 @@ public class User {
     public static User getDefaultUser(Context context){
         long defaultUserId = SharedPreferencesHelper.getDeviceOwnerUserId(context);
         if(defaultUserId == -1){
-            EnvironmentDbHelper.insertDefaultUser(context);
+            insertDefaultUser(context);
             return getDefaultUser(context);
         } else {
             Cursor userCursor = context.getContentResolver().query(UsersEntry.CONTENT_URI, null,
@@ -59,7 +67,7 @@ public class User {
                 userCursor.close();
                 return returnUser;
             } else {
-                EnvironmentDbHelper.insertDefaultUser(context);
+                insertDefaultUser(context);
                 return getDefaultUser(context);
             }
         }
@@ -73,7 +81,8 @@ public class User {
             user.setUserPicture(new Picture(
                     cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_TYPE)),
                     cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION)),
-                    cursor.getBlob(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE))));
+                    cursor.getBlob(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE)),
+                    CharacterDrawable.BORDER_LIGHTER));
             return user;
         } catch (Exception e){
             throw new IllegalArgumentException("Cursor should be populated with values from " +
@@ -90,13 +99,13 @@ public class User {
         return userValues;
     }
 
-    public void insertIntoDatabase(Context context){
+    public long insertIntoDatabase(Context context){
         Cursor userCursor = context.getContentResolver().query(UsersEntry.CONTENT_URI, null,
                 UsersEntry.COLUMN_USER_NAME + " = ? ", new String[]{getUserName()}, null);
         if(userCursor.getCount() == 0) {
             if(userPicture == null){
                 userPicture = new Picture(Picture.PICTURE_TYPE_COLOR,
-                        String.valueOf(Utility.getRandomColor(context)), null);
+                        String.valueOf(Utility.getRandomColor(context)), null, CharacterDrawable.BORDER_LIGHTER);
             }
             Uri uri = context.getContentResolver().insert(UsersEntry.CONTENT_URI, getContentValues());
             id = UsersEntry.getUserIdFromUri(uri);
@@ -106,6 +115,7 @@ public class User {
             this.id = existingUser.id;
         }
         userCursor.close();
+        return id;
     }
 
     public void setPassphraseForEnvironment(Context context,
@@ -216,5 +226,66 @@ public class User {
 
     public Drawable getUserPictureDrawable(Context context){
         return userPicture.getDrawable(Character.toUpperCase(getUserName().charAt(0)), context);
+    }
+
+    public static void insertDefaultUser(Context context){
+        String userName = null;
+        Bitmap userImage = null;
+        ContentResolver resolver = context.getApplicationContext().getContentResolver();
+        Cursor c = resolver.query(ContactsContract.Profile.CONTENT_URI, null, null, null, null);
+        if(c.moveToFirst()) {
+            userName = (c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));
+            InputStream photoDataStream = ContactsContract.Contacts.openContactPhotoInputStream
+                    (resolver, ContactsContract.Profile.CONTENT_URI, true);
+            if(photoDataStream != null) {
+                userImage = BitmapFactory.decodeStream(photoDataStream);
+            } else {
+                String photoUriString = c.getString(c.getColumnIndex(ContactsContract.Contacts.PHOTO_URI));
+                if(photoUriString != null && !photoUriString.isEmpty()) {
+                    Uri photoUri = Uri.parse(photoUriString);
+                    Cursor pictureCursor = resolver.query(photoUri, new String[]
+                            {ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
+                    try{
+                        byte[] photoBytes = pictureCursor.getBlob(0);
+                        userImage = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                } else {
+                    String photoThumbUriString = c.getString(c.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+                    if(photoThumbUriString != null && !photoThumbUriString.isEmpty()) {
+                        Uri photoThumbUri = Uri.parse(photoThumbUriString);
+                        Cursor pictureCursor = resolver.query(photoThumbUri, new String[]
+                                {ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
+                        try{
+                            byte[] photoBytes = pictureCursor.getBlob(0);
+                            userImage = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            c.close();
+        }
+        if(userName == null || userName.isEmpty()){
+            userName = UsersEntry.DEFAULT_USER_NAME;
+        }
+        User defaultUser = new User(userName);
+        if(userImage == null){
+            defaultUser.setUserPicture(new Picture(Picture.PICTURE_TYPE_COLOR,
+                    String.valueOf(Utility.getRandomColor(context)), null));
+        } else {
+            userImage = Utility.getCroppedBitmap(userImage, Color.rgb(200, 200, 200));
+            defaultUser.setUserPicture(new Picture(Picture.PICTURE_TYPE_CUSTOM,
+                    null, Picture.drawableToByteArray(new BitmapDrawable(context.getResources(), userImage))));
+        }
+        long id = defaultUser.insertIntoDatabase(context);
+
+        if(id >= 0){
+            SharedPreferencesHelper.setDeviceOwnerUserId(context, id);
+        } else {
+            throw new SQLiteException("Cannot insert default user into database");
+        }
     }
 }

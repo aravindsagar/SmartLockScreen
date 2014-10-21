@@ -35,22 +35,28 @@ public class Picture {
     public static final String PICTURE_TYPE_BUILT_IN = PACKAGE_NAME + ".PICTURE_TYPE.BUILT_IN";
 
     /**
-     * Custom picture, selected by the user from gallery. Image from database will be stored to image
+     * Custom picture, selected by the user from gallery. Image from database will be stored to image[]
      */
     public static final String PICTURE_TYPE_CUSTOM = PACKAGE_NAME + ".PICTURE_TYPE.CUSTOM";
 
     private String pictureType;
     private String pictureDescription;
     private byte[] image;
+    private int borderType;
 
     public Picture(){
 
     }
 
     public Picture(String pictureType, String pictureDescription, byte[] image){
+        this(pictureType, pictureDescription, image, CharacterDrawable.BORDER_DARKER);
+    }
+
+    public Picture(String pictureType, String pictureDescription, byte[] image, int borderType){
         this.pictureDescription = pictureDescription;
         this.pictureType = pictureType;
         this.image = image;
+        this.borderType = borderType;
     }
 
     public String getPictureDescription() {
@@ -71,7 +77,7 @@ public class Picture {
 
     public Drawable getDrawable(Character c, Context context){
         if(pictureType.equals(PICTURE_TYPE_COLOR)){
-            return new CharacterDrawable(c, Integer.parseInt(pictureDescription));
+            return new CharacterDrawable(c, Integer.parseInt(pictureDescription), borderType);
         } else if(pictureType.equals(PICTURE_TYPE_BUILT_IN)){
             Resources resources = context.getResources();
             final int resourceId = resources.getIdentifier(pictureDescription, "drawable",

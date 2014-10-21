@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="card_background_grey">#ffe9e9e9</color>
+    <color name="card_background_grey">#ffe1e1e1</color>
     <color name="text_view_touched">#ffeeeeee</color>
     <color name="text_view_touched_darker">#ffd7d7d7</color>
     <color name="list_item_touched">#8ceeeeee</color>
@@ -33,4 +33,6 @@
     <color name="user_pic_background6">#ff537890</color>
     <color name="user_pic_background7">#ffb7b66b</color>
     <color name="user_pic_background8">#ff6ca758</color>
+
+    <color name="card_background_with_alpha">#c8ffffff</color>
 </resources>

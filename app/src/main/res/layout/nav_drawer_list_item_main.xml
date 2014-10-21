@@ -24,6 +24,7 @@
         android:textAppearance="?android:textAppearanceMedium"
         android:fontFamily="sans-serif-light"
         android:textSize="@dimen/nav_bar_text_size"
+        android:textColor="@android:color/black"
         android:id="@+id/list_item_text_view"/>
 
 </LinearLayout>

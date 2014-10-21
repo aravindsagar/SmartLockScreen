@@ -7,20 +7,23 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
+import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+
 /**
  * Created by aravind on 8/10/14.
  * Creates a drawable with a character in the center enclosed in a circular colored region
  */
 public class CharacterDrawable extends Drawable {
+    public static final int BORDER_LIGHTER = 1000;
+    public static final int BORDER_DARKER = 1001;
 
     private final char character;
     private final Paint textPaint;
     private final Paint borderPaint;
     private final Paint backgroundPaint;
-    private static final int STROKE_WIDTH = 2;
-    private static final float SHADE_FACTOR = 0.9f;
+    private static final int STROKE_WIDTH = 4;
 
-    public CharacterDrawable(char character, int color) {
+    public CharacterDrawable(char character, int color, int borderType) {
         super();
         this.character = character;
         this.textPaint = new Paint();
@@ -34,7 +37,11 @@ public class CharacterDrawable extends Drawable {
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         // border paint settings
-        borderPaint.setColor(getLighterShade(color));
+        if(borderType == BORDER_LIGHTER) {
+            borderPaint.setColor(Utility.getLighterShade(color));
+        } else {
+            borderPaint.setColor(Utility.getDarkerShade(color));
+        }
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setAntiAlias(true);
         borderPaint.setStrokeWidth(STROKE_WIDTH);
@@ -44,27 +51,19 @@ public class CharacterDrawable extends Drawable {
         backgroundPaint.setStyle(Paint.Style.FILL);
     }
 
-    private int getDarkerShade(int color) {
-        return Color.rgb((int)(SHADE_FACTOR * Color.red(color)),
-                (int)(SHADE_FACTOR * Color.green(color)),
-                (int)(SHADE_FACTOR * Color.blue(color)));
-    }
-
-    private int getLighterShade(int color) {
-        return Color.rgb((int)(Color.red(color) / SHADE_FACTOR),
-                (int)(Color.green(color) / SHADE_FACTOR),
-                (int)(Color.blue(color) / SHADE_FACTOR));
+    public CharacterDrawable(char character, int color){
+        this(character, color, BORDER_DARKER);
     }
 
     @Override
     public void draw(Canvas canvas) {
         //draw background
         canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
-                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH * 2, backgroundPaint);
+                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2, backgroundPaint);
 
         // draw border
         canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
-                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH * 2, borderPaint);
+                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2, borderPaint);
 
         // draw text
         int width = canvas.getWidth();

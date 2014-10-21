@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:paddingRight="10dp"
         android:paddingLeft="10dp"
-        android:drawableLeft="@drawable/abc_ic_search"
+        android:drawableLeft="@drawable/abc_ic_search_api_mtrl_alpha"
         android:drawablePadding="8dp"
         android:gravity="center_vertical" />
 </FrameLayout>
