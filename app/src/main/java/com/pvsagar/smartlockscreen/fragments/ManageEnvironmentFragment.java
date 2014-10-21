@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -75,7 +74,7 @@ public class ManageEnvironmentFragment extends Fragment {
         SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 16;
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 24;
         }
         unknownEnvironmentView = getUnknownEnvironmentLayout(inflater);
         environmentsListView.addFooterView(unknownEnvironmentView);
@@ -208,6 +207,8 @@ public class ManageEnvironmentFragment extends Fragment {
                 startActivity(new Intent(getActivity(), SetUnknownEnvironmentPassword.class));
             }
         });
+        unknownLayout.setMaxCardElevation(CardTouchListener.CARD_NORMAL_ELEVATION);
+        unknownLayout.setCardElevation(CardTouchListener.CARD_NORMAL_ELEVATION);
         return unknownLayout;
     }
 
@@ -251,21 +252,5 @@ public class ManageEnvironmentFragment extends Fragment {
     public interface ActionModeListener{
         public void onActionModeDestroyed();
         public void onActionModeCreated();
-    }
-
-    public class TextViewTouchListener implements View.OnTouchListener{
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    v.setBackgroundColor(textViewTouchedColor);
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    v.setBackgroundColor(textViewNormalColor);
-                    break;
-            }
-            return false;
-        }
     }
 }

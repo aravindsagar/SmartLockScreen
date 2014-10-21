@@ -1,7 +1,9 @@
 package com.pvsagar.smartlockscreen.adapters;
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.pvsagar.smartlockscreen.ChoosePicture;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.cards.CardAnimatorListener;
@@ -43,6 +46,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
 
     private ColorDrawable switchOn, switchOff;
 
+    private static ImageView clickedImageView;
+
     public EnvironmentListAdapter(Context context, List<String> environmentNames,
             List<Boolean> enabledValues, List<String> environmentHints, List<Drawable> environmentPictures){
         super(context, R.layout.list_view_environments,environmentNames);
@@ -62,6 +67,10 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         }
     }
 
+    public static ImageView getClickedImageView() {
+        return clickedImageView;
+    }
+
     @Override
     public View getView(final int position, final View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -73,6 +82,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         textView.setText(environmentName);
         TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
         hintTextView.setText(environmentHints.get(position));
+        cardView.setPreventCornerOverlap(false);
         cardView.setMaxCardElevation(elevations.get(position));
         cardView.setCardElevation(elevations.get(position));
         if(mSelectedItemsIds.get(position)){
@@ -84,8 +94,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
 
             ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "elevation", CardTouchListener.CARD_SELECTED_ELEVATION);
             animator.setDuration(ANIMATOR_DURATION);
-            maxAnimator.setInterpolator(new AccelerateInterpolator());
-            maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
+            animator.setInterpolator(new AccelerateInterpolator());
+            animator.addListener(new CardAnimatorListener(position, elevations, cardView));
             animator.start();
         } else {
             ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
@@ -96,8 +106,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
 
             ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "elevation", CardTouchListener.CARD_NORMAL_ELEVATION);
             animator.setDuration(ANIMATOR_DURATION);
-            maxAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-            maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.addListener(new CardAnimatorListener(position, elevations, cardView));
             animator.start();
         }
 
@@ -117,8 +127,17 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
                 }
             }
         });
-        ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
+        final ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
         environmentPicture.setImageDrawable(environmentPictures.get(position));
+        environmentPicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), ChoosePicture.class);
+                clickedImageView = environmentPicture;
+                getContext().startActivity(intent);
+                ((Activity)getContext()).overridePendingTransition(0, 0);
+            }
+        });
         return rootView;
     }
 
