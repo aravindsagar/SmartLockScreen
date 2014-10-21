@@ -21,10 +21,13 @@ public class NotificationService extends NotificationListenerService{
     private static String LOG_TAG = NotificationService.class.getSimpleName();
     public static String EXTRAS_LOCK_SCREEN_NOTIFICATION = ".LockScreenNotification";
     public static String EXTRAS_LOCK_SCREEN_NOTIFICATION_ID = ".LockScreenNotification.id";
+    public static ArrayList<StatusBarNotification> currentSBN = new ArrayList<StatusBarNotification>();
+    public static ArrayList<LockScreenNotification> currentNotifications =
+            new ArrayList<LockScreenNotification>();
 
     @Override
     public void onCreate() {
-        NotificationListAdapter.currentNotifications = new ArrayList<LockScreenNotification>();
+        currentNotifications = new ArrayList<LockScreenNotification>();
         super.onCreate();
     }
 
@@ -35,17 +38,21 @@ public class NotificationService extends NotificationListenerService{
         /*LockScreenNotification lsn = new LockScreenNotification(sbn.getId(),sbn.getNotification(),
                 sbn.getPackageName(), sbn.isClearable(), sbn.getTag()); */
         LockScreenNotification lsn = new LockScreenNotification(sbn);
+        currentSBN.add(sbn);
 
         //
-        for(int i = 0; i < NotificationListAdapter.currentNotifications.size(); i++){
-            if(NotificationListAdapter.currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
-                    NotificationListAdapter.currentNotifications.get(i).getId() == sbn.getId() ){
+        for(int i = 0; i < currentNotifications.size(); i++){
+            if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
+                    currentNotifications.get(i).getId() == sbn.getId() ){
                 //Log.d(LOG_TAG,"Removing for adding: \n"+NotificationListAdapter.currentNotifications.get(i).getNotification().toString());
-                NotificationListAdapter.currentNotifications.remove(i);
+                //currentNotifications.remove(i);
+                NotificationListAdapter.deleteItem(i);
+                currentSBN.remove(i);
                 break;
             }
         }
-        NotificationListAdapter.currentNotifications.add(lsn);
+        //NotificationListAdapter.currentNotifications.add(lsn);
+        NotificationListAdapter.addItem(lsn);
         Intent intent = new Intent(this,BaseService.class);
         intent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
         startService(intent);
@@ -58,11 +65,13 @@ public class NotificationService extends NotificationListenerService{
         //Log.d(LOG_TAG,"Extras: \n"+sbn.getNotification().extras.get("android.title"));
 
         int id = sbn.getId();
-        for(int i = 0; i < NotificationListAdapter.currentNotifications.size(); i++){
-            if(NotificationListAdapter.currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
-                    NotificationListAdapter.currentNotifications.get(i).getId() == id ){
+        for(int i = 0; i < currentNotifications.size(); i++){
+            if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
+                    currentNotifications.get(i).getId() == id ){
                 //Log.d(LOG_TAG,"Removing: \n"+NotificationListAdapter.currentNotifications.get(i).getNotification().toString());
-                NotificationListAdapter.currentNotifications.remove(i);
+                //NotificationListAdapter.currentNotifications.remove(i);
+                NotificationListAdapter.deleteItem(i);
+                currentSBN.remove(i);
                 break;
             }
         }

@@ -8,7 +8,7 @@
     <it.gmariotti.cardslib.library.view.CardView
         android:id="@+id/card_view_notification"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         card:card_layout_resourceID="@layout/card_notification_inner_layout"
         />
 

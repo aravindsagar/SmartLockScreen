@@ -1,7 +1,10 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.app.Notification;
+import android.os.Build;
 import android.service.notification.StatusBarNotification;
+
+import com.pvsagar.smartlockscreen.services.NotificationService;
 
 /**
  * Created by PV on 10/7/2014.
@@ -23,11 +26,13 @@ public class LockScreenNotification {
         this.tag = tag;
     }
     public LockScreenNotification(StatusBarNotification sbn){
-        this.notification_id = sbn.getId();
-        this.mNotification = sbn.getNotification();
-        this.packageName = sbn.getPackageName();
-        this.isClearable = sbn.isClearable();
-        this.tag = sbn.getTag();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+            this.notification_id = sbn.getId();
+            this.mNotification = sbn.getNotification();
+            this.packageName = sbn.getPackageName();
+            this.isClearable = sbn.isClearable();
+            this.tag = sbn.getTag();
+        }
     }
 
     public int getId(){
@@ -48,5 +53,16 @@ public class LockScreenNotification {
 
     public String getTag(){
         return tag;
+    }
+
+    public void dismiss(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+            for(int i=0; i< NotificationService.currentNotifications.size(); i++){
+                if(this.packageName.equals(NotificationService.currentNotifications.get(i)) &&
+                        this.notification_id == NotificationService.currentNotifications.get(i).getId()){
+                    NotificationService.currentNotifications.get(i).dismiss();
+                }
+            }
+        }
     }
 }

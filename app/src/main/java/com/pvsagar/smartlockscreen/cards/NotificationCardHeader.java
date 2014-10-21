@@ -20,6 +20,7 @@ public class NotificationCardHeader extends CardHeader {
     InnerViewElementsSetUpListener listener;
     ImageView notificationImageView;
     TextView titleTextView;
+    TextView textTextView;
 
     public NotificationCardHeader(Context context, InnerViewElementsSetUpListener listener) {
         super(context);
@@ -30,6 +31,7 @@ public class NotificationCardHeader extends CardHeader {
     public void setupInnerViewElements(ViewGroup parent, View view) {
         super.setupInnerViewElements(parent, view);
         titleTextView = (TextView) parent.findViewById(R.id.card_header_title);
+        textTextView = (TextView) parent.findViewById(R.id.card_header_text);
         notificationImageView = (ImageView) parent.findViewById(R.id.image_view_notification);
         if(listener != null){
             listener.onInnerViewElementsSetUp(this);
@@ -50,6 +52,20 @@ public class NotificationCardHeader extends CardHeader {
             return;
         }
         titleTextView.setText(title);
+    }
+
+    public String getText() {
+        if(textTextView != null) {
+            return textTextView.getText().toString();
+        }
+        return null;
+    }
+
+    public void setText(String text) {
+        if(textTextView == null || text == null){
+            return;
+        }
+        textTextView.setText(text);
     }
 
     public void setImageDrawable(Drawable drawable){

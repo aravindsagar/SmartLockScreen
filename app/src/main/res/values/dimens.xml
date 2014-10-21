@@ -14,4 +14,8 @@
     <dimen name="nav_bar_secondary_icon_dimen">20dp</dimen>
     <dimen name="nav_bar_secondary_icon_padding">22dp</dimen>
     <dimen name="nav_bar_secondary_text_size">13sp</dimen>
+
+
+    <!-- Notifications -->
+    <dimen name="notification_card_header_title_size">18sp</dimen>
 </resources>
