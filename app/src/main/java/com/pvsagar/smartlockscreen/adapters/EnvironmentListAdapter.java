@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,9 +23,9 @@ import android.widget.TextView;
 import com.pvsagar.smartlockscreen.ChoosePicture;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.cards.CardAnimatorListener;
 import com.pvsagar.smartlockscreen.cards.CardTouchListener;
-import com.pvsagar.smartlockscreen.cards.EnvironmentListCardView;
 
 import java.util.List;
 import java.util.Vector;
@@ -75,7 +76,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     public View getView(final int position, final View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
-        EnvironmentListCardView cardView = (EnvironmentListCardView) rootView.findViewById(R.id.manage_environment_card_view);
+        CardView cardView = (CardView) rootView.findViewById(R.id.manage_environment_card_view);
         final Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
         String environmentName = environmentNames.get(position);
@@ -86,25 +87,25 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         cardView.setMaxCardElevation(elevations.get(position));
         cardView.setCardElevation(elevations.get(position));
         if(mSelectedItemsIds.get(position)){
-            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxElevation", CardTouchListener.CARD_SELECTED_ELEVATION);
+            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxCardElevation", CardTouchListener.CARD_SELECTED_ELEVATION);
             maxAnimator.setDuration(ANIMATOR_DURATION);
             maxAnimator.setInterpolator(new AccelerateInterpolator());
             maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
             maxAnimator.start();
 
-            ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "elevation", CardTouchListener.CARD_SELECTED_ELEVATION);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "cardElevation", CardTouchListener.CARD_SELECTED_ELEVATION);
             animator.setDuration(ANIMATOR_DURATION);
             animator.setInterpolator(new AccelerateInterpolator());
             animator.addListener(new CardAnimatorListener(position, elevations, cardView));
             animator.start();
         } else {
-            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
+            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxCardElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
             maxAnimator.setDuration(ANIMATOR_DURATION);
             maxAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
             maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
             maxAnimator.start();
 
-            ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "elevation", CardTouchListener.CARD_NORMAL_ELEVATION);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(cardView, "cardElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
             animator.setDuration(ANIMATOR_DURATION);
             animator.setInterpolator(new AccelerateDecelerateInterpolator());
             animator.addListener(new CardAnimatorListener(position, elevations, cardView));
@@ -129,6 +130,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         });
         final ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
         environmentPicture.setImageDrawable(environmentPictures.get(position));
+        environmentPicture.setOnTouchListener(new Picture.PictureTouchListener());
         environmentPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

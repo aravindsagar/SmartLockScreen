@@ -44,10 +44,6 @@ public class Picture {
     private byte[] image;
     private int borderType;
 
-    public Picture(){
-
-    }
-
     public Picture(String pictureType, String pictureDescription, byte[] image){
         this(pictureType, pictureDescription, image, CharacterDrawable.BORDER_DARKER);
     }
@@ -101,7 +97,7 @@ public class Picture {
         this.image = image;
     }
 
-    public class PictureTouchListener implements View.OnTouchListener{
+    public static class PictureTouchListener implements View.OnTouchListener{
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
@@ -109,7 +105,8 @@ public class Picture {
                 case MotionEvent.ACTION_DOWN: {
                     ImageView view = (ImageView) v;
                     //overlay is black with transparency of 0x77 (119)
-                    view.getDrawable().setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                    view.getDrawable().setColorFilter(0x77777777, PorterDuff.Mode.SRC_ATOP);
+                    view.setAlpha(0.5f);
                     view.invalidate();
                     break;
                 }
@@ -118,6 +115,7 @@ public class Picture {
                     ImageView view = (ImageView) v;
                     //clear the overlay
                     view.getDrawable().clearColorFilter();
+                    view.setAlpha(1.0f);
                     view.invalidate();
                     break;
                 }

@@ -74,7 +74,10 @@ public class ManageEnvironmentFragment extends Fragment {
         SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 24;
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT){
+                mPaddingTop += 24;
+            }
         }
         unknownEnvironmentView = getUnknownEnvironmentLayout(inflater);
         environmentsListView.addFooterView(unknownEnvironmentView);

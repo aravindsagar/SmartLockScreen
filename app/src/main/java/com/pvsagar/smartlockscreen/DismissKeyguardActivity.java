@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -36,38 +35,40 @@ public class DismissKeyguardActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        new WaitTask().execute();
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
+        startService(BaseService.getServiceIntent(this, null, BaseService.ACTION_DETECT_ENVIRONMENT));
+        finish();
+        overridePendingTransition(0, 0);
+
     }
 
-    private class WaitTask extends AsyncTask<Void,Void,Void> {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        new WaitBeforeDismiss().execute();
+    }
+
+    private class WaitBeforeDismiss extends AsyncTask<Void, Void, Void>{
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                Thread.sleep(100);
-                while (true){
+                while(true){
+                    Thread.sleep(100);
+                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT){
+                        return null;
+                    }
                     KeyguardManager keyguardManager = (KeyguardManager) DismissKeyguardActivity.this.getSystemService(KEYGUARD_SERVICE);
-                    if(keyguardManager.isKeyguardSecure()){
+                    if(keyguardManager.inKeyguardRestrictedInputMode()){
                         Log.d(LOG_TAG, "keyguard locked");
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(DismissKeyguardActivity.this, "keyguard locked", Toast.LENGTH_SHORT).show();
-                            }
-                        });
                     } else {
                         Log.d(LOG_TAG, "keyguard unlocked");
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(DismissKeyguardActivity.this, "keyguard unlocked", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        break;
+                        return null;
                     }
                 }
-            } catch (InterruptedException e){
+
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             return null;
@@ -75,17 +76,11 @@ public class DismissKeyguardActivity extends Activity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
-            startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DETECT_ENVIRONMENT));
-            finish();
-            overridePendingTransition(0, 0);
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
-
         }
 
         @Override
         protected void onCancelled(Void aVoid) {
-            EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
         }
     }

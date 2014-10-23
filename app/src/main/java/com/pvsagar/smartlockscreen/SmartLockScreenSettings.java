@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen;
 
+import android.annotation.TargetApi;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -169,6 +170,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             super.onPostCreate(savedInstanceState, persistentState);
@@ -193,7 +195,10 @@ public class SmartLockScreenSettings extends ActionBarActivity
         tintManager.setStatusBarTintEnabled(true);
         tintManager.setTintColor(actionBarColor);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 16;
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT){
+                mPaddingTop += 16;
+            }
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
         }
     }
