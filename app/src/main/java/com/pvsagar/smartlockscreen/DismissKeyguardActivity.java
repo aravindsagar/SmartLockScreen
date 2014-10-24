@@ -5,7 +5,6 @@ import android.app.KeyguardManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -32,6 +31,8 @@ public class DismissKeyguardActivity extends Activity {
             systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
         getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
+
+        new WaitBeforeDismiss().execute();
     }
 
     @Override
@@ -41,13 +42,6 @@ public class DismissKeyguardActivity extends Activity {
         startService(BaseService.getServiceIntent(this, null, BaseService.ACTION_DETECT_ENVIRONMENT));
         finish();
         overridePendingTransition(0, 0);
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        new WaitBeforeDismiss().execute();
     }
 
     private class WaitBeforeDismiss extends AsyncTask<Void, Void, Void>{
@@ -55,15 +49,14 @@ public class DismissKeyguardActivity extends Activity {
         protected Void doInBackground(Void... params) {
             try {
                 while(true){
-                    Thread.sleep(100);
-                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT){
-                        return null;
-                    }
                     KeyguardManager keyguardManager = (KeyguardManager) DismissKeyguardActivity.this.getSystemService(KEYGUARD_SERVICE);
                     if(keyguardManager.inKeyguardRestrictedInputMode()){
-                        Log.d(LOG_TAG, "keyguard locked");
+                        Thread.sleep(100);
                     } else {
-                        Log.d(LOG_TAG, "keyguard unlocked");
+                        Thread.sleep(100);
+                        return null;
+                    }
+                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT){
                         return null;
                     }
                 }

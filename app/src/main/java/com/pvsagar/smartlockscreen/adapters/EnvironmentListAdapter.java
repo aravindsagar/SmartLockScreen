@@ -35,20 +35,63 @@ import java.util.Vector;
  * A list adapter which populates items of the list shown in ManageEnvironmentFragment
  */
 public class EnvironmentListAdapter extends ArrayAdapter<String> {
+
+    /**
+     * Duration of the animation of "raising" the card when an environment is selected in multi-select mode.
+     */
     private static final int ANIMATOR_DURATION = 150;
 
     private Context context;
+
+    /**
+     * The list of environment names to be populated in the list
+     */
     private List<String> environmentNames;
+
+    /**
+     * Used to store whether an item is selected in multi select mode
+     */
     private SparseBooleanArray mSelectedItemsIds;
+
+    /**
+     * Stores whether environments are enabled or disabled
+     */
     private List<Boolean> enabledValues;
+
+    /**
+     * Stores the environment hints to be displayed
+     */
     private List<String> environmentHints;
+
+    /**
+     * Stores the drawables corresponding to each environment
+     */
     private List<Drawable> environmentPictures;
+
+    /**
+     * This is used while animating cards. Current elevations of all the items are stored, so that if an animation
+     * is cancelled, it can resume a new animation without jumoing to a different elevation
+     */
     private Vector<Float> elevations;
 
+    /**
+     * Colors for custom on-off switch
+     */
     private ColorDrawable switchOn, switchOff;
 
+    /**
+     * Stores which ImageView was clicked. Used in ChoosePictureActivity
+     */
     private static ImageView clickedImageView;
 
+    /**
+     * Constructor. Takes in all the details required to construct list items.
+     * @param context Activity context of calling activity
+     * @param environmentNames
+     * @param enabledValues
+     * @param environmentHints
+     * @param environmentPictures
+     */
     public EnvironmentListAdapter(Context context, List<String> environmentNames,
             List<Boolean> enabledValues, List<String> environmentHints, List<Drawable> environmentPictures){
         super(context, R.layout.list_view_environments,environmentNames);
@@ -68,9 +111,14 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         }
     }
 
+    /**
+     * Gets the clicked image view. Returns non null value only after an image view has been clicked, and ChoosePicture activity is running.
+     * @return the image view which was clicked to launch choose picture activity
+     */
     public static ImageView getClickedImageView() {
         return clickedImageView;
     }
+
 
     @Override
     public View getView(final int position, final View convertView, ViewGroup parent) {
@@ -154,15 +202,27 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         return environmentNames.get(position);
     }
 
+    /**
+     * Toggles the selection status of list items
+     * @param position position of the item to be toggled
+     */
     public void toggleSelection(int position){
         selectView(position,!mSelectedItemsIds.get(position));
     }
 
+    /**
+     * Exit multi select mode by marking all items as unselected
+     */
     public void removeSelection() {
         mSelectedItemsIds = new SparseBooleanArray();
         notifyDataSetChanged();
     }
 
+    /**
+     * Used to add position of an item to selected items list
+     * @param position position of the item to be added
+     * @param value true, if it is selected, false otherwise
+     */
     public void selectView(int position, boolean value){
         if(value){
             mSelectedItemsIds.put(position,true);
@@ -173,10 +233,10 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         notifyDataSetChanged();
     }
 
-    public int getSelectedCount(){
-        return mSelectedItemsIds.size();
-    }
-
+    /**
+     * Gets selected item positions
+     * @return selected item positions
+     */
     public SparseBooleanArray getSelectedIds(){
         return mSelectedItemsIds;
     }

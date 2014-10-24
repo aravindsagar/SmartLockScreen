@@ -1,7 +1,6 @@
 package com.pvsagar.smartlockscreen.applogic;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
@@ -20,6 +19,12 @@ import java.util.List;
 public class EnvironmentOverlapResolver {
     private static final String LOG_TAG = EnvironmentOverlapResolver.class.getSimpleName();
 
+    /**
+     * A comparator class which is used to sort passphrases according to their strength.
+     * Types of passphrases can be arranged according to decreasing order of their strength, as Password > Pin > Pattern > None.
+     * That is, a password is always stronger than a pin, pattern or no passphrase, and a pin is always stronger than a pattern or no passphrase etc.
+     * Strengths of 2 passwords can be ascertained using their lengths and number of numerals and special characters in use. For comparing pins or patterns, their simple length is used.
+     */
     public static class PassphraseComparator implements Comparator<Passphrase>{
         @Override
         public int compare(Passphrase lhs, Passphrase rhs) {
@@ -37,10 +42,22 @@ public class EnvironmentOverlapResolver {
             return 0;
         }
 
+        /**
+         * Returns the relative ordering of 2 passphrase types
+         * @param lhs One of Passphrase.TYPE_*
+         * @param rhs One of Passphrase.TYPE_*
+         * @return negative value if lhs type is stronger, 0 if types are the same, positive value if rhs type is stronger
+         */
         public int comparePassphraseType(String lhs, String rhs){
             return getPassphraseTypeOrderNumber(lhs) - getPassphraseTypeOrderNumber(rhs);
         }
 
+        /**
+         * Determine the stronger password among 2 given strings
+         * @param lhs password string 1
+         * @param rhs password string 2
+         * @return negative value if lhs string is stronger, 0 if have same strength, positive value if rhs string is stronger
+         */
         public int comparePasswords(String lhs, String rhs){
             if(lhs.length() != rhs.length()){
                 return lhs.length() - rhs.length();
@@ -96,6 +113,13 @@ public class EnvironmentOverlapResolver {
         }
     }
 
+    /**
+     * This takes in a list of environments and moves the preferred one among them in the beginning of the list.
+     * If the user has set a preference, that preference is used, else the environment with the strongest passphrase among them is selected.
+     * See {@link PassphraseComparator} class which is used to compare relative strengths of the passphrases.
+     * @param overlappingEnvironments a list of environments among which the preferred one is to be found out
+     * @param context Activity/service context
+     */
     public static void setPreferredEnvironmentFirst(List<Environment> overlappingEnvironments, final Context context){
         if (overlappingEnvironments == null) {
             return;
@@ -113,7 +137,7 @@ public class EnvironmentOverlapResolver {
             Collections.swap(overlappingEnvironments, swap1, swap2);
             return;
         }
-        Log.d(LOG_TAG, "Sorting environments based on their password");
+        //Sorting environments based on their password
         Collections.sort(overlappingEnvironments, new Comparator<Environment>() {
             @Override
             public int compare(Environment lhs, Environment rhs) {

@@ -129,6 +129,8 @@ public class EnvironmentDatabaseContract {
 
         public static final String COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION = "environment_picture";
 
+        public static final String COLUMN_ENVIRONMENT_PICTURE_DRAWABLE = "environment_picture_drawable";
+
         public static final String COLUMN_ENVIRONMENT_PICTURE = "environment_picture_blob";
 
         public static Uri buildEnvironmentUriWithId(long id){
@@ -180,6 +182,8 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_USER_PICTURE_TYPE = "user_picture_type";
 
         public static final String COLUMN_USER_PICTURE_DESCRIPTION = "user_picture";
+
+        public static final String COLUMN_USER_PICTURE_DRAWABLE = "user_picture_drawable";
 
         public static final String COLUMN_USER_PICTURE = "user_picture_blob";
 

@@ -17,27 +17,49 @@ import java.util.List;
 
 /**
  * Created by aravind on 6/10/14.
+ * List adapter to populate the Navigation Drawer used in SmartLockScreen Settings activity.
+ * The list is heterogeneous; the user profiles are shown, main items which replace the fragment in the settings activity are shown,
+ * and secondary items which launch separate activities are also shown.
  */
 public class NavigationDrawerListAdapter extends BaseAdapter{
     private static final String LOG_TAG = NavigationDrawerListAdapter.class.getSimpleName();
 
+    /**
+     * Constant integer values denoting item types used the list
+     */
     public static final int ITEM_TYPE_PROFILE = 0;
     public static final int ITEM_TYPE_NEW_PROFILE = 1;
     public static final int ITEM_TYPE_MAIN = 2;
     public static final int ITEM_TYPE_SECONDARY = 3;
     public static final int ITEM_TYPE_SEPARATOR = 4;
 
+    /**
+     * Data required to populate the list
+     */
     private List<User> mUsers;
     private List<String> mMainItems;
     private List<Integer> mMainItemImageRIds;
     private List<String> mSecondaryItems;
     private List<Integer> mSecondaryItemImageRIds;
+
     private Context mContext;
 
+    /**
+     * Stores the currently selected items in various sections of the list
+     */
     private int selectedProfileIndex = -1, selectedMainItemIndex = -1;
 
     private Typeface selectedItemTypeface;
 
+    /**
+     * Constructor which takes in the required data to create list items
+     * @param context Activity context
+     * @param users List of users to be shown
+     * @param mainItems The names of main items. They are intended to replace the fragment of the settings activity
+     * @param mainItemImageRIds Resource ids of icons for main list items. Should be in the same order as that of the names list.
+     * @param secondaryItems Secondary item names.
+     * @param secondaryItemImageRIds Resource ids of icons for secondary list items. Should be in the same order as that of the names list.
+     */
     public NavigationDrawerListAdapter(Context context, List<User> users, List<String> mainItems,
             List<Integer> mainItemImageRIds, List<String> secondaryItems, List<Integer> secondaryItemImageRIds) {
         mContext = context;
@@ -54,10 +76,18 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         return mContext;
     }
 
+    /**
+     * Sets the currently selected user profile. This causes a tick mark to be shown against the selected profile item
+     * @param selectedProfileIndex index of the selected profile
+     */
     public void setSelectedProfileIndex(int selectedProfileIndex) {
         this.selectedProfileIndex = selectedProfileIndex;
     }
 
+    /**
+     * The main item which is selected. This will cause that particular item's text to be shown in bold
+     * @param selectedMainItemIndex
+     */
     public void setSelectedMainItemIndex(int selectedMainItemIndex) {
         this.selectedMainItemIndex = selectedMainItemIndex;
     }
@@ -152,11 +182,6 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         return -1;
     }
 
-    private int convertDipToPx(int pixel){
-        float scale = getContext().getResources().getDisplayMetrics().density;
-        return (int) ((pixel * scale) + 0.5f);
-    }
-
     @Override
     public int getCount() {
         return mMainItems.size() + mSecondaryItems.size() + mUsers.size() + 3;
@@ -190,6 +215,12 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         return position;
     }
 
+    /**
+     * Takes the position of an item, and converts it into the array index in the corresponding array(or position in list)
+     * Use getItemViewType to determine which array or list to use
+     * @param position position of the item in the list whose array index is to be calculated
+     * @return the array index in the corresponding array.
+     */
     public int getItemArrayIndex(int position) {
         switch (getItemViewType(position)){
             case ITEM_TYPE_PROFILE:

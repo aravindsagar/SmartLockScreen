@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen.frontend_helpers;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
@@ -19,7 +20,10 @@ public class NotificationHelper {
         notificationBuilder.setPriority(Notification.PRIORITY_MIN);
         Intent notificationIntent = new Intent(context, SmartLockScreenSettings.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addParentStack(SmartLockScreenSettings.class);
+        stackBuilder.addNextIntent(notificationIntent);
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(pendingIntent);
         notificationBuilder.setContentTitle(NOTIFICATION_TITLE);
         if(text == null || text.isEmpty()){
