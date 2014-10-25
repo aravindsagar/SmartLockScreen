@@ -1,7 +1,10 @@
 package com.pvsagar.smartlockscreen.applogic_objects;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Build;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.pvsagar.smartlockscreen.services.NotificationService;
@@ -55,12 +58,12 @@ public class LockScreenNotification {
         return tag;
     }
 
-    public void dismiss(){
+    public void dismiss(Context context){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
             for(int i=0; i< NotificationService.currentNotifications.size(); i++){
                 if(this.packageName.equals(NotificationService.currentNotifications.get(i)) &&
                         this.notification_id == NotificationService.currentNotifications.get(i).getId()){
-                    NotificationService.currentNotifications.get(i).dismiss();
+                    
                 }
             }
         }

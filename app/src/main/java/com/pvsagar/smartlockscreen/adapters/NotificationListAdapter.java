@@ -144,7 +144,7 @@ public class NotificationListAdapter extends ArrayAdapter<LockScreenNotification
             card.setOnSwipeListener(new Card.OnSwipeListener() {
                 @Override
                 public void onSwipe(Card card) {
-                    lsn.dismiss();
+                    lsn.dismiss(getContext());
                 }
             });
         }
