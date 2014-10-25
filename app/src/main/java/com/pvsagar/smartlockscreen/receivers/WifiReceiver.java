@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * Created by aravind on 4/9/14.
+ * Receives broadcasts related to changes in Wifi network state.
  */
 public class WifiReceiver extends BroadcastReceiver {
     private static final String LOG_TAG = WifiReceiver.class.getSimpleName();

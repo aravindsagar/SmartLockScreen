@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 /**
  * Created by aravind on 18/9/14.
+ * A helper class for managing wake locks in the app
  */
 public class WakeLockHelper {
     private static final String LOG_TAG = WakeLockHelper.class.getSimpleName();

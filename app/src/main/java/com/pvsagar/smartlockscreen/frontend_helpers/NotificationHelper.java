@@ -12,6 +12,7 @@ import com.pvsagar.smartlockscreen.SmartLockScreenSettings;
 
 /**
  * Created by aravind on 25/8/14.
+ * Helper class for showing and updating notifications in the notifications shade
  */
 public class NotificationHelper {
     private static final String NOTIFICATION_TITLE = "Smart Lockscreen";

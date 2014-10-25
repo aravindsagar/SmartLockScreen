@@ -11,7 +11,9 @@ import android.view.WindowManager;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
-
+/**
+ * A blank activity which is used to dismiss keyguard after pattern lock challenge is successfully completed.
+ */
 public class DismissKeyguardActivity extends Activity {
     private static final String LOG_TAG = DismissKeyguardActivity.class.getSimpleName();
 

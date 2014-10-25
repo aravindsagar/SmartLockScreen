@@ -20,6 +20,9 @@ public class EnvironmentDatabaseContract {
     public static final String PATH_WIFI_NETWORKS = "wifinetworks";
     public static final String PATH_USERS = "users";
 
+    /**
+     * Class storing information related to geofences table
+     */
     public static final class GeoFenceEntry implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_GEOFENCES).build();
@@ -46,6 +49,9 @@ public class EnvironmentDatabaseContract {
         }
     }
 
+    /**
+     * Class storing information related to bluetooth_devices table
+     */
     public static final class BluetoothDevicesEntry implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_BLUETOOTH_DEVICES).build();
@@ -66,6 +72,9 @@ public class EnvironmentDatabaseContract {
         }
     }
 
+    /**
+     * Class storing information related to wifi_networks table
+     */
     public static final class WiFiNetworksEntry implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_WIFI_NETWORKS).build();
@@ -86,6 +95,9 @@ public class EnvironmentDatabaseContract {
         }
     }
 
+    /**
+     * Class storing information related to environments table
+     */
     public static final class EnvironmentEntry implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_ENVIRONMENTS).build();
@@ -157,6 +169,9 @@ public class EnvironmentDatabaseContract {
         }
     }
 
+    /**
+     * Class storing information related to environment_bluetooth_devices table
+     */
     public static final class EnvironmentBluetoothEntry implements BaseColumns {
         public static final String TABLE_NAME = "environment_bluetooth_devices";
 
@@ -165,7 +180,9 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_BLUETOOTH_ID = "bluetooth_device_id";
     }
 
-    //Making a separate table for users because planning to put user picture etc later.
+    /**
+     * Class storing information related to users table
+     */
     public static final class UsersEntry implements BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_USERS).build();
@@ -210,6 +227,9 @@ public class EnvironmentDatabaseContract {
         public static final String DEFAULT_USER_NAME = "Main User";
     }
 
+    /**
+     * Class storing information related to passwords table
+     */
     public static final class PasswordEntry implements BaseColumns {
         public static final String TABLE_NAME = "passwords";
 
@@ -218,6 +238,9 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_PASSWORD_STRING = "password_string";
     }
 
+    /**
+     * Class storing information related to user_passwords table
+     */
     public static final class UserPasswordsEntry implements BaseColumns {
         public static final String TABLE_NAME = "user_passwords";
 
@@ -228,6 +251,9 @@ public class EnvironmentDatabaseContract {
         public static final String COLUMN_PASSWORD_ID = "password_id";
     }
 
+    /**
+     * Class storing information related to app_whitelist table
+     */
     public static final class AppWhitelistEntry implements BaseColumns {
         public static final String TABLE_NAME = "app_whitelist";
 

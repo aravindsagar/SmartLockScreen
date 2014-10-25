@@ -61,6 +61,9 @@ import it.gmariotti.cardslib.library.view.CardView;
 
 //TODO see whether the location name entered exists for other lat/long/radius entries, and take appropriate actions
 
+/**
+ * Activity for adding a new environment
+ */
 public class AddEnvironment extends ActionBarActivity {
 
     private static final String LOG_TAG = AddEnvironment.class.getSimpleName();

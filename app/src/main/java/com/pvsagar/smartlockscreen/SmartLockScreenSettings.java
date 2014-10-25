@@ -39,6 +39,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The main settings activity with a navigation drawer.
+ */
 public class SmartLockScreenSettings extends ActionBarActivity
         implements SetMasterPasswordFragment.MasterPasswordSetListener,
         ManageEnvironmentFragment.ActionModeListener{

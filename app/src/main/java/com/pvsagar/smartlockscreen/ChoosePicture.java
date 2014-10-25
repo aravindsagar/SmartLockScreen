@@ -13,7 +13,9 @@ import android.widget.RelativeLayout;
 
 import com.pvsagar.smartlockscreen.adapters.EnvironmentListAdapter;
 
-
+/**
+ * Activity which provides the ui for user to pick a picture for user/environment
+ */
 public class ChoosePicture extends Activity {
     private static final String LOG_TAG = ChoosePicture.class.getSimpleName();
     private static final String PACKAGE_NAME = ChoosePicture.class.getPackage().getName();

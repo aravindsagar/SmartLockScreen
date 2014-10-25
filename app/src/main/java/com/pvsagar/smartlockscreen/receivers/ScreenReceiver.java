@@ -16,6 +16,7 @@ import com.pvsagar.smartlockscreen.services.BaseService;
 
 /**
  * Created by aravind on 15/9/14.
+ * Receives screen on and off events so that lockscreen overlay can be started appropriately.
  */
 public class ScreenReceiver extends BroadcastReceiver {
     private static final String LOG_TAG = ScreenReceiver.class.getSimpleName();

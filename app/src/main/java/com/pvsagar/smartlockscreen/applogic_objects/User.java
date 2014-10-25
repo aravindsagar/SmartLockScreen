@@ -342,7 +342,7 @@ public class User {
             defaultUser.setUserPicture(new Picture(Picture.PICTURE_TYPE_COLOR,
                     String.valueOf(Utility.getRandomColor(context)), null, null));
         } else {
-            userImage = Utility.getCroppedBitmap(userImage, Color.rgb(200, 200, 200));
+            userImage = Picture.getCroppedBitmap(userImage, Color.rgb(200, 200, 200));
             defaultUser.setUserPicture(new Picture(Picture.PICTURE_TYPE_CUSTOM,
                     null, null, Picture.drawableToByteArray(new BitmapDrawable(context.getResources(), userImage))));
         }
