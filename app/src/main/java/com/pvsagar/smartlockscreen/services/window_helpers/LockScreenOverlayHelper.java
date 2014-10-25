@@ -66,7 +66,7 @@ public class LockScreenOverlayHelper extends Overlay{
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
 
         layout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        layout.setOnTouchListener(new View.OnTouchListener() {
+        /*layout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(v.hasOnClickListeners()){
@@ -74,7 +74,7 @@ public class LockScreenOverlayHelper extends Overlay{
                 }
                 return true;
             }
-        });
+        });*/
 //      WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
         //TODO add wallpaper support!
         ImageView wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
@@ -94,7 +94,7 @@ public class LockScreenOverlayHelper extends Overlay{
         //notificationListAdapter = new NotificationListAdapter(context);
         //notificationsListView.setAdapter(notificationListAdapter);
 
-        notificationCardsLayout.setOnTouchListener(new CustomFlingListener(context) {
+        rLayout.setOnTouchListener(new CustomFlingListener(context) {
             @Override
             public void onRightToLeft() {
                 ExternalIntents.launchCamera(context);

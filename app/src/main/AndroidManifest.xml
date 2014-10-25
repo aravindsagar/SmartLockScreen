@@ -90,7 +90,6 @@
             android:excludeFromRecents="true"
             android:label="@string/title_activity_dismiss_keyguard"
             android:taskAffinity=""
-            android:launchMode="singleTask"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
