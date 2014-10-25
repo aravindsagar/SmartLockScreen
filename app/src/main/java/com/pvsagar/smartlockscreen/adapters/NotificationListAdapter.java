@@ -16,7 +16,7 @@ import android.widget.ArrayAdapter;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
-import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.cards.NotificationCardHeader;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
@@ -69,7 +69,7 @@ public class NotificationListAdapter extends ArrayAdapter<LockScreenNotification
                         Drawable app_icon = getContext().getPackageManager().getApplicationIcon(lsn.getPackageName());
                         img = ((BitmapDrawable) app_icon).getBitmap();
                     }
-                    header.setImageBitmap(Utility.getCroppedBitmap(img,0));
+                    header.setImageBitmap(Picture.getCroppedBitmap(img, 0));
                     //Drawable img = res.getDrawable(icon);
 
                 } catch (Exception e){

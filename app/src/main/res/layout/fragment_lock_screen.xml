@@ -31,14 +31,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:textSize="65sp"
-            android:paddingTop="25sp" />
+            android:textSize="80sp"
+            android:paddingTop="25sp"
+            android:textStyle="normal"
+            android:fontFamily="sans-serif-thin"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/button_unlock"
-            android:id="@+id/unlock_button"/>
+            android:id="@+id/unlock_button"
+            android:visibility="gone"/>
         <!--<ListView
             android:id="@+id/list_view_notifications"
             android:layout_width="match_parent"

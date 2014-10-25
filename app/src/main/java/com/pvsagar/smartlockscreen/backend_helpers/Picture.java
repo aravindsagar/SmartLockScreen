@@ -44,6 +44,9 @@ public class Picture {
      */
     public static final String PICTURE_TYPE_CUSTOM = PACKAGE_NAME + ".PICTURE_TYPE.CUSTOM";
 
+    public static final int CROP_MODE_CENTER = 200;
+    public static final int CROP_MODE_CUT_CORNERS = 201;
+
     private String pictureType;
     private String backgroundColor;
     private String drawableName;
@@ -62,33 +65,49 @@ public class Picture {
         this.drawableName = drawableName;
     }
 
-    public static  Bitmap getCroppedBitmap(Bitmap bitmap, int borderColor) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    public static Bitmap getCroppedBitmap(Bitmap bitmap, int borderColor){
+        return getCroppedBitmap(bitmap, borderColor, CROP_MODE_CUT_CORNERS);
+    }
+
+    public static  Bitmap getCroppedBitmap(Bitmap bitmap, int borderColor, int mode) {
+        Bitmap output;
+
+        final int radius;
+        switch (mode){
+            case CROP_MODE_CENTER:
+                radius = (int) (Math.sqrt(bitmap.getWidth() * bitmap.getWidth() + bitmap.getHeight() * bitmap.getHeight()))/2;
+                break;
+            case CROP_MODE_CUT_CORNERS:
+            default:
+                radius = Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2;
+        }
+        output = Bitmap.createBitmap(radius * 2,
+                radius * 2, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
 
         final int color = 0xff424242;
         final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
+        final Rect srcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final Rect rect = new Rect(radius - bitmap.getWidth()/2, radius - bitmap.getHeight()/2,
+                radius + bitmap.getWidth()/2, radius + bitmap.getHeight()/2);
+        paint.setColor(color);
         paint.setAntiAlias(true);
         canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
+
         // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2, paint);
+        canvas.drawCircle(radius, radius, radius, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
+        canvas.drawBitmap(bitmap, srcRect, rect, paint);
         //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
         //return _bmp;
         Paint borderPaint = new Paint();
-        final int STROKE_WIDTH = 10;
+        final int STROKE_WIDTH = radius/10;
         borderPaint.setColor(borderColor);
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setAntiAlias(true);
         borderPaint.setStrokeWidth(STROKE_WIDTH);
         canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
-                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2.0f, borderPaint);
+                radius - STROKE_WIDTH/2, borderPaint);
         return output;
     }
 

@@ -24,21 +24,17 @@ import android.widget.TextView;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.adapters.NotificationListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
-import com.pvsagar.smartlockscreen.cards.CardTouchListener;
-import com.pvsagar.smartlockscreen.cards.NotificationCardHeader;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomFlingListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.ExternalIntents;
+import com.pvsagar.smartlockscreen.frontend_helpers.NotificationAreaHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.OnFlingGestureListener;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.prototypes.SwipeDismissListItemViewTouchListener;
 
 /**
  * Created by aravind on 19/9/14.
@@ -114,6 +110,7 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onTopToBottom() {
                 lockScreenDismiss();
+                NotificationAreaHelper.expand(context);
             }
 
             @Override
@@ -174,7 +171,7 @@ public class LockScreenOverlayHelper extends Overlay{
                         Drawable app_icon = context.getPackageManager().getApplicationIcon(lsn.getPackageName());
                         img = ((BitmapDrawable) app_icon).getBitmap();
                     }
-                    notificationImageView.setImageBitmap(Utility.getCroppedBitmap(img, 0));
+                    notificationImageView.setImageBitmap(Picture.getCroppedBitmap(img, Color.DKGRAY));
                 } catch (Exception e){
                     Log.e(LOG_TAG, e.toString());
                 }
@@ -256,6 +253,7 @@ public class LockScreenOverlayHelper extends Overlay{
                     @Override
                     public void onTopToBottom() {
                         Log.d(LOG_TAG,"Top to bottom");
+                        NotificationAreaHelper.expand(context);
                         lockScreenDismiss();
                     }
                 });
