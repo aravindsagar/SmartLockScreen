@@ -12,6 +12,7 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 /**
  * Created by aravind on 3/10/14.
  * Card header with a title and checkbox
+ * For the 3rd party card library in use.
  */
 public class EnvironmentCardHeader extends CardHeader {
     TextView titleView;

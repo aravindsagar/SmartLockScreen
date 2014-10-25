@@ -42,6 +42,7 @@ import it.gmariotti.cardslib.library.prototypes.SwipeDismissListItemViewTouchLis
 
 /**
  * Created by aravind on 19/9/14.
+ * Helper class for managing LockScreenOverlay
  */
 public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();

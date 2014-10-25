@@ -30,12 +30,12 @@ public class TestEnvironmentDb extends AndroidTestCase {
 
     public void testCreateDb() throws Throwable {
         mContext.deleteDatabase(EnvironmentDbHelper.DATABASE_NAME);
-        SQLiteDatabase db = new EnvironmentDbHelper(mContext).getWritableDatabase();
+        SQLiteDatabase db = EnvironmentDbHelper.getInstance(mContext).getWritableDatabase();
         assertTrue(db.isOpen());
     }
 
     public void testInsertReadDb() {
-        EnvironmentDbHelper dbHelper = new EnvironmentDbHelper(mContext);
+        EnvironmentDbHelper dbHelper = EnvironmentDbHelper.getInstance(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //Testing geofences table

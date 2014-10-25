@@ -216,7 +216,7 @@ public class EnvironmentDetector {
 
     /**
      * Interface which should be extended to receive callback when environment detection background
-     * task is over. The implementation registered via EnvironmentDetector.detectCurrentEnvironment
+     * task is over. The implementation registered via {@link com.pvsagar.smartlockscreen.applogic.EnvironmentDetector#detectCurrentEnvironment(android.content.Context, com.pvsagar.smartlockscreen.applogic.EnvironmentDetector.EnvironmentDetectedCallback)}
      * will receive the current environments detected; it can take further actions based on that.
      */
     public interface EnvironmentDetectedCallback{

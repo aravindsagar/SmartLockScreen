@@ -6,6 +6,7 @@ import android.view.View;
 
 /**
  * Created by aravind on 19/10/14.
+ * TouchListener for cards which alter its elevation appropriately.
  */
 public class CardTouchListener implements View.OnTouchListener{
     public static final float CARD_NORMAL_ELEVATION = 3f;

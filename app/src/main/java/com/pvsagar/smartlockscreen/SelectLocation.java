@@ -66,6 +66,9 @@ public class SelectLocation extends ActionBarActivity implements GooglePlayServi
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_location));
             paddingBottom = tintManager.getConfig().getNavigationBarHeight();
             paddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT){
+                paddingTop += 16;
+            }
         }
         setUpGoogleMap();
     }

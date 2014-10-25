@@ -4,7 +4,11 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
@@ -24,13 +28,14 @@ public class Picture {
 
     /**
      * Picture type color: A circle with a specific color with a letter written at the center will
-     * be shown. The color is is stored in pictureDescription. The character to be drawn should be
+     * be shown. The color is is stored in backgroundColor. The character to be drawn should be
      * passed in to get the bitmap,else it will use a '?' instead
      */
     public static final String PICTURE_TYPE_COLOR = PACKAGE_NAME + ".PICTURE_TYPE.COLOR";
 
     /**
-     * A built in picture is used. Drawable name should be stored in pictureDescription.
+     * A built in picture is used. Background color should be stored in backgroundColor,
+     * and drawable name in drawableName variable
      */
     public static final String PICTURE_TYPE_BUILT_IN = PACKAGE_NAME + ".PICTURE_TYPE.BUILT_IN";
 
@@ -40,31 +45,59 @@ public class Picture {
     public static final String PICTURE_TYPE_CUSTOM = PACKAGE_NAME + ".PICTURE_TYPE.CUSTOM";
 
     private String pictureType;
-    private String pictureDescription;
+    private String backgroundColor;
+    private String drawableName;
     private byte[] image;
     private int borderType;
 
-    public Picture(){
-
+    public Picture(String pictureType, String backgroundColor, String drawableName, byte[] image){
+        this(pictureType, backgroundColor, drawableName, image, CharacterDrawable.BORDER_DARKER);
     }
 
-    public Picture(String pictureType, String pictureDescription, byte[] image){
-        this(pictureType, pictureDescription, image, CharacterDrawable.BORDER_DARKER);
-    }
-
-    public Picture(String pictureType, String pictureDescription, byte[] image, int borderType){
-        this.pictureDescription = pictureDescription;
+    public Picture(String pictureType, String backgroundColor, String drawableName, byte[] image, int borderType){
+        this.backgroundColor = backgroundColor;
         this.pictureType = pictureType;
         this.image = image;
         this.borderType = borderType;
+        this.drawableName = drawableName;
     }
 
-    public String getPictureDescription() {
-        return pictureDescription;
+    public static  Bitmap getCroppedBitmap(Bitmap bitmap, int borderColor) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
+        //return _bmp;
+        Paint borderPaint = new Paint();
+        final int STROKE_WIDTH = 10;
+        borderPaint.setColor(borderColor);
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setAntiAlias(true);
+        borderPaint.setStrokeWidth(STROKE_WIDTH);
+        canvas.drawCircle(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f,
+                Math.min(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f) - STROKE_WIDTH/2.0f, borderPaint);
+        return output;
     }
 
-    public void setPictureDescription(String pictureDescription) {
-        this.pictureDescription = pictureDescription;
+    public String getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(String backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     public String getPictureType() {
@@ -77,10 +110,10 @@ public class Picture {
 
     public Drawable getDrawable(Character c, Context context){
         if(pictureType.equals(PICTURE_TYPE_COLOR)){
-            return new CharacterDrawable(c, Integer.parseInt(pictureDescription), borderType);
+            return new CharacterDrawable(c, Integer.parseInt(backgroundColor), borderType);
         } else if(pictureType.equals(PICTURE_TYPE_BUILT_IN)){
             Resources resources = context.getResources();
-            final int resourceId = resources.getIdentifier(pictureDescription, "drawable",
+            final int resourceId = resources.getIdentifier(drawableName, "drawable",
                     context.getPackageName());
             return resources.getDrawable(resourceId);
         } else if(pictureType.equals(PICTURE_TYPE_CUSTOM)){
@@ -101,7 +134,15 @@ public class Picture {
         this.image = image;
     }
 
-    public class PictureTouchListener implements View.OnTouchListener{
+    public String getDrawableName() {
+        return drawableName;
+    }
+
+    public void setDrawableName(String drawableName) {
+        this.drawableName = drawableName;
+    }
+
+    public static class PictureTouchListener implements View.OnTouchListener{
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
@@ -109,7 +150,8 @@ public class Picture {
                 case MotionEvent.ACTION_DOWN: {
                     ImageView view = (ImageView) v;
                     //overlay is black with transparency of 0x77 (119)
-                    view.getDrawable().setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                    view.getDrawable().setColorFilter(0x77777777, PorterDuff.Mode.SRC_ATOP);
+                    view.setAlpha(0.5f);
                     view.invalidate();
                     break;
                 }
@@ -118,6 +160,7 @@ public class Picture {
                     ImageView view = (ImageView) v;
                     //clear the overlay
                     view.getDrawable().clearColorFilter();
+                    view.setAlpha(1.0f);
                     view.invalidate();
                     break;
                 }

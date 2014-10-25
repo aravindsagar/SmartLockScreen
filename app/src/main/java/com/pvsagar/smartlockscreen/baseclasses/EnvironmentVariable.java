@@ -25,16 +25,24 @@ public abstract class EnvironmentVariable {
 
     protected long id = -1;
 
-    //Stores the numeric values associated with the variable
+    /**
+     * Stores the numeric values associated with the variable
+     */
     private double[] floatValues;
 
-    //Stores the String values associated with the variable
+    /**
+     * Stores the String values associated with the variable
+     */
     private String[] stringValues;
 
-    //Stores the variable type. This will be one of the TYPE_* strings defined above
+    /**
+     * Stores the variable type. This will be one of the TYPE_* strings defined above
+     */
     private String variableType;
 
-    //To keep track of whether the variable has been initialized with a valid type
+    /**
+     * To keep track of whether the variable has been initialized with a valid type
+     */
     private boolean isInitialized = false;
 
     /**
@@ -135,15 +143,21 @@ public abstract class EnvironmentVariable {
     }
 
     private boolean checkTypeValidity(String variableType){
-        if(variableType.equals(TYPE_BLUETOOTH_DEVICES) || variableType.equals(TYPE_WIFI_NETWORKS)
-                || variableType.equals(TYPE_NOISE_LEVEL) || variableType.equals(TYPE_LOCATION)){
-            return true;
-        }
-        return false;
+        return variableType.equals(TYPE_BLUETOOTH_DEVICES) || variableType.equals(TYPE_WIFI_NETWORKS)
+                || variableType.equals(TYPE_NOISE_LEVEL) || variableType.equals(TYPE_LOCATION);
     }
 
+    /**
+     * This method indicates whether string values are in  used to store data related to this environment variable
+     * @return true if string values are used, false otherwise
+     */
     public abstract boolean isStringValuesSupported();
 
+    /**
+     * This method indicates whether real values are in  used to store data related to this environment variable.
+     * Although the function name says float, in practise double is the data tye used to store the values.
+     * @return true if real values are used, false otherwise
+     */
     public abstract boolean isFloatValuesSupported();
 
     protected double[] getFloatValues(){
@@ -182,6 +196,10 @@ public abstract class EnvironmentVariable {
         }
     }
 
+    /**
+     * Returns an instance of ContentValues with data from this variable
+     * @return an instance of ContentValues with data from this variable
+     */
     public abstract ContentValues getContentValues();
 
     @Override

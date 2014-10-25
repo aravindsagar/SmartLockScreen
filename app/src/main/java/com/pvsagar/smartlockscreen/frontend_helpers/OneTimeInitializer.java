@@ -11,6 +11,8 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
 
 /**
  * Created by aravind on 1/10/14.
+ * Checks whether initialization is required and does the required steps. This usually is required
+ * only when the app runs for the first time
  */
 public class OneTimeInitializer {
     private static final String LOG_TAG = OneTimeInitializer.class.getSimpleName();

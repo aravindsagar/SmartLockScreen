@@ -14,6 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by aravind on 8/9/14.
+ * A helper class for encrypting and decrypting passphrase strings
  */
 public class EncryptorDecryptor {
     public static String encrypt(final String plainMessage,

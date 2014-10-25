@@ -10,7 +10,7 @@ import com.pvsagar.smartlockscreen.services.NotificationService;
 
 /**
  * Created by aravind on 17/9/14.
- * Receiver which retsarts the services when the package is reinstalled (for eg, during app update)
+ * Receiver which restarts the services when the package is reinstalled (for eg, during app update)
  */
 public class OnUpgradeBroadcastReceiver extends BroadcastReceiver {
     @Override

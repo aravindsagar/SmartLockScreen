@@ -7,6 +7,7 @@ import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
 
 /**
  * Created by aravind on 8/9/14.
+ * Tests the password encryption and decryption
  */
 public class TestPasswordEncryptDecrypt extends AndroidTestCase {
     private static final String LOG_TAG = TestPasswordEncryptDecrypt.class.getSimpleName();

@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * Created by aravind on 8/8/14.
+ * Not yet in use. Unsure whether to use.
  */
 public class NoiseLevelEnvironmentVariable extends EnvironmentVariable {
     private static final String LOG_TAG = NoiseLevelEnvironmentVariable.class.getSimpleName();

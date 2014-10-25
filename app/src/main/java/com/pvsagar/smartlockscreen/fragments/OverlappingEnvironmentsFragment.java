@@ -70,7 +70,10 @@ public class OverlappingEnvironmentsFragment extends Fragment {
         int mPaddingBottom, mPaddingTop;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 16;
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT){
+                mPaddingTop += 16;
+            }
             switch (getActivity().getResources().getConfiguration().orientation){
                 case Configuration.ORIENTATION_UNDEFINED:
                 case Configuration.ORIENTATION_PORTRAIT:
@@ -143,9 +146,9 @@ public class OverlappingEnvironmentsFragment extends Fragment {
 
     private float getListPreferredItemHeight(){
         android.util.TypedValue value = new android.util.TypedValue();
-        boolean b = getActivity().getTheme().resolveAttribute(
+        getActivity().getTheme().resolveAttribute(
                 android.R.attr.listPreferredItemHeightSmall, value, true);
-        String s = TypedValue.coerceToString(value.type, value.data);
+        TypedValue.coerceToString(value.type, value.data);
         android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         return value.getDimension(metrics);

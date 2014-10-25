@@ -15,7 +15,8 @@ import java.util.List;
 
 /**
  * Created by aravind on 8/8/14.
- * Class for storing Geofences.
+ * Class for storing Geofences. A geofence is basically a latitude and longitude along with a radius,
+ * ie it defines a circular area on the earth's surface
  */
 public class LocationEnvironmentVariable extends EnvironmentVariable {
     private static String LOG_TAG = LocationEnvironmentVariable.class.getSimpleName();
@@ -105,6 +106,11 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         setStringValue(locationName, INDEX_RADIUS);
     }
 
+    /**
+     * Get geofences stored in the database
+     * @param context Activity/Service context
+     * @return list of geofences stored
+     */
     public static List<EnvironmentVariable> getLocationEnvironmentVariables
             (Context context){
         Cursor cursor = context.getContentResolver().query(
@@ -114,6 +120,11 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         return returnValues;
     }
 
+    /**
+     * Get android geofence objects corresponding to the geofences stored in db.
+     * @param context Activity/Service context
+     * @return Geofence objects as defined in Google Play Services
+     */
     public static List<Geofence> getAndroidGeofences(Context context) {
         Cursor cursor = context.getContentResolver().query(GeoFenceEntry.CONTENT_URI,
                 null, null, null, null);
@@ -143,6 +154,12 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         return locationValues;
     }
 
+    /**
+     * Convert a Geofence object into LocationEnvironmentVariable object
+     * @param context Activity/Service context
+     * @param geofence instance to be converted
+     * @return instance of LocationEnvironmentVariable
+     */
     public static LocationEnvironmentVariable getLocationEnvironmentVariableFromAndroidGeofence
             (Context context, Geofence geofence){
         Cursor locationCursor = context.getContentResolver().query(GeoFenceEntry.
@@ -158,6 +175,11 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         return (LocationEnvironmentVariable) locationVariables.get(0);
     }
 
+    /**
+     * Takes in a cursor and returns list of LocationEnvironmentVariables from it
+     * @param cursor should contain values from geofences table
+     * @return List of LocationEnvironmentVariable from cursor
+     */
     public static List<EnvironmentVariable> getLocationEnvironmentVariablesFromCursor
             (Cursor cursor){
         ArrayList<EnvironmentVariable> locationEnvironmentVariables =

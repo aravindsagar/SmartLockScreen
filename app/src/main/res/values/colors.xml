@@ -6,12 +6,12 @@
     <color name="list_item_touched">#8ceeeeee</color>
 
     <color name="action_bar_add_environment">#ff1a713f</color>
-    <color name="action_bar_edit_environment">#ffa5840d</color>
+    <color name="action_bar_edit_environment">#2346a4</color>
     <color name="action_bar_setup">#ff79970e</color>
     <color name="action_bar_settings">#ffc69e2b</color>
 
-    <color name="action_bar_unused4">#ff2ba7cb</color>
-    <color name="action_bar_unused3">#2346a4</color>
+    <color name="action_bar_unused4">#ffa5840d</color>
+    <color name="action_bar_unused3">#ff2ba7cb</color>
     <color name="action_bar_unused2">#ff08a6d2</color>
     <color name="action_bar_unused1">#ffe37b1e</color>
 
