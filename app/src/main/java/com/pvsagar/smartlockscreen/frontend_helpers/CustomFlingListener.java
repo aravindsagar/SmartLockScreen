@@ -21,6 +21,9 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
     public static int DIRECTION_LEFT = 3;
 
     float downX, downY, upX, upY;
+    float last1MoveX = -1, last1MoveY = -1, last2MoveX = -1, last2MoveY = -1;
+    long last1MoveTime = -1, last2MoveTime = -1;
+    float downRawX, downRawY;
     long downTime,upTime;
     float velocityX,velocityY,distX,distY;
     static final int MIN_SWIPE_DIST = 60;
@@ -39,10 +42,18 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
                 downY = event.getY();
+                downRawX = event.getRawX();
+                downRawY = event.getRawY();
                 downTime = new Date().getTime();
                 directionKnown = false;
                 break;
             case MotionEvent.ACTION_MOVE:
+                last2MoveX = last1MoveX;
+                last2MoveY = last1MoveY;
+                last1MoveX = event.getRawX();
+                last1MoveY = event.getRawY();
+                last2MoveTime = last1MoveTime;
+                last1MoveTime = new Date().getTime();
                 if(!directionKnown){
                     if(downY - event.getY() > MIN_SWIPE_DIST){
                         directionKnown = true;
@@ -61,6 +72,8 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                         direction = DIRECTION_RIGHT;
                         Log.d(LOG_TAG,"Direction right");
                     }
+                } else{
+                    onMove(event, direction, downRawX, downRawY);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -71,18 +84,26 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                 distY = convertPxToDip((int)(upY-downY));
                 velocityX = distX / ((upTime - downTime)/1000.0f);
                 velocityY = distY / ((upTime - downTime)/1000.0f);
+                float endVelocityX = (event.getRawX() - last2MoveX)/(upTime - last2MoveTime);
+                endVelocityX/=2;
+                float endVelocityY = (event.getRawY() - last2MoveY)/(upTime - last2MoveTime);
+                endVelocityY/=2;
                 Log.d(LOG_TAG,"downTime: "+downTime+"\t upTime: "+upTime);
                 Log.d(LOG_TAG,"velocityX: "+velocityX+"\t velocityY: "+velocityY);
                 if(directionKnown){
                     if(direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY){
-                        onBottomToTop();
+                        onBottomToTop(-endVelocityY);
                     } else if(direction == DIRECTION_DOWN && velocityY > MIN_THRESHOLD_VELOCITY){
-                        onTopToBottom();
+                        onTopToBottom(endVelocityY);
                     } else if(direction == DIRECTION_LEFT && velocityX < -MIN_THRESHOLD_VELOCITY){
-                        onRightToLeft();
+                        onRightToLeft(-endVelocityX);
                     } else if(direction == DIRECTION_RIGHT && velocityX > MIN_THRESHOLD_VELOCITY){
-                        onLeftToRight();
+                        onLeftToRight(endVelocityX);
+                    } else {
+                        onSwipeFail();
                     }
+                } else {
+                    onDirectionUnknown();
                 }
                 /*if(Math.abs(distX) > Math.abs(distY)){
                     if(velocityX > MIN_THRESHOLD_VELOCITY && distX > MIN_SWIPE_DIST){
@@ -102,13 +123,19 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
         return true;
     }
 
-    public abstract void onRightToLeft();
+    public abstract void onRightToLeft(float endVelocity);
 
-    public abstract void onLeftToRight();
+    public abstract void onLeftToRight(float endVelocity);
 
-    public abstract void onTopToBottom();
+    public abstract void onTopToBottom(float endVelocity);
 
-    public abstract void onBottomToTop();
+    public abstract void onBottomToTop(float endVelocity);
+
+    public abstract void onMove(MotionEvent event, int direction, float downRawX, float downRawY);
+
+    public abstract void onSwipeFail();
+
+    public abstract void onDirectionUnknown();
 
     private int convertPxToDip(int pixel){
         float scale = mContext.getResources().getDisplayMetrics().density;

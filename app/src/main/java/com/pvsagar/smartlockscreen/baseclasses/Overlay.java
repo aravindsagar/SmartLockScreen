@@ -1,9 +1,11 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 
 /**
  * Created by aravind on 23/9/14.
@@ -14,7 +16,7 @@ public abstract class Overlay {
     protected LayoutInflater inflater;
     protected WindowManager windowManager;
     protected Context context;
-    protected View layout;
+    private View layout;
     protected WindowManager.LayoutParams params;
 
     public Overlay(Context context, WindowManager windowManager){

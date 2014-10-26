@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.services.window_helpers;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.content.Context;
@@ -16,8 +17,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,6 +56,7 @@ public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();
     private NotificationListAdapter notificationListAdapter;
     private LinearLayout notificationCardsLayout;
+    private LinearLayout layout;
 
     public static int clickedCard = -1;
     public static final int MAX_NOTIFICATION_SHOWN = 4;
@@ -71,7 +75,7 @@ public class LockScreenOverlayHelper extends Overlay{
     @Override
     protected View getLayout(){
         final RelativeLayout rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
-        final LinearLayout layout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
+        layout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
 
         layout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
@@ -95,7 +99,7 @@ public class LockScreenOverlayHelper extends Overlay{
         unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                lockScreenDismiss();
+                lockScreenDismiss(2);
             }
         });
         notificationChanged();
@@ -105,26 +109,50 @@ public class LockScreenOverlayHelper extends Overlay{
 
         rLayout.setOnTouchListener(new CustomFlingListener(context) {
             @Override
-            public void onRightToLeft() {
+            public void onRightToLeft(float endVelocity) {
                 ExternalIntents.launchCamera(context);
-                lockScreenDismiss();
+                lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
             }
 
             @Override
-            public void onLeftToRight() {
+            public void onLeftToRight(float endVelocity) {
                 ExternalIntents.launchDialer(context);
-                lockScreenDismiss();
+                lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
             }
 
             @Override
-            public void onTopToBottom() {
-                lockScreenDismiss();
+            public void onTopToBottom(float endVelocity) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
                 NotificationAreaHelper.expand(context);
             }
 
             @Override
-            public void onBottomToTop() {
-                lockScreenDismiss();
+            public void onBottomToTop(float endVelocity) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+            }
+
+            @Override
+            public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                    float deltaY = event.getRawY() - downRawY;
+                    Log.d(LOG_TAG,"Animate layout: "+deltaY);
+                    layout.setTranslationY(deltaY);
+                } else {
+                    float deltaX = event.getRawX() - downRawX;
+                    Log.d(LOG_TAG,"Animate layout: "+deltaX);
+                    layout.setTranslationX(deltaX);
+                }
+            }
+
+            @Override
+            public void onSwipeFail() {
+                layout.animate().translationY(0).start();
+                layout.animate().translationX(0).start();
+            }
+
+            @Override
+            public void onDirectionUnknown() {
+
             }
         });
 
@@ -132,17 +160,57 @@ public class LockScreenOverlayHelper extends Overlay{
         return rLayout;
     }
 
-    private void lockScreenDismiss(){
-        String currentPassphraseType = AdminActions.getCurrentPassphraseType();
-        if (!Utility.checkForNullAndWarn(currentPassphraseType, LOG_TAG)){
-            if (currentPassphraseType.equals(Passphrase.TYPE_PATTERN) &&
-                    AdminActions.getCurrentPassphraseString() != null) {
-                context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_PATTERN_OVERLAY));
+    private void lockScreenDismiss(float endVelocity){
+        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+    }
+
+    private void lockScreenDismiss(int direction, float endVelocity){
+        Log.d(LOG_TAG, "end velocity: " +  endVelocity);
+        if(direction == CustomFlingListener.DIRECTION_UP){
+            layout.animate().translationY(-layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
+                    .setListener(new AnimateEndListener()).start();
+        } else if(direction == CustomFlingListener.DIRECTION_DOWN){
+            layout.animate().translationY(layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
+                    .setListener(new AnimateEndListener()).start();
+        } else if(direction == CustomFlingListener.DIRECTION_LEFT){
+            layout.animate().translationX(-layout.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                    .setListener(new AnimateEndListener()).start();
+        } else{
+            layout.animate().translationX(+layout.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                    .setListener(new AnimateEndListener()).start();
+        }
+
+    }
+
+    private class AnimateEndListener implements Animator.AnimatorListener{
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            String currentPassphraseType = AdminActions.getCurrentPassphraseType();
+            if (!Utility.checkForNullAndWarn(currentPassphraseType, LOG_TAG)){
+                if (currentPassphraseType.equals(Passphrase.TYPE_PATTERN) &&
+                        AdminActions.getCurrentPassphraseString() != null) {
+                    context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_PATTERN_OVERLAY));
+                } else {
+                    remove();
+                }
             } else {
                 remove();
             }
-        } else {
-            remove();
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            onAnimationEnd(animation);
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
         }
     }
 
@@ -153,7 +221,7 @@ public class LockScreenOverlayHelper extends Overlay{
         }*/
         Log.d(LOG_TAG,"Entered notification changed");
         if(notificationCardsLayout != null){
-            Log.d(LOG_TAG,"Linear Layout not null");
+            Log.d(LOG_TAG, "Linear Layout not null");
             if(((LinearLayout)notificationCardsLayout).getChildCount() > 0){
                 ((LinearLayout)notificationCardsLayout).removeAllViews();
             }
@@ -197,7 +265,7 @@ public class LockScreenOverlayHelper extends Overlay{
                         if(clickedCard == position){
                             try {
                                 mNotification.contentIntent.send();
-                                lockScreenDismiss();
+                                lockScreenDismiss(2);
                             } catch (Exception e){
                                 Log.e(LOG_TAG,e.toString());
                             }
@@ -233,156 +301,74 @@ public class LockScreenOverlayHelper extends Overlay{
                         return true;
                     }
                 });*/
-                /*
-                cardView.setOnTouchListener(new OnFlingGestureListener(context) {
+
+                cardView.setOnTouchListener(new CustomFlingListener(context) {
                     @Override
-                    public void onRightToLeft() {
-                        Log.d(LOG_TAG,"Right to left");
+                    public void onRightToLeft(float endVelocity) {
+                        Log.d(LOG_TAG,"Swipe right to left");
                         if(isClearable){
-                            cardView.animate().translationX(cardView.getWidth()).alpha(0);
+                            cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
+                                    .alpha(0f);
                             lsn.dismiss(context);
+                        } else {
+                            cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
+                                    alpha(1f);
                         }
                     }
 
                     @Override
-                    public void onLeftToRight() {
-                        Log.d(LOG_TAG,"Left to right");
+                    public void onLeftToRight(float endVelocity) {
+                        Log.d(LOG_TAG,"Swipe left to right");
                         if(isClearable){
-                            cardView.animate().translationX(cardView.getWidth()).alpha(0);
+                            cardView.animate().translationX(cardView.getWidth()).alpha(0f);
                             lsn.dismiss(context);
+                        } else {
+                            cardView.animate().translationX(0).alpha(1f);
                         }
                     }
 
                     @Override
-                    public void onBottomToTop() {
-                        Log.d(LOG_TAG,"bottom to top");
-                        lockScreenDismiss();
+                    public void onTopToBottom(float endVelocity) {
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
                     }
 
                     @Override
-                    public void onTopToBottom() {
-                        Log.d(LOG_TAG,"Top to bottom");
-                        NotificationAreaHelper.expand(context);
-                        lockScreenDismiss();
+                    public void onBottomToTop(float endVelocity) {
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
                     }
-                });
-                */
-                cardView.setOnTouchListener(new View.OnTouchListener() {
-                    public int DIRECTION_UP = 0;
-                    public int DIRECTION_DOWN = 1;
-                    public int DIRECTION_RIGHT = 2;
-                    public int DIRECTION_LEFT = 3;
-                    final float MAX_DIST_CLICK = 10.0f;
-                    final float MIN_SWIPE_DIST = 60.0f;
-                    final float MIN_THRESHOLD_VELOCITY = 250;
 
-                    boolean flagSwipe = false;
-                    float downX, downY, upX, upY,moveX,moveY;
-                    float downRawX, downRawY;
-                    long downTime,upTime;
-                    float velocityX,velocityY,distX,distY;
-                    boolean directionKnown;
-                    int direction;
-                    boolean dismissRight = true;
-                    boolean swipeDown = true;
                     @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        float deltaX,deltaY;
-                        switch (event.getAction()){
-                            case MotionEvent.ACTION_DOWN:
-                                flagSwipe = true;
-                                downX = event.getX();
-                                downY = event.getY();
-                                downRawX = event.getRawX();
-                                directionKnown = false;
-                                downTime = new Date().getTime();
-                                moveX = 0;
-                                moveY = 0;
-                                break;
-                            case MotionEvent.ACTION_MOVE:
-                                //Log.d(LOG_TAG,"Action Move");
-                                if(!directionKnown){
-                                    if(downY - event.getY() > MIN_SWIPE_DIST){
-                                        directionKnown = true;
-                                        direction = DIRECTION_UP;
-                                        Log.d(LOG_TAG,"Direction up");
-                                    } else if(downY - event.getY() < -MIN_SWIPE_DIST){
-                                        directionKnown = true;
-                                        direction = DIRECTION_DOWN;
-                                        Log.d(LOG_TAG,"Direction down");
-                                    } else if(downX - event.getX() > MIN_SWIPE_DIST){
-                                        directionKnown = true;
-                                        direction = DIRECTION_LEFT;
-                                        Log.d(LOG_TAG,"Direction left");
-                                    } else if(downX - event.getX() < -MIN_SWIPE_DIST){
-                                        directionKnown = true;
-                                        direction = DIRECTION_RIGHT;
-                                        Log.d(LOG_TAG,"Direction right: "+v.getX());
-                                    }
-                                } else {
-                                    //Animate
-                                    if(direction == DIRECTION_LEFT || direction == DIRECTION_RIGHT){
-                                        //Right to left
-                                        Log.d(LOG_TAG,"Down x: "+downX+"  eventx: "+event.getRawX());
-                                        //if(Math.abs(moveX - (event.getRawX() - downRawX)) > 10) {
-                                            moveX = event.getRawX() - downRawX;
-                                            v.setTranslationX(moveX);
-                                    }
-                                }
-                                break;
-                            case MotionEvent.ACTION_UP:
-                                upX = event.getX();
-                                upY = event.getY();
-                                upTime = new Date().getTime();
-                                distX = convertPxToDip((int) (upX - downX));
-                                distY = convertPxToDip((int)(upY-downY));
-                                velocityX = distX / ((upTime - downTime)/1000.0f);
-                                velocityY = distY / ((upTime - downTime)/1000.0f);
-                                if(!directionKnown){
-                                    v.animate().translationX(0).alpha(1f);
-                                    v.callOnClick();
-                                } else {
-                                    if(direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY){
-                                        //Bottom to top
-                                        lockScreenDismiss();
-                                    } else if(direction == DIRECTION_DOWN && velocityY > MIN_THRESHOLD_VELOCITY){
-                                        //Top to bottom
-                                        lockScreenDismiss();
-                                    } else if(direction == DIRECTION_LEFT && velocityX < -MIN_THRESHOLD_VELOCITY){
-                                        //Right to left
-                                        Log.d(LOG_TAG,"Swipe right to left");
-                                        if(isClearable){
-                                            v.animate().translationX(-v.getWidth()).alpha(0f);
-                                            lsn.dismiss(context);
-                                        } else {
-                                            v.animate().translationX(0).alpha(1f);
-                                        }
-                                    } else if(direction == DIRECTION_RIGHT && velocityX > MIN_THRESHOLD_VELOCITY){
-                                        //Left to right
-                                        Log.d(LOG_TAG,"Swipe left to right");
-                                        if(isClearable){
-                                            v.animate().translationX(v.getWidth()).alpha(0f);
-                                            lsn.dismiss(context);
-                                        } else {
-                                            v.animate().translationX(0).alpha(1f);
-                                        }
-                                    } else {
-                                        v.animate().translationX(0).alpha(1f);
-                                    }
-                                }
-                                break;
+                    public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                        if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
+                            // Horizontal motion
+                            Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
+                            cardView.setTranslationX(event.getRawX() - downRawX);
+                        } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                            float deltaY = event.getRawY() - downRawY;
+                            Log.d(LOG_TAG,"Animate layout: "+deltaY);
+                            layout.setTranslationY(deltaY);
                         }
-                        return true;
+                    }
+
+                    @Override
+                    public void onDirectionUnknown() {
+                        cardView.callOnClick();
+                    }
+
+                    @Override
+                    public void onSwipeFail() {
+                        cardView.animate().translationX(0).start();
+                        layout.animate().translationY(0).start();
                     }
                 });
 
-                //Animation animation = AnimationUtils.loadAnimation(context,R.animator.push_up_in);
-                //animation.setDuration(200);
-                //cardView.startAnimation(animation);
+                /*Animation animation = AnimationUtils.loadAnimation(context,R.animator.push_up_in);
+                animation.setDuration(200);
+                cardView.startAnimation(animation);
                 ObjectAnimator animator = ObjectAnimator.ofFloat(cardView,"alpha",0f,1f);
-                animator.setDuration(200);
+                animator.setDuration(1000);
                 animator.start();
-                //cardView.set
+                //cardView.set*/
                 notificationCardsLayout.addView(cardView);
             }
         }
@@ -393,7 +379,8 @@ public class LockScreenOverlayHelper extends Overlay{
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.OPAQUE);
 
         if(AdminActions.getCurrentPassphraseType().equals(Passphrase.TYPE_NONE)) {
