@@ -24,6 +24,7 @@ import java.util.Timer;
  * Helper class for showing a pattern lock screen.
  */
 public class PatternLockOverlay extends Overlay {
+    private static final String LOG_TAG = PatternLockOverlay.class.getSimpleName();
 
     private static final int COLOR_INVALID_PATTERN = Color.rgb(255, 80, 50);
     private static final int COLOR_VALID_PATTERN = Color.rgb(80, 200, 70);

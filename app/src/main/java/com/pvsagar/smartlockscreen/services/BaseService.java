@@ -197,7 +197,7 @@ public class BaseService extends Service implements
                     mPatternLockOverlay.execute();
                 } else if(action.equals(ACTION_UNLOCK)){
                     EnvironmentDetector.manageEnvironmentDetectionCriticalSection.acquireUninterruptibly();
-                    AdminActions.changePassword("", Passphrase.TYPE_NONE);
+                    AdminActions.changePassword("", Passphrase.TYPE_NONE, null);
                     Intent dismissIntent = new Intent(this, DismissKeyguardActivity.class);
                     dismissIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     this.getApplicationContext().startActivity(dismissIntent);
@@ -424,9 +424,9 @@ public class BaseService extends Service implements
             if(unknownPassphrase == null) {
                 unknownPassphrase = Passphrase.getMasterPassword(this);
             }
-            if(!unknownPassphrase.setAsCurrentPassword()){
+            if(!unknownPassphrase.setAsCurrentPassword(this)){
                 AdminActions.initializeAdminObjects(this);
-                if(!unknownPassphrase.setAsCurrentPassword()){
+                if(!unknownPassphrase.setAsCurrentPassword(this)){
                     startService(BaseService.getServiceIntent(this,
                             "Please enable administrator for the app.", null));
                 }
@@ -437,9 +437,9 @@ public class BaseService extends Service implements
             if(user != null) {
                 Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
                 if(passphrase != null){
-                    if(!passphrase.setAsCurrentPassword()){
+                    if(!passphrase.setAsCurrentPassword(this)){
                         AdminActions.initializeAdminObjects(this);
-                        if(!passphrase.setAsCurrentPassword()){
+                        if(!passphrase.setAsCurrentPassword(this)){
                             startService(BaseService.getServiceIntent(this,
                                     "Please enable administrator for the app.", null));
                         }

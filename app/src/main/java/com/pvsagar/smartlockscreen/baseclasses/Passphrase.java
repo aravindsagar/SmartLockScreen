@@ -144,9 +144,9 @@ public abstract class Passphrase<PassphraseRepresentation> {
      * Sets this passphrase as current device password
      * @return
      */
-    public boolean setAsCurrentPassword(){
+    public boolean setAsCurrentPassword(Context context){
         Log.d(LOG_TAG, "Setting current password: " + passwordString);
-        return AdminActions.changePassword(passwordString, this.passphraseType);
+        return AdminActions.changePassword(passwordString, this.passphraseType, getMasterPassword(context));
     }
 
     /**

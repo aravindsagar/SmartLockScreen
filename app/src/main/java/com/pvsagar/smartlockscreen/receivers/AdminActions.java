@@ -82,7 +82,23 @@ public class AdminActions extends DeviceAdminReceiver {
         return mDPM != null && mDeviceAdmin != null && mDPM.isAdminActive(mDeviceAdmin);
     }
 
-    public static boolean changePassword(String password, String passphraseType){
+    public static boolean changePassword(String password, String passphraseType, Passphrase masterPassphrase){
+        currentPassphraseType = passphraseType;
+        if(passphraseType.equals(Passphrase.TYPE_PATTERN)){
+            currentPassphraseString = password;
+            password = (String) masterPassphrase.getPassphraseRepresentation();
+        }
+        if(isAdminEnabled()) {
+            mDPM.resetPassword(password, 0);
+            return true;
+        }
+        else {
+            Log.e(LOG_TAG, "No admin privileges, cannot change password.");
+            return false;
+        }
+    }
+
+    /*public static boolean changePassword(String password, String passphraseType){
         currentPassphraseType = passphraseType;
         if(passphraseType.equals(Passphrase.TYPE_PATTERN)){
             currentPassphraseString = password;
@@ -95,7 +111,7 @@ public class AdminActions extends DeviceAdminReceiver {
             Log.e(LOG_TAG, "No admin privileges, cannot change password.");
             return false;
         }
-    }
+    }*/
 
     @Override
     public void onPasswordFailed(Context context, Intent intent) {

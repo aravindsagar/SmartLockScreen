@@ -1,7 +1,6 @@
 package com.pvsagar.smartlockscreen.services.window_helpers;
 
 import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,8 +17,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -37,16 +34,9 @@ import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomFlingListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.ExternalIntents;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationAreaHelper;
-import com.pvsagar.smartlockscreen.frontend_helpers.OnFlingGestureListener;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
-
-import java.util.Date;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.prototypes.SwipeDismissListItemViewTouchListener;
 
 /**
  * Created by aravind on 19/9/14.
@@ -155,7 +145,6 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         });
 
-
         return rLayout;
     }
 
@@ -179,7 +168,6 @@ public class LockScreenOverlayHelper extends Overlay{
                         .setListener(new AnimateEndListener()).start();
             }
         } else {
-            Log.d(LOG_TAG,"Accelerate ip");
             layout.animate().translationY(-layout.getHeight()).setListener(new AnimateEndListener())
                     .setInterpolator(new AccelerateInterpolator()).start();
         }

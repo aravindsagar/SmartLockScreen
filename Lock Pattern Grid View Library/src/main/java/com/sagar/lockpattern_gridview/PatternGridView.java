@@ -89,6 +89,7 @@ public class PatternGridView extends View implements PatternInterface{
         }finally {
             styledAttributes.recycle();
         }
+        setLayerType(LAYER_TYPE_HARDWARE, null);
         init();
     }
 
