@@ -7,6 +7,7 @@ import android.view.WindowManager;
 
 /**
  * Created by aravind on 23/9/14.
+ * A base class for managing overlay windows.
  */
 public abstract class Overlay {
 
@@ -26,6 +27,9 @@ public abstract class Overlay {
 
     protected abstract View getLayout();
 
+    /**
+     * Adds the view specified by getLayout() to the windowManager passed during initialization
+     */
     public void execute(){
         if(layout != null) {
             remove();
@@ -41,6 +45,9 @@ public abstract class Overlay {
         }
     }
 
+    /**
+     * Removes the view specified by getLayout() from the windowManager passed during initialization
+     */
     public void remove(){
         if(layout == null){
             layout = getLayout();

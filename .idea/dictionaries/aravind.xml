@@ -9,6 +9,8 @@
       <w>geofences</w>
       <w>lockscreen</w>
       <w>passphrase</w>
+      <w>passphrases</w>
+      <w>ssid</w>
     </words>
   </dictionary>
 </component>

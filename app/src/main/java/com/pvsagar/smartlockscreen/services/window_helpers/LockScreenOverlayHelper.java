@@ -27,13 +27,13 @@ import android.widget.TextView;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.adapters.NotificationListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
+import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
-import com.pvsagar.smartlockscreen.cards.CardTouchListener;
-import com.pvsagar.smartlockscreen.cards.NotificationCardHeader;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomFlingListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.ExternalIntents;
+import com.pvsagar.smartlockscreen.frontend_helpers.NotificationAreaHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.OnFlingGestureListener;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -47,6 +47,7 @@ import it.gmariotti.cardslib.library.prototypes.SwipeDismissListItemViewTouchLis
 
 /**
  * Created by aravind on 19/9/14.
+ * Helper class for managing LockScreenOverlay
  */
 public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();
@@ -74,7 +75,7 @@ public class LockScreenOverlayHelper extends Overlay{
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
 
         layout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        layout.setOnTouchListener(new View.OnTouchListener() {
+        /*layout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(v.hasOnClickListeners()){
@@ -82,7 +83,7 @@ public class LockScreenOverlayHelper extends Overlay{
                 }
                 return true;
             }
-        });
+        });*/
 //      WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
         //TODO add wallpaper support!
         ImageView wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
@@ -102,7 +103,7 @@ public class LockScreenOverlayHelper extends Overlay{
         //notificationListAdapter = new NotificationListAdapter(context);
         //notificationsListView.setAdapter(notificationListAdapter);
 
-        notificationCardsLayout.setOnTouchListener(new CustomFlingListener(context) {
+        rLayout.setOnTouchListener(new CustomFlingListener(context) {
             @Override
             public void onRightToLeft() {
                 ExternalIntents.launchCamera(context);
@@ -118,6 +119,7 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onTopToBottom() {
                 lockScreenDismiss();
+                NotificationAreaHelper.expand(context);
             }
 
             @Override
@@ -178,7 +180,7 @@ public class LockScreenOverlayHelper extends Overlay{
                         Drawable app_icon = context.getPackageManager().getApplicationIcon(lsn.getPackageName());
                         img = ((BitmapDrawable) app_icon).getBitmap();
                     }
-                    notificationImageView.setImageBitmap(Utility.getCroppedBitmap(img, 0));
+                    notificationImageView.setImageBitmap(Picture.getCroppedBitmap(img, Color.DKGRAY));
                 } catch (Exception e){
                     Log.e(LOG_TAG, e.toString());
                 }
@@ -260,6 +262,7 @@ public class LockScreenOverlayHelper extends Overlay{
                     @Override
                     public void onTopToBottom() {
                         Log.d(LOG_TAG,"Top to bottom");
+                        NotificationAreaHelper.expand(context);
                         lockScreenDismiss();
                     }
                 });

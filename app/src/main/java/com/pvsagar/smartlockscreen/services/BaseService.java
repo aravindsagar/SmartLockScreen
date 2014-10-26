@@ -51,6 +51,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * The main service which acts as the app backbone. This service should be notified of all
+ * the relevant events, and will take required actions related to the events
+ */
 public class BaseService extends Service implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,

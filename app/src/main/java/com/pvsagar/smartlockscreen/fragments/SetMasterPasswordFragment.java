@@ -102,7 +102,10 @@ public class SetMasterPasswordFragment extends Fragment {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
-            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true) + 16;
+            mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
+            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT){
+                mPaddingTop += 16;
+            }
         }
     }
 

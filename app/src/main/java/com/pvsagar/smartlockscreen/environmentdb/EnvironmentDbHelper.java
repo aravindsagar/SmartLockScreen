@@ -80,6 +80,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 EnvironmentEntry.COLUMN_ENVIRONMENT_HINT + " TEXT, " +
                 EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION + " TEXT, " +
                 EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_TYPE + " TEXT, " +
+                EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DRAWABLE + " TEXT, " +
                 EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE + " BLOB, " +
                 " FOREIGN KEY (" + EnvironmentEntry.COLUMN_GEOFENCE_ID + ") REFERENCES " +
                 GeoFenceEntry.TABLE_NAME + "(" + GeoFenceEntry._ID + "), " +
@@ -103,6 +104,7 @@ public class EnvironmentDbHelper extends SQLiteOpenHelper {
                 UsersEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 UsersEntry.COLUMN_USER_NAME + " TEXT NOT NULL, " +
                 UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION + " TEXT, " +
+                UsersEntry.COLUMN_USER_PICTURE_DRAWABLE + " TEXT, " +
                 UsersEntry.COLUMN_USER_PICTURE_TYPE + " TEXT, " +
                 UsersEntry.COLUMN_USER_PICTURE + " BLOB, " +
                 "UNIQUE (" + UsersEntry.COLUMN_USER_NAME + ") ON CONFLICT IGNORE);";

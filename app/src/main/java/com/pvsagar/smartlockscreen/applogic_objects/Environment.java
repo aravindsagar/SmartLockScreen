@@ -31,19 +31,27 @@ import java.util.Vector;
 public class Environment {
     private static final String LOG_TAG = Environment.class.getSimpleName();
 
-    ///The id of the environment, as stored in the database
+    /**
+     * The id of the environment, as stored in the database
+     */
     private long id;
 
-    ///The EnvironmentVariables associated with the environment
+    /**
+     * The EnvironmentVariables associated with the environment
+     */
     private LocationEnvironmentVariable locationEnvironmentVariable;
     private Vector<BluetoothEnvironmentVariable> bluetoothEnvironmentVariables;
     private WiFiEnvironmentVariable wiFiEnvironmentVariable;
     private NoiseLevelEnvironmentVariable noiseLevelEnvironmentVariable;
 
-    //true for all, false for any
+    /**
+     * true for all, false for any
+     */
     private boolean bluetoothAllOrAny;
 
-    ///Other data about the environment
+    /**
+     * Other data about the environment
+     */
     private String name, hint;
     private boolean isEnabled;
 
@@ -249,10 +257,11 @@ public class Environment {
 
         if(environmentPicture == null){
             environmentPicture = new Picture(Picture.PICTURE_TYPE_COLOR,
-                    String.valueOf(Utility.getRandomColor(context)), null);
+                    String.valueOf(Utility.getRandomColor(context)), null, null);
         }
         environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_TYPE, environmentPicture.getPictureType());
-        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION, environmentPicture.getPictureDescription());
+        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION, environmentPicture.getBackgroundColor());
+        environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DRAWABLE, environmentPicture.getDrawableName());
         environmentValues.put(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE, environmentPicture.getImage());
 
         if(e.hasNoiseLevel && e.getNoiseLevelEnvironmentVariable() != null){
@@ -613,6 +622,7 @@ public class Environment {
             Picture picture = new Picture(
                     envCursor.getString(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_TYPE)),
                     envCursor.getString(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DESCRIPTION)),
+                    envCursor.getString(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE_DRAWABLE)),
                     envCursor.getBlob(envCursor.getColumnIndex(EnvironmentEntry.COLUMN_ENVIRONMENT_PICTURE)));
             e.setName(envName);
             e.setHint(envHint);
@@ -683,14 +693,26 @@ public class Environment {
         return environmentPicture;
     }
 
+    /**
+     * Sets environment picture. You should call {@link #updateEnvironmentPicture()} to reflect the changes in database
+     * @param environmentPicture New picture for the environment
+     */
     public void setEnvironmentPicture(Picture environmentPicture) {
         this.environmentPicture = environmentPicture;
     }
 
+    /**
+     * Gets the environment picture as a drawable
+     * @param context Activity/ service context
+     * @return Drawable corresponding to the environment picture
+     */
     public Drawable getEnvironmentPictureDrawable(Context context){
         return environmentPicture.getDrawable(Character.toUpperCase(getName().charAt(0)), context);
     }
 
+    /**
+     * Updates the environment picture in database
+     */
     public void updateEnvironmentPicture(){
         //TODO code this
     }

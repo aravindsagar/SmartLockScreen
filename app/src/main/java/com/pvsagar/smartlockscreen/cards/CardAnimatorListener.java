@@ -7,10 +7,23 @@ import java.util.Vector;
 
 /**
  * Created by aravind on 19/10/14.
+ * Receives events related to animations applied to card, and keeps track of the card elevations.
+ * An instance of this class should be set as Animator Listener while animating the card.
  */
 public class CardAnimatorListener implements Animator.AnimatorListener{
+    /**
+     * Position of the card in its list
+     */
     private int mPosition;
+
+    /**
+     * The vector where elevations are stored
+     */
     private Vector<Float> mElevations;
+
+    /**
+     * CardView corresponding to the card to be monitored
+     */
     private CardView mCardView;
 
     public CardAnimatorListener(int position, Vector<Float> elevations, CardView cardView){

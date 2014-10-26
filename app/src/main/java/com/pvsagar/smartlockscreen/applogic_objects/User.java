@@ -27,6 +27,7 @@ import java.util.List;
 
 /**
  * Created by aravind on 8/9/14.
+ * Class which represents a User.
  */
 public class User {
     private static final String LOG_TAG = User.class.getSimpleName();
@@ -53,6 +54,11 @@ public class User {
         return id;
     }
 
+    /**
+     * Gets an instance of this class which represents the default user (device owner)
+     * @param context Activity/Service context
+     * @return instance of device owner
+     */
     public static User getDefaultUser(Context context){
         long defaultUserId = SharedPreferencesHelper.getDeviceOwnerUserId(context);
         if(defaultUserId == -1){
@@ -73,6 +79,11 @@ public class User {
         }
     }
 
+    /**
+     * Takes in a cursor and creates instances of user populated with data from the cursor
+     * @param cursor should contain data from users table
+     * @return list of users read from the cursor
+     */
     private static User getUserFromCursor(Cursor cursor){
         try{
             String userName = cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_NAME));
@@ -81,6 +92,7 @@ public class User {
             user.setUserPicture(new Picture(
                     cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_TYPE)),
                     cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION)),
+                    cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE_DRAWABLE)),
                     cursor.getBlob(cursor.getColumnIndex(UsersEntry.COLUMN_USER_PICTURE)),
                     CharacterDrawable.BORDER_LIGHTER));
             return user;
@@ -90,22 +102,32 @@ public class User {
         }
     }
 
+    /**
+     * Gets content values for this user instance
+     * @return instance of ContentValues with values from this instance of User
+     */
     private ContentValues getContentValues(){
         ContentValues userValues = new ContentValues();
         userValues.put(UsersEntry.COLUMN_USER_NAME, getUserName());
         userValues.put(UsersEntry.COLUMN_USER_PICTURE_TYPE, getUserPicture().getPictureType());
-        userValues.put(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION, getUserPicture().getPictureDescription());
+        userValues.put(UsersEntry.COLUMN_USER_PICTURE_DESCRIPTION, getUserPicture().getBackgroundColor());
+        userValues.put(UsersEntry.COLUMN_USER_PICTURE_DRAWABLE, getUserPicture().getDrawableName());
         userValues.put(UsersEntry.COLUMN_USER_PICTURE, getUserPicture().getImage());
         return userValues;
     }
 
+    /**
+     * Inserts this user into database
+     * @param context Activity/Service context
+     * @return id of the user
+     */
     public long insertIntoDatabase(Context context){
         Cursor userCursor = context.getContentResolver().query(UsersEntry.CONTENT_URI, null,
                 UsersEntry.COLUMN_USER_NAME + " = ? ", new String[]{getUserName()}, null);
         if(userCursor.getCount() == 0) {
             if(userPicture == null){
                 userPicture = new Picture(Picture.PICTURE_TYPE_COLOR,
-                        String.valueOf(Utility.getRandomColor(context)), null, CharacterDrawable.BORDER_LIGHTER);
+                        String.valueOf(Utility.getRandomColor(context)), null, null, CharacterDrawable.BORDER_LIGHTER);
             }
             Uri uri = context.getContentResolver().insert(UsersEntry.CONTENT_URI, getContentValues());
             id = UsersEntry.getUserIdFromUri(uri);
@@ -118,6 +140,12 @@ public class User {
         return id;
     }
 
+    /**
+     * Sets passphrase for this user for specific environment
+     * @param context Activity/Service context
+     * @param passphrase Passphrase to be set
+     * @param environment Environment for which the passphrase is to be set
+     */
     public void setPassphraseForEnvironment(Context context,
                                             Passphrase passphrase, Environment environment){
         if(id>0) {
@@ -138,6 +166,12 @@ public class User {
         }
     }
 
+    /**
+     * Gets passphrase for this user for specific environment
+     * @param context Activity/Service context
+     * @param environment Environment for which the passphrase is to be retrieved
+     * @return required Passphrase
+     */
     public Passphrase getPassphraseForEnvironment(Context context, Environment environment){
         if(id>0) {
             if(environment.getId() <= 0){
@@ -158,6 +192,11 @@ public class User {
         return null;
     }
 
+    /**
+     * Sets passphrase for current user, when environment is unknown. For restricted profiles, this passphrase will be used throughout
+     * @param context Activity/Service context
+     * @param passphrase passphrase to be set
+     */
     public void setPassphraseForUnknownEnvironment(Context context, Passphrase passphrase){
         if(id>0) {
             context.getContentResolver().update(UsersEntry.buildUserUriWithIdEnvironmentAndPassword
@@ -168,6 +207,10 @@ public class User {
         }
     }
 
+    /**
+     * Removes the passphrase for current user, for unknown environment.
+     * @param context Activity/Service context
+     */
     public void removePassphraseForUnknownEnvironment(Context context){
         if(id>0) {
             context.getContentResolver().delete(UsersEntry.buildUserUriWithIdEnvironmentAndPassword(
@@ -175,6 +218,11 @@ public class User {
         }
     }
 
+    /**
+     * Gets passphrase for current user, when environment is unknown. For restricted profiles, this passphrase is to be used throughout
+     * @param context Activity/Service context
+     * @return required passphrase
+     */
     public Passphrase getPassphraseForUnknownEnvironment(Context context){
         if(id>0) {
             Cursor passwordCursor = context.getContentResolver().query(UsersEntry.
@@ -191,6 +239,9 @@ public class User {
         return null;
     }
 
+    /**
+     * Stores the active user
+     */
     private static User currentUser;
 
     public static User getCurrentUser(Context context) {
@@ -204,6 +255,11 @@ public class User {
         currentUser = user;
     }
 
+    /**
+     * Get all users from the database
+     * @param context Activity/Service context
+     * @return list of all users
+     */
     public static List<User> getAllUsers(Context context){
         Cursor userCursor = context.getContentResolver().query(UsersEntry.CONTENT_URI, null, null, null, null);
         ArrayList<User> allUsers = new ArrayList<User>();
@@ -224,10 +280,20 @@ public class User {
         this.userPicture = userPicture;
     }
 
+    /**
+     * Gets a drawable corresponding to user's picture
+     * @param context Activity/Service context
+     * @return a drawable of user picture
+     */
     public Drawable getUserPictureDrawable(Context context){
         return userPicture.getDrawable(Character.toUpperCase(getUserName().charAt(0)), context);
     }
 
+    /**
+     * Inserts the default user (Device owner) into the database. This reads the 'me' contact card available
+     * in the system, and uses a generic string if that is null
+     * @param context Activity/Service context
+     */
     public static void insertDefaultUser(Context context){
         String userName = null;
         Bitmap userImage = null;
@@ -274,11 +340,11 @@ public class User {
         User defaultUser = new User(userName);
         if(userImage == null){
             defaultUser.setUserPicture(new Picture(Picture.PICTURE_TYPE_COLOR,
-                    String.valueOf(Utility.getRandomColor(context)), null));
+                    String.valueOf(Utility.getRandomColor(context)), null, null));
         } else {
-            userImage = Utility.getCroppedBitmap(userImage, Color.rgb(200, 200, 200));
+            userImage = Picture.getCroppedBitmap(userImage, Color.rgb(200, 200, 200));
             defaultUser.setUserPicture(new Picture(Picture.PICTURE_TYPE_CUSTOM,
-                    null, Picture.drawableToByteArray(new BitmapDrawable(context.getResources(), userImage))));
+                    null, null, Picture.drawableToByteArray(new BitmapDrawable(context.getResources(), userImage))));
         }
         long id = defaultUser.insertIntoDatabase(context);
 
@@ -288,4 +354,6 @@ public class User {
             throw new SQLiteException("Cannot insert default user into database");
         }
     }
+
+    //TODO function to change device owner name
 }

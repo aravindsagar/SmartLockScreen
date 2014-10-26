@@ -56,10 +56,26 @@ public abstract class Passphrase<PassphraseRepresentation> {
         setPasswordRepresentation(passphrase);
     }
 
+    /**
+     * Each passphrase type should provide a unique string corresponding to each of the passphrase representation
+     * instance used. This method does that.
+     * @param passphrase to be converted to a string
+     * @return string representation of the passphrase
+     */
     protected abstract String getPassphraseStringFromPassphraseRepresentation(PassphraseRepresentation passphrase);
 
+    /**
+     * Converts a given string back to the original passphrase representation object instance
+     * @param passphrase string representation of the passphrase
+     * @return original representation of the passphrase
+     */
     protected abstract PassphraseRepresentation getPassphraseRepresentationFromPassphraseString(String passphrase);
 
+    /**
+     * Takes a given passphrase representation instance and checks for its validity
+     * @param passphrase whose validity should be checked
+     * @return true if valid, false otherwise
+     */
     protected abstract boolean isPassphraseRepresentationValid(PassphraseRepresentation passphrase);
 
     public void setPasswordRepresentation(PassphraseRepresentation passphrase) {
@@ -100,6 +116,11 @@ public abstract class Passphrase<PassphraseRepresentation> {
         return passwordValues;
     }
 
+    /**
+     * Reads passphrase information from a cursor
+     * @param cursor should be populated with values from passwords table
+     * @return passphrase instances corresponding to the values from the cursor
+     */
     public static Passphrase getPassphraseFromCursor(Cursor cursor){
         try{
             String type = cursor.getString(cursor.getColumnIndex(PasswordEntry.COLUMN_PASSWORD_TYPE));
@@ -119,16 +140,30 @@ public abstract class Passphrase<PassphraseRepresentation> {
         }
     }
 
+    /**
+     * Sets this passphrase as current device password
+     * @return
+     */
     public boolean setAsCurrentPassword(){
         Log.d(LOG_TAG, "Setting current password: " + passwordString);
         return AdminActions.changePassword(passwordString, this.passphraseType);
     }
 
+    /**
+     * Sets the master passphrase
+     * @param masterPassword master passphrase to be set
+     * @param context Activity/service context
+     */
     public static void setMasterPassword(Passphrase masterPassword, Context context){
         SharedPreferencesHelper.setMasterPassword(context, masterPassword.encryptedPasswordString,
                 masterPassword.passphraseType);
     }
 
+    /**
+     * Returns the current master passphrase
+     * @param context Activity/service context
+     * @return current master passphrase
+     */
     public static Passphrase getMasterPassword(Context context){
         String masterPasswordType = SharedPreferencesHelper.getMasterPasswordType(context),
                 masterPasswordString = SharedPreferencesHelper.getMasterPasswordString(context);

@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -114,6 +115,8 @@ public class SearchLocation extends ActionBarActivity {
         final View customActionBarView = layoutInflater.inflate(R.layout.actionbar_custom_search, null);
         customActionBarView.getBackground().setAlpha(100);
         searchBarEditText = (EditText) customActionBarView.findViewById(R.id.edit_text_searchbar);
+        searchBarEditText.setHintTextColor(Color.LTGRAY);
+        searchBarEditText.setTextColor(Color.WHITE);
         searchBarEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

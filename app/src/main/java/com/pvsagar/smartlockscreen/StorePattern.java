@@ -14,7 +14,9 @@ import com.sagar.lockpattern_gridview.PatternInterface;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Activity with UI to store a pattern
+ */
 public class StorePattern extends Activity {
     private static final String PACKAGE_NAME = StorePattern.class.getPackage().getName();
     public static final String EXTRA_PATTERN = PACKAGE_NAME + ".EXTRA_PATTERN";

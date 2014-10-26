@@ -11,8 +11,20 @@ import java.util.List;
  * id to use from them.
  */
 public class OverlappingEnvironmentIdsWithResolved{
+
+    /**
+     * A list of environment ids corresponding to a set of overlapping environments
+     */
     private List<Long> overlappingEnvIds;
+
+    /**
+     * The id of the environment which is preferred(resolved) among the overlapping environments
+     */
     private long resolvedEnvId;
+
+    /**
+     * Index of the preferred environment's id in the overlapping environment list
+     */
     int resolvedEnvIndex = -1;
 
     public long getResolvedEnvId() {
@@ -31,6 +43,11 @@ public class OverlappingEnvironmentIdsWithResolved{
         this.overlappingEnvIds = overlappingEnvIds;
     }
 
+    /**
+     * Get barebone environments of all the environment ids in this instance
+     * @param context Activity/Service context
+     * @return barebone environments
+     */
     public List<Environment> getBareboneEnvironmentList(Context context){
         if (overlappingEnvIds == null) {
             return null;
@@ -50,6 +67,10 @@ public class OverlappingEnvironmentIdsWithResolved{
         return resolvedEnvIndex;
     }
 
+    /**
+     * A simple factory class which stores environments retrieved from the database in memory and reuses those instances,
+     * instead of fetching them again from the database when the same environment is requested to be read multiple times.
+     */
     public static class SimpleEnvironmentRetrievalFactory {
         private static ArrayList<Environment> environments = new ArrayList<Environment>();
         public static Environment getBareboneEnvironmentWithId(Long id, Context context){

@@ -89,7 +89,7 @@
             android:name=".DismissKeyguardActivity"
             android:excludeFromRecents="true"
             android:label="@string/title_activity_dismiss_keyguard"
-            android:taskAffinity="@string/task_lockscreen"
+            android:taskAffinity=""
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
@@ -100,7 +100,9 @@
         <activity
             android:name=".SmartLockScreenSettings"
             android:label="@string/title_activity_smart_lock_screen_settings"
-            android:theme="@style/HoloWithActionMode" >
+            android:theme="@style/HoloWithActionMode"
+            android:clearTaskOnLaunch="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
