@@ -67,6 +67,7 @@ public class LockScreenOverlayHelper extends Overlay{
     public static final float CARD_TOUCHED_ELEVATION = 0f;
     public static final int CARD_VIEW_NORMAL_ALPHA = 200;
     public static final int CARD_VIEW_SELECTED_ALPHA = 255;
+    private static final int DEFAULT_START_ANIMATION_VELOCITY = 0;
 
     public LockScreenOverlayHelper(Context context, WindowManager windowManager){
         super(context, windowManager);
@@ -99,7 +100,7 @@ public class LockScreenOverlayHelper extends Overlay{
         unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                lockScreenDismiss(2);
+                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
             }
         });
         notificationChanged();
@@ -135,11 +136,9 @@ public class LockScreenOverlayHelper extends Overlay{
             public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
                 if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                     float deltaY = event.getRawY() - downRawY;
-                    Log.d(LOG_TAG,"Animate layout: "+deltaY);
                     layout.setTranslationY(deltaY);
                 } else {
                     float deltaX = event.getRawX() - downRawX;
-                    Log.d(LOG_TAG,"Animate layout: "+deltaX);
                     layout.setTranslationX(deltaX);
                 }
             }
@@ -165,19 +164,24 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void lockScreenDismiss(int direction, float endVelocity){
-        Log.d(LOG_TAG, "end velocity: " +  endVelocity);
-        if(direction == CustomFlingListener.DIRECTION_UP){
-            layout.animate().translationY(-layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
-                    .setListener(new AnimateEndListener()).start();
-        } else if(direction == CustomFlingListener.DIRECTION_DOWN){
-            layout.animate().translationY(layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
-                    .setListener(new AnimateEndListener()).start();
-        } else if(direction == CustomFlingListener.DIRECTION_LEFT){
-            layout.animate().translationX(-layout.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
-                    .setListener(new AnimateEndListener()).start();
-        } else{
-            layout.animate().translationX(+layout.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
-                    .setListener(new AnimateEndListener()).start();
+        if(endVelocity > 0) {
+            if (direction == CustomFlingListener.DIRECTION_UP) {
+                layout.animate().translationY(-layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                        .setListener(new AnimateEndListener()).start();
+            } else if (direction == CustomFlingListener.DIRECTION_DOWN) {
+                layout.animate().translationY(layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                        .setListener(new AnimateEndListener()).start();
+            } else if (direction == CustomFlingListener.DIRECTION_LEFT) {
+                layout.animate().translationX(-layout.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                        .setListener(new AnimateEndListener()).start();
+            } else {
+                layout.animate().translationX(+layout.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                        .setListener(new AnimateEndListener()).start();
+            }
+        } else {
+            Log.d(LOG_TAG,"Accelerate ip");
+            layout.animate().translationY(-layout.getHeight()).setListener(new AnimateEndListener())
+                    .setInterpolator(new AccelerateInterpolator()).start();
         }
 
     }
@@ -265,7 +269,7 @@ public class LockScreenOverlayHelper extends Overlay{
                         if(clickedCard == position){
                             try {
                                 mNotification.contentIntent.send();
-                                lockScreenDismiss(2);
+                                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
                             } catch (Exception e){
                                 Log.e(LOG_TAG,e.toString());
                             }
@@ -320,10 +324,12 @@ public class LockScreenOverlayHelper extends Overlay{
                     public void onLeftToRight(float endVelocity) {
                         Log.d(LOG_TAG,"Swipe left to right");
                         if(isClearable){
-                            cardView.animate().translationX(cardView.getWidth()).alpha(0f);
+                            cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
+                                    alpha(0f);
                             lsn.dismiss(context);
                         } else {
-                            cardView.animate().translationX(0).alpha(1f);
+                            cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
+                                    alpha(1f);
                         }
                     }
 
@@ -345,7 +351,6 @@ public class LockScreenOverlayHelper extends Overlay{
                             cardView.setTranslationX(event.getRawX() - downRawX);
                         } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                             float deltaY = event.getRawY() - downRawY;
-                            Log.d(LOG_TAG,"Animate layout: "+deltaY);
                             layout.setTranslationY(deltaY);
                         }
                     }

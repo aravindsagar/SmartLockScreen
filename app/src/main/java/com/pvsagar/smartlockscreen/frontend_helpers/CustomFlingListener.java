@@ -14,13 +14,13 @@ import java.util.Date;
  * Created by PV on 10/25/2014.
  */
 public abstract class CustomFlingListener implements View.OnTouchListener {
-    public static String LOG_TAG = CustomFlingListener.class.getSimpleName();
+    private static String LOG_TAG = CustomFlingListener.class.getSimpleName();
     public static int DIRECTION_UP = 0;
     public static int DIRECTION_DOWN = 1;
     public static int DIRECTION_RIGHT = 2;
     public static int DIRECTION_LEFT = 3;
 
-    float downX, downY, upX, upY;
+    float upRawX, upRawY;
     float last1MoveX = -1, last1MoveY = -1, last2MoveX = -1, last2MoveY = -1;
     long last1MoveTime = -1, last2MoveTime = -1;
     float downRawX, downRawY;
@@ -40,8 +40,6 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                downX = event.getX();
-                downY = event.getY();
                 downRawX = event.getRawX();
                 downRawY = event.getRawY();
                 downTime = new Date().getTime();
@@ -55,19 +53,19 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                 last2MoveTime = last1MoveTime;
                 last1MoveTime = new Date().getTime();
                 if(!directionKnown){
-                    if(downY - event.getY() > MIN_SWIPE_DIST){
+                    if(downRawY - event.getRawY() > MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_UP;
                         Log.d(LOG_TAG,"Direction up");
-                    } else if(downY - event.getY() < -MIN_SWIPE_DIST){
+                    } else if(downRawY - event.getRawY() < -MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_DOWN;
                         Log.d(LOG_TAG,"Direction down");
-                    } else if(downX - event.getX() > MIN_SWIPE_DIST){
+                    } else if(downRawX - event.getRawX() > MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_LEFT;
                         Log.d(LOG_TAG,"Direction left");
-                    } else if(downX - event.getX() < -MIN_SWIPE_DIST){
+                    } else if(downRawX - event.getRawX() < -MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_RIGHT;
                         Log.d(LOG_TAG,"Direction right");
@@ -77,29 +75,32 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                upX = event.getX();
-                upY = event.getY();
+                upRawX = event.getRawX();
+                upRawY = event.getRawY();
+                Log.d(LOG_TAG, "upX: " + upRawX + ", upY: " + upRawY);
                 upTime = new Date().getTime();
-                distX = convertPxToDip((int)(upX-downX));
-                distY = convertPxToDip((int)(upY-downY));
+                distX = convertPxToDip((int)(upRawX-downRawX));
+                distY = convertPxToDip((int)(upRawY-downRawY));
                 velocityX = distX / ((upTime - downTime)/1000.0f);
                 velocityY = distY / ((upTime - downTime)/1000.0f);
                 float endVelocityX = (event.getRawX() - last2MoveX)/(upTime - last2MoveTime);
-                endVelocityX/=2;
                 float endVelocityY = (event.getRawY() - last2MoveY)/(upTime - last2MoveTime);
-                endVelocityY/=2;
-                Log.d(LOG_TAG,"downTime: "+downTime+"\t upTime: "+upTime);
-                Log.d(LOG_TAG,"velocityX: "+velocityX+"\t velocityY: "+velocityY);
+
                 if(directionKnown){
                     if(direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY){
+                        Log.d(LOG_TAG,"UP");
                         onBottomToTop(-endVelocityY);
                     } else if(direction == DIRECTION_DOWN && velocityY > MIN_THRESHOLD_VELOCITY){
+                        Log.d(LOG_TAG,"Down");
                         onTopToBottom(endVelocityY);
                     } else if(direction == DIRECTION_LEFT && velocityX < -MIN_THRESHOLD_VELOCITY){
+                        Log.d(LOG_TAG,"Left");
                         onRightToLeft(-endVelocityX);
                     } else if(direction == DIRECTION_RIGHT && velocityX > MIN_THRESHOLD_VELOCITY){
+                        Log.d(LOG_TAG,"Right");
                         onLeftToRight(endVelocityX);
                     } else {
+                        Log.d(LOG_TAG,"Swipe fail velX: "+velocityX+"  velY: "+velocityY);
                         onSwipeFail();
                     }
                 } else {
