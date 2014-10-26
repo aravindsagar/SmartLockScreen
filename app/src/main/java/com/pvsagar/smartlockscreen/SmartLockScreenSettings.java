@@ -33,6 +33,7 @@ import com.pvsagar.smartlockscreen.fragments.SetMasterPasswordFragment;
 import com.pvsagar.smartlockscreen.frontend_helpers.OneTimeInitializer;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
+import com.pvsagar.smartlockscreen.services.NotificationService;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
@@ -83,6 +84,10 @@ public class SmartLockScreenSettings extends ActionBarActivity
         OneTimeInitializer.initialize(this, MASTER_PASSWORD_REQUEST);
 
         startService(BaseService.getServiceIntent(this, null, null));
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && !NotificationService.isInstanceCreated()){
+            Intent intent = new Intent(this,NotificationService.class);
+            startService(intent);
+        }
 
         setUpActionBar();
         setUpNavDrawer();

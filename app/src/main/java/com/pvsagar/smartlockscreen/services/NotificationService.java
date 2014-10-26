@@ -18,15 +18,21 @@ import java.util.ArrayList;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class NotificationService extends NotificationListenerService{
 
+    private static NotificationService notificationService = null;
+
     private static String LOG_TAG = NotificationService.class.getSimpleName();
     public static String EXTRAS_LOCK_SCREEN_NOTIFICATION = ".LockScreenNotification";
     public static String EXTRAS_LOCK_SCREEN_NOTIFICATION_ID = ".LockScreenNotification.id";
     public static ArrayList<StatusBarNotification> currentSBN = new ArrayList<StatusBarNotification>();
-    public static ArrayList<LockScreenNotification> currentNotifications =
-            new ArrayList<LockScreenNotification>();
+    public static ArrayList<LockScreenNotification> currentNotifications;
+
+    public static boolean isInstanceCreated(){
+        return notificationService != null;
+    }
 
     @Override
     public void onCreate() {
+        notificationService = this;
         currentNotifications = new ArrayList<LockScreenNotification>();
         super.onCreate();
     }

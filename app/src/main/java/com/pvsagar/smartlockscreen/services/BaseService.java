@@ -134,7 +134,6 @@ public class BaseService extends Service implements
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
             Intent intent = new Intent(this,NotificationService.class);
-            Log.d(LOG_TAG,"\n\n\n\n\n\n\n\n\n\n\n\n\nStarting Notification Service\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
             startService(intent);
         }
 

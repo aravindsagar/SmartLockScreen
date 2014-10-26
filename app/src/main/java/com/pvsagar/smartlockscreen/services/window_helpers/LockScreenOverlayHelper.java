@@ -1,7 +1,6 @@
 package com.pvsagar.smartlockscreen.services.window_helpers;
 
 import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +9,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.widget.CardView;
@@ -18,8 +18,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -37,16 +35,9 @@ import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomFlingListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.ExternalIntents;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationAreaHelper;
-import com.pvsagar.smartlockscreen.frontend_helpers.OnFlingGestureListener;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
-
-import java.util.Date;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.prototypes.SwipeDismissListItemViewTouchListener;
 
 /**
  * Created by aravind on 19/9/14.
@@ -103,7 +94,9 @@ public class LockScreenOverlayHelper extends Overlay{
                 lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
             }
         });
-        notificationChanged();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            notificationChanged();
+        }
         //ListView notificationsListView = (ListView) rLayout.findViewById(R.id.list_view_notifications);
         //notificationListAdapter = new NotificationListAdapter(context);
         //notificationsListView.setAdapter(notificationListAdapter);
@@ -314,6 +307,7 @@ public class LockScreenOverlayHelper extends Overlay{
                             cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
                                     .alpha(0f);
                             lsn.dismiss(context);
+                            notificationCardsLayout.removeView(cardView);
                         } else {
                             cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
                                     alpha(1f);
@@ -327,6 +321,7 @@ public class LockScreenOverlayHelper extends Overlay{
                             cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                                     alpha(0f);
                             lsn.dismiss(context);
+                            notificationCardsLayout.removeView(cardView);
                         } else {
                             cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                                     alpha(1f);
@@ -366,14 +361,6 @@ public class LockScreenOverlayHelper extends Overlay{
                         layout.animate().translationY(0).start();
                     }
                 });
-
-                /*Animation animation = AnimationUtils.loadAnimation(context,R.animator.push_up_in);
-                animation.setDuration(200);
-                cardView.startAnimation(animation);
-                ObjectAnimator animator = ObjectAnimator.ofFloat(cardView,"alpha",0f,1f);
-                animator.setDuration(1000);
-                animator.start();
-                //cardView.set*/
                 notificationCardsLayout.addView(cardView);
             }
         }
