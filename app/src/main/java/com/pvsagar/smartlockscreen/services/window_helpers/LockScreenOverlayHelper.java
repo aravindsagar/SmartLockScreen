@@ -9,6 +9,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.widget.CardView;
@@ -93,7 +94,9 @@ public class LockScreenOverlayHelper extends Overlay{
                 lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
             }
         });
-        notificationChanged();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            notificationChanged();
+        }
         //ListView notificationsListView = (ListView) rLayout.findViewById(R.id.list_view_notifications);
         //notificationListAdapter = new NotificationListAdapter(context);
         //notificationsListView.setAdapter(notificationListAdapter);
@@ -302,6 +305,7 @@ public class LockScreenOverlayHelper extends Overlay{
                             cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
                                     .alpha(0f);
                             lsn.dismiss(context);
+                            notificationCardsLayout.removeView(cardView);
                         } else {
                             cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
                                     alpha(1f);
@@ -315,6 +319,7 @@ public class LockScreenOverlayHelper extends Overlay{
                             cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                                     alpha(0f);
                             lsn.dismiss(context);
+                            notificationCardsLayout.removeView(cardView);
                         } else {
                             cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                                     alpha(1f);
@@ -354,14 +359,6 @@ public class LockScreenOverlayHelper extends Overlay{
                         layout.animate().translationY(0).start();
                     }
                 });
-
-                /*Animation animation = AnimationUtils.loadAnimation(context,R.animator.push_up_in);
-                animation.setDuration(200);
-                cardView.startAnimation(animation);
-                ObjectAnimator animator = ObjectAnimator.ofFloat(cardView,"alpha",0f,1f);
-                animator.setDuration(1000);
-                animator.start();
-                //cardView.set*/
                 notificationCardsLayout.addView(cardView);
             }
         }
