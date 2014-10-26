@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen.services.window_helpers;
 
+import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,6 +16,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,6 +38,8 @@ import com.pvsagar.smartlockscreen.frontend_helpers.OnFlingGestureListener;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
+
+import java.util.Date;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -226,7 +231,7 @@ public class LockScreenOverlayHelper extends Overlay{
                         return true;
                     }
                 });*/
-
+                /*
                 cardView.setOnTouchListener(new OnFlingGestureListener(context) {
                     @Override
                     public void onRightToLeft() {
@@ -258,6 +263,123 @@ public class LockScreenOverlayHelper extends Overlay{
                         lockScreenDismiss();
                     }
                 });
+                */
+                cardView.setOnTouchListener(new View.OnTouchListener() {
+                    public int DIRECTION_UP = 0;
+                    public int DIRECTION_DOWN = 1;
+                    public int DIRECTION_RIGHT = 2;
+                    public int DIRECTION_LEFT = 3;
+                    final float MAX_DIST_CLICK = 10.0f;
+                    final float MIN_SWIPE_DIST = 60.0f;
+                    final float MIN_THRESHOLD_VELOCITY = 250;
+
+                    boolean flagSwipe = false;
+                    float downX, downY, upX, upY,moveX,moveY;
+                    float downRawX, downRawY;
+                    long downTime,upTime;
+                    float velocityX,velocityY,distX,distY;
+                    boolean directionKnown;
+                    int direction;
+                    boolean dismissRight = true;
+                    boolean swipeDown = true;
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        float deltaX,deltaY;
+                        switch (event.getAction()){
+                            case MotionEvent.ACTION_DOWN:
+                                flagSwipe = true;
+                                downX = event.getX();
+                                downY = event.getY();
+                                downRawX = event.getRawX();
+                                directionKnown = false;
+                                downTime = new Date().getTime();
+                                moveX = 0;
+                                moveY = 0;
+                                break;
+                            case MotionEvent.ACTION_MOVE:
+                                //Log.d(LOG_TAG,"Action Move");
+                                if(!directionKnown){
+                                    if(downY - event.getY() > MIN_SWIPE_DIST){
+                                        directionKnown = true;
+                                        direction = DIRECTION_UP;
+                                        Log.d(LOG_TAG,"Direction up");
+                                    } else if(downY - event.getY() < -MIN_SWIPE_DIST){
+                                        directionKnown = true;
+                                        direction = DIRECTION_DOWN;
+                                        Log.d(LOG_TAG,"Direction down");
+                                    } else if(downX - event.getX() > MIN_SWIPE_DIST){
+                                        directionKnown = true;
+                                        direction = DIRECTION_LEFT;
+                                        Log.d(LOG_TAG,"Direction left");
+                                    } else if(downX - event.getX() < -MIN_SWIPE_DIST){
+                                        directionKnown = true;
+                                        direction = DIRECTION_RIGHT;
+                                        Log.d(LOG_TAG,"Direction right: "+v.getX());
+                                    }
+                                } else {
+                                    //Animate
+                                    if(direction == DIRECTION_LEFT || direction == DIRECTION_RIGHT){
+                                        //Right to left
+                                        Log.d(LOG_TAG,"Down x: "+downX+"  eventx: "+event.getRawX());
+                                        //if(Math.abs(moveX - (event.getRawX() - downRawX)) > 10) {
+                                            moveX = event.getRawX() - downRawX;
+                                            v.setTranslationX(moveX);
+                                    }
+                                }
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                upX = event.getX();
+                                upY = event.getY();
+                                upTime = new Date().getTime();
+                                distX = convertPxToDip((int) (upX - downX));
+                                distY = convertPxToDip((int)(upY-downY));
+                                velocityX = distX / ((upTime - downTime)/1000.0f);
+                                velocityY = distY / ((upTime - downTime)/1000.0f);
+                                if(!directionKnown){
+                                    v.animate().translationX(0).alpha(1f);
+                                    v.callOnClick();
+                                } else {
+                                    if(direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY){
+                                        //Bottom to top
+                                        lockScreenDismiss();
+                                    } else if(direction == DIRECTION_DOWN && velocityY > MIN_THRESHOLD_VELOCITY){
+                                        //Top to bottom
+                                        lockScreenDismiss();
+                                    } else if(direction == DIRECTION_LEFT && velocityX < -MIN_THRESHOLD_VELOCITY){
+                                        //Right to left
+                                        Log.d(LOG_TAG,"Swipe right to left");
+                                        if(isClearable){
+                                            v.animate().translationX(-v.getWidth()).alpha(0f);
+                                            lsn.dismiss(context);
+                                        } else {
+                                            v.animate().translationX(0).alpha(1f);
+                                        }
+                                    } else if(direction == DIRECTION_RIGHT && velocityX > MIN_THRESHOLD_VELOCITY){
+                                        //Left to right
+                                        Log.d(LOG_TAG,"Swipe left to right");
+                                        if(isClearable){
+                                            v.animate().translationX(v.getWidth()).alpha(0f);
+                                            lsn.dismiss(context);
+                                        } else {
+                                            v.animate().translationX(0).alpha(1f);
+                                        }
+                                    } else {
+                                        v.animate().translationX(0).alpha(1f);
+                                    }
+                                }
+                                break;
+                        }
+                        return true;
+                    }
+                });
+
+                //Animation animation = AnimationUtils.loadAnimation(context,R.animator.push_up_in);
+                //animation.setDuration(200);
+                //cardView.startAnimation(animation);
+                ObjectAnimator animator = ObjectAnimator.ofFloat(cardView,"alpha",0f,1f);
+                animator.setDuration(200);
+                animator.start();
+                //cardView.set
                 notificationCardsLayout.addView(cardView);
             }
         }
@@ -285,5 +407,10 @@ public class LockScreenOverlayHelper extends Overlay{
     public void remove() {
 //        NotificationAreaHelper.expand(context);
         super.remove();
+    }
+
+    private int convertPxToDip(int pixel){
+        float scale = context.getResources().getDisplayMetrics().density;
+        return (int) ((pixel / scale) + 0.5f);
     }
 }
