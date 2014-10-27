@@ -60,6 +60,10 @@ public class LockScreenOverlayHelper extends Overlay{
     public static final int CARD_VIEW_NORMAL_ALPHA = 200;
     public static final int CARD_VIEW_SELECTED_ALPHA = 255;
     private static final int DEFAULT_START_ANIMATION_VELOCITY = 0;
+    private static final int DEFAULT_START_ANIMATION_VELOCITY_DOWN = 1;
+    private static final int DEFAULT_START_ANIMATION_VELOCITY_UP = -1;
+    private static final String EXTRA_NOTIFICATION_SUBSTRING_PREFIX = "+ ";
+    private static final String EXTRA_NOTIFICATION_SUBSTRING_SUFFIX = " more";
 
     public LockScreenOverlayHelper(Context context, WindowManager windowManager){
         super(context, windowManager);
@@ -72,15 +76,6 @@ public class LockScreenOverlayHelper extends Overlay{
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
 
         layout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        /*layout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(v.hasOnClickListeners()){
-                    v.callOnClick();
-                }
-                return true;
-            }
-        });*/
 //      WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
         //TODO add wallpaper support!
         ImageView wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
@@ -101,9 +96,6 @@ public class LockScreenOverlayHelper extends Overlay{
             context.startService(intent);
             notificationChanged();
         }
-        //ListView notificationsListView = (ListView) rLayout.findViewById(R.id.list_view_notifications);
-        //notificationListAdapter = new NotificationListAdapter(context);
-        //notificationsListView.setAdapter(notificationListAdapter);
 
         rLayout.setOnTouchListener(new CustomFlingListener(context) {
             @Override
@@ -296,13 +288,6 @@ public class LockScreenOverlayHelper extends Overlay{
                         }
                     }
                 });
-                /*cardView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        Log.d(LOG_TAG,"Long clicked card:" + position);
-                        return true;
-                    }
-                });*/
 
                 cardView.setOnTouchListener(new CustomFlingListener(context) {
                     @Override
@@ -336,6 +321,7 @@ public class LockScreenOverlayHelper extends Overlay{
                     @Override
                     public void onTopToBottom(float endVelocity) {
                         lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
+                        NotificationAreaHelper.expand(context);
                     }
 
                     @Override
@@ -366,6 +352,71 @@ public class LockScreenOverlayHelper extends Overlay{
                         layout.animate().translationY(0).start();
                     }
                 });
+                notificationCardsLayout.addView(cardView);
+            }
+
+            if(NotificationService.currentNotifications.size() > MAX_NOTIFICATION_SHOWN){
+                final CardView cardView;
+                cardView = (CardView) inflater.inflate(R.layout.card_extra_notifications, notificationCardsLayout, false);
+                TextView cardExtraTextView = (TextView) cardView.findViewById(R.id.text_view_extra_notifications);
+                String title = EXTRA_NOTIFICATION_SUBSTRING_PREFIX +
+                        (NotificationService.currentNotifications.size() - MAX_NOTIFICATION_SHOWN)
+                        + EXTRA_NOTIFICATION_SUBSTRING_SUFFIX;
+                cardExtraTextView.setText(title);
+                cardView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, DEFAULT_START_ANIMATION_VELOCITY_DOWN);
+                        NotificationAreaHelper.expand(context);
+                    }
+                });
+                cardView.setOnTouchListener(new CustomFlingListener(context) {
+                    @Override
+                    public void onRightToLeft(float endVelocity) {
+                        ExternalIntents.launchCamera(context);
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
+                    }
+
+                    @Override
+                    public void onLeftToRight(float endVelocity) {
+                        ExternalIntents.launchDialer(context);
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
+                    }
+
+                    @Override
+                    public void onTopToBottom(float endVelocity) {
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, DEFAULT_START_ANIMATION_VELOCITY);
+                        NotificationAreaHelper.expand(context);
+                    }
+
+                    @Override
+                    public void onBottomToTop(float endVelocity) {
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, DEFAULT_START_ANIMATION_VELOCITY);
+                    }
+
+                    @Override
+                    public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                        if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                            float deltaY = event.getRawY() - downRawY;
+                            layout.setTranslationY(deltaY);
+                        } else {
+                            float deltaX = event.getRawX() - downRawX;
+                            layout.setTranslationX(deltaX);
+                        }
+                    }
+
+                    @Override
+                    public void onSwipeFail() {
+                        layout.animate().translationY(0).start();
+                        layout.animate().translationX(0).start();
+                    }
+
+                    @Override
+                    public void onDirectionUnknown() {
+                        cardView.callOnClick();
+                    }
+                });
+                cardView.getBackground().setAlpha(60);
                 notificationCardsLayout.addView(cardView);
             }
         }

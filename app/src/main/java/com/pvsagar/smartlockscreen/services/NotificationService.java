@@ -66,18 +66,22 @@ public class NotificationService extends NotificationListenerService{
                     StatusBarNotification[] sbns = getActiveNotifications();
                     if(sbns != null){
                         Log.d(LOG_TAG,"Get current notifications not null");
+                        boolean flag;
                         for (StatusBarNotification sbn : sbns) {
+                            flag = false;
                             for(int i = 0; i < currentNotifications.size(); i++){
                                 if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
                                         currentNotifications.get(i).getId() == sbn.getId() ){
-                                    //Log.d(LOG_TAG,"Removing for adding: \n"+NotificationListAdapter.currentNotifications.get(i).getNotification().toString());
-                                    currentNotifications.remove(i);
-                                    currentSBN.remove(i);
+                                    flag = true;
                                     break;
                                 }
                             }
-                            currentNotifications.add(new LockScreenNotification(sbn));
-                            currentSBN.add(sbn);
+                            if(flag){
+                                continue;
+                            } else {
+                                currentNotifications.add(new LockScreenNotification(sbn));
+                                currentSBN.add(sbn);
+                            }
                         }
                         Intent baseIntent = new Intent(this,BaseService.class);
                         baseIntent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
