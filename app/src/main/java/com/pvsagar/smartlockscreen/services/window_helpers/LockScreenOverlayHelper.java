@@ -3,6 +3,7 @@ package com.pvsagar.smartlockscreen.services.window_helpers;
 import android.animation.Animator;
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -95,6 +96,9 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         });
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Intent intent = new Intent(context,NotificationService.class);
+            intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION);
+            context.startService(intent);
             notificationChanged();
         }
         //ListView notificationsListView = (ListView) rLayout.findViewById(R.id.list_view_notifications);
@@ -223,18 +227,21 @@ public class LockScreenOverlayHelper extends Overlay{
             //Update the notifications
             for(int i = 0; i < NotificationService.currentNotifications.size()
                     && i < MAX_NOTIFICATION_SHOWN; i++){
+                final LockScreenNotification lsn =  NotificationService.currentNotifications.get(i);
                 final int position = i;
                 final CardView cardView = (CardView) inflater.inflate(R.layout.list_item_notification, notificationCardsLayout, false);
                 TextView titleTextView = (TextView) cardView.findViewById(R.id.notification_card_title);
                 TextView subTextTextView = (TextView) cardView.findViewById(R.id.notification_card_subtext);
                 ImageView notificationImageView = (ImageView) cardView.findViewById(R.id.image_view_notification);
                 /* Populating the notification card */
-                final LockScreenNotification lsn =  NotificationService.currentNotifications.get(i);
                 final boolean isClearable = lsn.isClearable();
                 final Notification mNotification = lsn.getNotification();
                 final Bundle extras = mNotification.extras;
                 titleTextView.setText(extras.getString(KEY_NOTIFICATION_TITLE));
-                subTextTextView.setText(extras.getString(KEY_NOTIFICATION_TEXT));
+                CharSequence charSequence = (CharSequence) extras.getCharSequence(KEY_NOTIFICATION_TEXT);
+                if(charSequence != null){
+                    subTextTextView.setText(charSequence.toString());
+                }
                 try {
                     int icon = mNotification.icon;
                     //Resources res = getContext().getPackageManager().getResourcesForApplication(lsn.getPackageName());
