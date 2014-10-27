@@ -1,12 +1,9 @@
 package com.pvsagar.smartlockscreen.frontend_helpers;
 
 import android.content.Context;
-import android.database.DatabaseUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
-import com.google.android.gms.games.GamesMetadata;
 
 import java.util.Date;
 
@@ -40,6 +37,8 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
+                last1MoveX = event.getRawX();
+                last1MoveY = event.getRawY();
                 downRawX = event.getRawX();
                 downRawY = event.getRawY();
                 downTime = new Date().getTime();
@@ -83,8 +82,18 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                 distY = convertPxToDip((int)(upRawY-downRawY));
                 velocityX = distX / ((upTime - downTime)/1000.0f);
                 velocityY = distY / ((upTime - downTime)/1000.0f);
-                float endVelocityX = (event.getRawX() - last2MoveX)/(upTime - last2MoveTime);
-                float endVelocityY = (event.getRawY() - last2MoveY)/(upTime - last2MoveTime);
+                float endVelocityX;
+                if(last2MoveX > 0) {
+                    endVelocityX = (event.getRawX() - last2MoveX) / (upTime - last2MoveTime);
+                } else {
+                    endVelocityX = velocityX;
+                }
+                float endVelocityY;
+                if(last2MoveY > 0) {
+                    endVelocityY = (event.getRawY() - last2MoveY) / (upTime - last2MoveTime);
+                } else {
+                    endVelocityY = velocityY;
+                }
 
                 if(directionKnown){
                     if(direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY){
