@@ -81,7 +81,7 @@ public class LockScreenNotification {
             Intent intent = new Intent(context, NotificationService.class);
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 intent.putExtra(NotificationService.EXTRAS_CANCEL_NOTIFICATION_KEY, getKey());
-                Log.d(LOG_TAG,getKey());
+//                Log.d(LOG_TAG,getKey());
             } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 &&
                     Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT){
                 Bundle bundle = new Bundle();

@@ -55,7 +55,6 @@ public class AdminActions extends DeviceAdminReceiver {
 
     @Override
     public void onPasswordSucceeded(Context context, Intent intent) {
-        Log.d(LOG_TAG, "Password success");
         super.onPasswordSucceeded(context, intent);
     }
 

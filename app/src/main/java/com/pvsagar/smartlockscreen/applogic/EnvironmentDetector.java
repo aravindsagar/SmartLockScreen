@@ -70,33 +70,6 @@ public class EnvironmentDetector {
             }
             Context context = params[0];
 
-            String logText = "Current Location: ";
-            if(GeoFenceIntentService.getCurrentGeofences() != null && !GeoFenceIntentService.
-                    getCurrentGeofences().isEmpty()){
-                for (LocationEnvironmentVariable variable : GeoFenceIntentService.getCurrentGeofences()) {
-                    logText += variable.getLocationName() + ", ";
-                }
-            } else {
-                logText += "Unknown; ";
-            }
-            logText += "Current Bluetooth Devices: ";
-            if(BluetoothReceiver.getCurrentlyConnectedBluetoothDevices() != null &&
-                    !BluetoothReceiver.getCurrentlyConnectedBluetoothDevices().isEmpty()){
-                for (BluetoothEnvironmentVariable variable : BluetoothReceiver.
-                        getCurrentlyConnectedBluetoothDevices()) {
-                    logText += variable.getDeviceName() + ", ";
-                }
-            } else {
-                logText += "Unknown; ";
-            }
-            logText += "Current Wifi Network: ";
-            if(WifiReceiver.getCurrentWifiNetwork() != null){
-                logText += WifiReceiver.getCurrentWifiNetwork().getSSID();
-            } else {
-                logText += "Unknown";
-            }
-            Log.d(LOG_TAG, logText);
-
             List<Environment> currentEnvironments = new ArrayList<Environment>();
             manageEnvironmentDetectionCriticalSection.acquireUninterruptibly();
             for(LocationEnvironmentVariable location: GeoFenceIntentService.getCurrentGeofences()){
@@ -175,7 +148,6 @@ public class EnvironmentDetector {
                         continue;
                     }
                 }
-                Log.d(LOG_TAG, "Adding environment to currentEnvironments: " + e.getName());
                 currentEnvironments.add(e);
             }
             return currentEnvironments;

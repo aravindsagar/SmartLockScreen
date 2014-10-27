@@ -689,7 +689,7 @@ public class EnvironmentProvider extends ContentProvider {
             String receivedValues = values.getAsString(GeoFenceEntry.COLUMN_COORD_LAT) + " " +
                     values.getAsString(GeoFenceEntry.COLUMN_COORD_LONG) + " " +
                     values.getAsString(GeoFenceEntry.COLUMN_RADIUS);
-            Log.d(LOG_TAG, "Location values received: " + receivedValues);
+                    values.getAsString(GeoFenceEntry.COLUMN_RADIUS);
             geofenceId = db.insert(GeoFenceEntry.TABLE_NAME, null, values);
         } else {
             boolean isLatEqual = isEqual(values.getAsDouble(GeoFenceEntry.COLUMN_COORD_LAT),
@@ -899,7 +899,6 @@ public class EnvironmentProvider extends ContentProvider {
                     (UserPasswordsEntry.COLUMN_PASSWORD_ID));
             int deletedEntries = db.delete(PasswordEntry.TABLE_NAME, PasswordEntry._ID + " = ? ",
                     new String[]{String.valueOf(oldPasswordId)});
-            Log.d(LOG_TAG, "old password id = " + oldPasswordId + ", Deleted entries: " + deletedEntries);
             return returnValue;
         }
         insert(uri, values);

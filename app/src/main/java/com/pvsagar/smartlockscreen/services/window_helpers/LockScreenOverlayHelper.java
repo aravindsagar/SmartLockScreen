@@ -210,9 +210,7 @@ public class LockScreenOverlayHelper extends Overlay{
         /*if(notificationListAdapter != null) {
             notificationListAdapter.notifyDataSetChanged();
         }*/
-        Log.d(LOG_TAG,"Entered notification changed");
         if(notificationCardsLayout != null){
-            Log.d(LOG_TAG, "Linear Layout not null");
             if(((LinearLayout)notificationCardsLayout).getChildCount() > 0){
                 ((LinearLayout)notificationCardsLayout).removeAllViews();
             }
@@ -255,7 +253,6 @@ public class LockScreenOverlayHelper extends Overlay{
                 cardView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d(LOG_TAG, "Card clicked: "+position);
                         if(clickedCard == position){
                             try {
                                 mNotification.contentIntent.send();
@@ -292,7 +289,6 @@ public class LockScreenOverlayHelper extends Overlay{
                 cardView.setOnTouchListener(new CustomFlingListener(context) {
                     @Override
                     public void onRightToLeft(float endVelocity) {
-                        Log.d(LOG_TAG,"Swipe right to left");
                         if(isClearable){
                             cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
                                     .alpha(0f);
@@ -306,7 +302,6 @@ public class LockScreenOverlayHelper extends Overlay{
 
                     @Override
                     public void onLeftToRight(float endVelocity) {
-                        Log.d(LOG_TAG,"Swipe left to right");
                         if(isClearable){
                             cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                                     alpha(0f);
@@ -333,7 +328,6 @@ public class LockScreenOverlayHelper extends Overlay{
                     public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
                         if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
                             // Horizontal motion
-                            Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
                             cardView.setTranslationX(event.getRawX() - downRawX);
                         } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                             float deltaY = event.getRawY() - downRawY;

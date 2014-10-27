@@ -1,7 +1,6 @@
 package com.pvsagar.smartlockscreen.frontend_helpers;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -55,19 +54,15 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                     if(downRawY - event.getRawY() > MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_UP;
-                        Log.d(LOG_TAG,"Direction up");
                     } else if(downRawY - event.getRawY() < -MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_DOWN;
-                        Log.d(LOG_TAG,"Direction down");
                     } else if(downRawX - event.getRawX() > MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_LEFT;
-                        Log.d(LOG_TAG,"Direction left");
                     } else if(downRawX - event.getRawX() < -MIN_SWIPE_DIST){
                         directionKnown = true;
                         direction = DIRECTION_RIGHT;
-                        Log.d(LOG_TAG,"Direction right");
                     }
                 } else{
                     onMove(event, direction, downRawX, downRawY);
@@ -76,7 +71,6 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
                 upRawX = event.getRawX();
                 upRawY = event.getRawY();
-                Log.d(LOG_TAG, "upX: " + upRawX + ", upY: " + upRawY);
                 upTime = new Date().getTime();
                 distX = convertPxToDip((int)(upRawX-downRawX));
                 distY = convertPxToDip((int)(upRawY-downRawY));
@@ -97,19 +91,14 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
 
                 if(directionKnown){
                     if(direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY){
-                        Log.d(LOG_TAG,"UP");
                         onBottomToTop(-endVelocityY);
                     } else if(direction == DIRECTION_DOWN && velocityY > MIN_THRESHOLD_VELOCITY){
-                        Log.d(LOG_TAG,"Down");
                         onTopToBottom(endVelocityY);
                     } else if(direction == DIRECTION_LEFT && velocityX < -MIN_THRESHOLD_VELOCITY){
-                        Log.d(LOG_TAG,"Left");
                         onRightToLeft(-endVelocityX);
                     } else if(direction == DIRECTION_RIGHT && velocityX > MIN_THRESHOLD_VELOCITY){
-                        Log.d(LOG_TAG,"Right");
                         onLeftToRight(endVelocityX);
                     } else {
-                        Log.d(LOG_TAG,"Swipe fail velX: "+velocityX+"  velY: "+velocityY);
                         onSwipeFail();
                     }
                 } else {

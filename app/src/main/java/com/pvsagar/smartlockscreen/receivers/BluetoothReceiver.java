@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -39,8 +38,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     getBluetoothEnvironmentVariableFromDatabase(context, device.getName(),
                             device.getAddress()));
         } else return;
-        Toast.makeText(context, device.getName() + " connected.", Toast.LENGTH_SHORT).show();
-        Log.d(LOG_TAG, "Currently connected device count: " + currentlyConnectedBluetoothDevices.size());
+//        Toast.makeText(context, device.getName() + " connected.", Toast.LENGTH_SHORT).show();
         context.startService(BaseService.getServiceIntent(context, null,
                 BaseService.ACTION_DETECT_ENVIRONMENT));
     }

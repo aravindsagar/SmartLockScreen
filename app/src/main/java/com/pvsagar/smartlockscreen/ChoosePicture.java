@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
@@ -50,7 +49,6 @@ public class ChoosePicture extends Activity {
         clickedImageView.getLocationInWindow(location);
         initX = location[0];
         initY = location[1];
-        Log.d(LOG_TAG, "x = " + initX + ", y = " + initY);
 
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.getLayoutParams();
         params.setMargins(initX, initY, 0, 0);

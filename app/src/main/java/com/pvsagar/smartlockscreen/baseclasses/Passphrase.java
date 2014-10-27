@@ -3,7 +3,6 @@ package com.pvsagar.smartlockscreen.baseclasses;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
@@ -145,7 +144,6 @@ public abstract class Passphrase<PassphraseRepresentation> {
      * @return
      */
     public boolean setAsCurrentPassword(Context context){
-        Log.d(LOG_TAG, "Setting current password: " + passwordString);
         return AdminActions.changePassword(passwordString, this.passphraseType, getMasterPassword(context));
     }
 

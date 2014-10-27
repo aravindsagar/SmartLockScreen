@@ -152,7 +152,6 @@ public class BaseService extends Service implements
             Uri uri = intent.getData();
 
             if (uri != null) {
-                Log.d(LOG_TAG, "Uri: " + uri);
                 startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
                         uri.toString()));
             }
@@ -261,7 +260,6 @@ public class BaseService extends Service implements
                 for (String string : strings) {
                     geofences += string + ",";
                 }
-                Toast.makeText(this, "Geofences added: " + geofences, Toast.LENGTH_SHORT).show();
                 break;
             default:
                 Log.e(LOG_TAG, "Error adding Geofences. Status code: " + i);
@@ -281,7 +279,6 @@ public class BaseService extends Service implements
                 for (String string : strings) {
                     geofences += string + ",";
                 }
-                Toast.makeText(this, "Geofences removed: " + geofences, Toast.LENGTH_SHORT).show();
                 break;
             default:
                 Log.e(LOG_TAG, "Error removing Geofences. Status code: " + i);
@@ -366,9 +363,8 @@ public class BaseService extends Service implements
                         socket.close();
                         connectedDevices.add(new BluetoothEnvironmentVariable(device.getName(),
                                 device.getAddress()));
-                        Log.d(LOG_TAG, device.getName() + " added.");
                     } catch (Exception e) {
-                        Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
+//                        Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
                     }
                 }
                 return connectedDevices;

@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
 
@@ -45,12 +44,12 @@ public class NotificationService extends NotificationListenerService{
         if(intent != null) {
             action = intent.getAction();
             if (action != null && !action.isEmpty()) {
-                Log.d(LOG_TAG, "Entered onstartcommand");
+//                Log.d(LOG_TAG, "Entered onstartcommand");
                 if (action.equals(ACTION_CANCEL_NOTIFICATION)) {
                     //cancelNotification(key);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 &&
                             Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                        Log.d(LOG_TAG, "Condition satisfied");
+//                        Log.d(LOG_TAG, "Condition satisfied");
                         //Cancel notification with package and stuff
                         Bundle bundle = intent.getBundleExtra(EXTRAS_CANCEL_NOTIFICATION_BUNDLE);
                         String pkg = bundle.getString(EXTRAS_CANCEL_NOTIFICATION_PACKAGE);
@@ -59,13 +58,13 @@ public class NotificationService extends NotificationListenerService{
                         cancelNotification(pkg, tag, id);
                     } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         String key = (String) intent.getCharSequenceExtra(EXTRAS_CANCEL_NOTIFICATION_KEY);
-                        Log.d(LOG_TAG, key);
+//                        Log.d(LOG_TAG, key);
                     }
                 } else if (action.equals(ACTION_GET_CURRENT_NOTIFICATION)) {
-                    Log.d(LOG_TAG,"Get current notifications");
+//                    Log.d(LOG_TAG,"Get current notifications");
                     StatusBarNotification[] sbns = getActiveNotifications();
                     if(sbns != null){
-                        Log.d(LOG_TAG,"Get current notifications not null");
+//                        Log.d(LOG_TAG,"Get current notifications not null");
                         boolean flag;
                         for (StatusBarNotification sbn : sbns) {
                             flag = false;
@@ -107,7 +106,7 @@ public class NotificationService extends NotificationListenerService{
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Log.d(LOG_TAG,"Added:\n"+sbn.toString());
+//        Log.d(LOG_TAG,"Added:\n"+sbn.toString());
         //Log.d(LOG_TAG,"Extras: \n"+sbn.getNotification().extras.get(KEY_NOTIFICATION_TITLE));
         /*LockScreenNotification lsn = new LockScreenNotification(sbn.getId(),sbn.getNotification(),
                 sbn.getPackageName(), sbn.isClearable(), sbn.getTag()); */

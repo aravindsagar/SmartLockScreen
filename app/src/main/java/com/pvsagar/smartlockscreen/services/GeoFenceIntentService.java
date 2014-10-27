@@ -44,7 +44,6 @@ public class GeoFenceIntentService extends IntentService {
      * @param intent This will be a geofence transition intent.
      */
     protected void onHandleIntent(Intent intent) {
-        Log.d(LOG_TAG, "onHandleIntentCalled.");
         // First check for errors
         if (LocationClient.hasError(intent)) {
             // Get the error code with a static method
