@@ -14,7 +14,13 @@ public class ExternalIntents {
     public static void launchDialer(Context context){
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        try {
+            context.startActivity(intent);
+        } catch (Exception e2){
+            Toast.makeText(context, "Cannot start dialer.", Toast.LENGTH_SHORT).show();
+            e2.printStackTrace();
+        }
+
     }
 
     public static void launchCamera(Context context){
