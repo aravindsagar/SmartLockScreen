@@ -144,7 +144,7 @@ public class GeneralSettingsActivity extends PreferenceActivity {
                 if(BaseService.getCurrentEnvironments() == null || BaseService.getCurrentEnvironments().isEmpty()){
                     notificationText = "Unknown Environment";
                 } else {
-                    notificationText = "Current Environment: " + BaseService.getCurrentEnvironments().get(0).getName();
+                    notificationText = "Environment: " + BaseService.getCurrentEnvironments().get(0).getName();
                 }
                 mContext.startService(BaseService.getServiceIntent(mContext,
                         notificationText, null));
