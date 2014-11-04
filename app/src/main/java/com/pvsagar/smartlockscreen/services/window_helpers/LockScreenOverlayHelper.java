@@ -379,13 +379,13 @@ public class LockScreenOverlayHelper extends Overlay{
 
                     @Override
                     public void onTopToBottom(float endVelocity) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, DEFAULT_START_ANIMATION_VELOCITY);
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
                         NotificationAreaHelper.expand(context);
                     }
 
                     @Override
                     public void onBottomToTop(float endVelocity) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, DEFAULT_START_ANIMATION_VELOCITY);
+                        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
                     }
 
                     @Override

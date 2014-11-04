@@ -77,14 +77,18 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                 velocityX = distX / ((upTime - downTime)/1000.0f);
                 velocityY = distY / ((upTime - downTime)/1000.0f);
                 float endVelocityX;
-                if(last2MoveX > 0) {
-                    endVelocityX = (event.getRawX() - last2MoveX) / (upTime - last2MoveTime);
+                if(last1MoveX != upRawX){
+                    endVelocityX =  (upRawX - last1MoveX) / (upTime - last1MoveTime);
+                } else if(last2MoveX != upRawX){
+                    endVelocityX =  (upRawX - last2MoveX) / (upTime - last2MoveTime);
                 } else {
                     endVelocityX = velocityX;
                 }
                 float endVelocityY;
-                if(last2MoveY > 0) {
-                    endVelocityY = (event.getRawY() - last2MoveY) / (upTime - last2MoveTime);
+                if(last1MoveY != upRawY){
+                    endVelocityY =  (upRawY - last1MoveY) / (upTime - last1MoveTime);
+                } else if(last2MoveX != upRawX){
+                    endVelocityY =  (upRawY - last2MoveY) / (upTime - last2MoveTime);
                 } else {
                     endVelocityY = velocityY;
                 }

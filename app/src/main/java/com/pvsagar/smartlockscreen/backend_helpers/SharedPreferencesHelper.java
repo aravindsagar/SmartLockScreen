@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.OverlappingEnvironmentIdsWithResolved;
 
@@ -24,12 +25,16 @@ public class SharedPreferencesHelper {
     private static final String KEY_MASTER_PASSWORD_TYPE = PACKAGE_NAME + ".MASTER_PASSWORD_TYPE";
     private static final String KEY_DEVICE_OWNER_USER_ID = PACKAGE_NAME + ".DEVICE_OWNER_USER_ID";
     private static final String KEY_PREFIX_OVERLAP_CHOICE = PACKAGE_NAME + ".OVERLAP_CHOICE_AMONG";
+    private static String KEY_ENABLE_NOTIFICATION;
 
     private static SharedPreferences preferences;
 
     private static void initPreferences(Context context){
         if(preferences==null){
             preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        }
+        if(KEY_ENABLE_NOTIFICATION == null || KEY_ENABLE_NOTIFICATION.isEmpty()){
+            KEY_ENABLE_NOTIFICATION = context.getResources().getString(R.string.pref_key_enable_notification);
         }
     }
 
@@ -155,5 +160,10 @@ public class SharedPreferencesHelper {
             environmentIds.add(Long.parseLong(keyParts[i]));
         }
         return environmentIds;
+    }
+
+    public static boolean isNotificationEnabled(Context context){
+        initPreferences(context);
+        return preferences.getBoolean(KEY_ENABLE_NOTIFICATION, true);
     }
 }

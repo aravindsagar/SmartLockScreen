@@ -15,24 +15,26 @@ import com.pvsagar.smartlockscreen.SmartLockScreenSettings;
  * Helper class for showing and updating notifications in the notifications shade
  */
 public class NotificationHelper {
+
     private static final String NOTIFICATION_TITLE = "Smart Lockscreen";
+
     public static Notification getAppNotification(Context context, String text){
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
-        notificationBuilder.setPriority(Notification.PRIORITY_MIN);
-        Intent notificationIntent = new Intent(context, SmartLockScreenSettings.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(SmartLockScreenSettings.class);
-        stackBuilder.addNextIntent(notificationIntent);
-        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationBuilder.setContentIntent(pendingIntent);
-        notificationBuilder.setContentTitle(NOTIFICATION_TITLE);
-        if(text == null || text.isEmpty()){
-            text = "Service Started.";
-        }
-        notificationBuilder.setContentText(text);
-        notificationBuilder.setOngoing(true);
-        notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
-        return notificationBuilder.build();
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+            notificationBuilder.setPriority(Notification.PRIORITY_MIN);
+            Intent notificationIntent = new Intent(context, SmartLockScreenSettings.class);
+            notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            stackBuilder.addParentStack(SmartLockScreenSettings.class);
+            stackBuilder.addNextIntent(notificationIntent);
+            PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            notificationBuilder.setContentIntent(pendingIntent);
+            notificationBuilder.setContentTitle(NOTIFICATION_TITLE);
+            if (text == null || text.isEmpty()) {
+                text = "Service Started.";
+            }
+            notificationBuilder.setContentText(text);
+            notificationBuilder.setOngoing(true);
+            notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
+            return notificationBuilder.build();
     }
 }

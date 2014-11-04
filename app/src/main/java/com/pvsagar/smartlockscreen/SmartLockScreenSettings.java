@@ -144,10 +144,16 @@ public class SmartLockScreenSettings extends ActionBarActivity
                             listAdapter.setSelectedMainItemIndex(itemArrayIndex);
                             listAdapter.notifyDataSetChanged();
                         }
+                        if(position != -1) {
+                            prevPosition = position;
+                            position = -1;
+                        }
                         break;
                     case NavigationDrawerListAdapter.ITEM_TYPE_SECONDARY:
-                        fragmentManager = getFragmentManager();
                         switch (listAdapter.getItemArrayIndex(position)){
+                            case INDEX_SETTINGS:
+                                startActivity(new Intent(SmartLockScreenSettings.this, GeneralSettingsActivity.class));
+                                break;
                             //TODO launch appropriate activities
                             case INDEX_ABOUT:
                             case INDEX_HELP:
@@ -163,10 +169,6 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 }
                 if(mTitle != null) {
                     setTitle(mTitle);
-                }
-                if(position != -1) {
-                    prevPosition = position;
-                    position = -1;
                 }
             }
 

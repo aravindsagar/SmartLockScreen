@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pvsagar.smartlockscreen" >
+
     <!-- Location can be used as a variable determining the current location, hence Location permission is required -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -22,7 +23,7 @@
     <!-- To start the service automatically after boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- Required for restricting access to certain apps. This allows SmartLockScreen to determine the app open currently-->
+    <!-- Required for restricting access to certain apps. This allows SmartLockScreen to determine the app open currently -->
     <uses-permission android:name="android.permission.GET_TASKS" />
 
     <!-- For running environment detection and password setting in the background when phone is locked -->
@@ -47,10 +48,10 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:hardwareAccelerated="true">
+        android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -61,49 +62,49 @@
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name=".AddEnvironment"
+            android:name="com.pvsagar.smartlockscreen.AddEnvironment"
             android:label="@string/title_activity_add_environment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             android:windowSoftInputMode="stateVisible|adjustResize" >
         </activity>
         <activity
-            android:name=".SelectLocation"
+            android:name="com.pvsagar.smartlockscreen.SelectLocation"
             android:label="@string/title_activity_select_location"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
         </activity>
         <activity
-            android:name=".EditEnvironment"
+            android:name="com.pvsagar.smartlockscreen.EditEnvironment"
             android:label="@string/title_activity_edit_environment"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             android:windowSoftInputMode="stateVisible|adjustResize" >
         </activity>
         <activity
-            android:name=".SearchLocation"
+            android:name="com.pvsagar.smartlockscreen.SearchLocation"
             android:label="@string/title_activity_search_location"
             android:theme="@style/TransparentTheme" >
         </activity>
         <activity
-            android:name=".StorePattern"
+            android:name="com.pvsagar.smartlockscreen.StorePattern"
             android:label="@string/title_activity_store_pattern"
             android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" />
         <activity
-            android:name=".DismissKeyguardActivity"
+            android:name="com.pvsagar.smartlockscreen.DismissKeyguardActivity"
             android:excludeFromRecents="true"
             android:label="@string/title_activity_dismiss_keyguard"
             android:taskAffinity=""
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
-            android:name=".SetMasterPassword"
+            android:name="com.pvsagar.smartlockscreen.SetMasterPassword"
             android:label="@string/title_activity_set_master_password"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
         </activity>
         <activity
-            android:name=".SmartLockScreenSettings"
-            android:label="@string/title_activity_smart_lock_screen_settings"
-            android:theme="@style/HoloWithActionMode"
+            android:name="com.pvsagar.smartlockscreen.SmartLockScreenSettings"
             android:clearTaskOnLaunch="true"
-            android:launchMode="singleTask">
+            android:label="@string/title_activity_smart_lock_screen_settings"
+            android:launchMode="singleTask"
+            android:theme="@style/HoloWithActionMode" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -111,55 +112,63 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SetUnknownEnvironmentPassword"
+            android:name="com.pvsagar.smartlockscreen.SetUnknownEnvironmentPassword"
             android:label="@string/title_activity_set_unknown_environment_password"
             android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" >
         </activity>
         <activity
-            android:name=".ChoosePicture"
+            android:name="com.pvsagar.smartlockscreen.ChoosePicture"
             android:label="@string/title_activity_choose_picture"
-            android:parentActivityName=".SmartLockScreenSettings"
+            android:parentActivityName="com.pvsagar.smartlockscreen.SmartLockScreenSettings"
             android:theme="@style/TransparentThemeNoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
+        </activity>
+        <activity
+            android:name="com.pvsagar.smartlockscreen.GeneralSettingsActivity"
+            android:label="@string/title_activity_general_settings"
+            android:parentActivityName="com.pvsagar.smartlockscreen.SmartLockScreenSettings"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
         </activity>
 
         <provider
-            android:name=".environmentdb.EnvironmentProvider"
+            android:name="com.pvsagar.smartlockscreen.environmentdb.EnvironmentProvider"
             android:authorities="com.pvsagar.smartlockscreen.app"
             android:exported="false" />
 
         <service
-            android:name=".services.BaseService"
+            android:name="com.pvsagar.smartlockscreen.services.BaseService"
             android:enabled="true" >
         </service>
         <service
-            android:name=".services.GeoFenceIntentService"
+            android:name="com.pvsagar.smartlockscreen.services.GeoFenceIntentService"
             android:exported="false" >
         </service>
-
-        <service android:name=".services.NotificationService"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+        <service
+            android:name="com.pvsagar.smartlockscreen.services.NotificationService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" >
             <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
 
-
-        <receiver android:name=".receivers.WifiReceiver" >
+        <receiver android:name="com.pvsagar.smartlockscreen.receivers.WifiReceiver" >
             <intent-filter android:priority="100" >
                 <action android:name="android.net.wifi.STATE_CHANGE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.BluetoothReceiver" >
+        <receiver android:name="com.pvsagar.smartlockscreen.receivers.BluetoothReceiver" >
             <intent-filter android:priority="100" >
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".receivers.AdminActions"
+            android:name="com.pvsagar.smartlockscreen.receivers.AdminActions"
             android:description="@string/device_admin_description"
             android:label="@string/device_admin_name"
             android:permission="android.permission.BIND_DEVICE_ADMIN" >
@@ -171,17 +180,17 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.StartOnBootReceiver" >
+        <receiver android:name="com.pvsagar.smartlockscreen.receivers.StartOnBootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.OnUpgradeBroadcastReceiver" >
+        <receiver android:name="com.pvsagar.smartlockscreen.receivers.OnUpgradeBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.PhoneStateReceiver" >
+        <receiver android:name="com.pvsagar.smartlockscreen.receivers.PhoneStateReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
                 <action android:name="com.android.deskclock.ALARM_DONE" />
@@ -190,6 +199,12 @@
                 <action android:name="com.android.deskclock.ALARM_SNOOZE" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name="com.pvsagar.smartlockscreen.services.AppLockService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
 
     </application>
 
