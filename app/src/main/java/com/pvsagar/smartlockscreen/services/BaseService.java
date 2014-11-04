@@ -34,6 +34,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
@@ -79,6 +80,7 @@ public class BaseService extends Service implements
     public static final String ACTION_DISMISS_PATTERN_OVERLAY_ONLY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY_ONLY";
     public static final String ACTION_UNLOCK = PACKAGE_NAME + ".UNLOCK";
     public static final String ACTION_NOTIFICATION_CHANGED = PACKAGE_NAME + ".NOTIFICATION_CHANGED";
+    public static final String ACTION_REMOVE_PERSISTENT_NOTIFICATION = PACKAGE_NAME + ".REMOVE_PERSISTENT_NOTIFICATION";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
 
@@ -120,7 +122,9 @@ public class BaseService extends Service implements
     @Override
     public void onCreate() {
         User.setCurrentUser(User.getDefaultUser(this));
-        startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
+        if(SharedPreferencesHelper.isNotificationEnabled(this)) {
+            startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
+        }
         AdminActions.initializeAdminObjects(this);
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
@@ -214,6 +218,8 @@ public class BaseService extends Service implements
                     //LockScreenNotification lsn = (LockScreenNotification)
                     //        extras.getParcelable(NotificationService.EXTRAS_LOCK_SCREEN_NOTIFICATION);
                     mLockScreenOverlayHelper.notificationChanged();
+                } else if(action.equals(ACTION_REMOVE_PERSISTENT_NOTIFICATION)){
+                    stopForeground(true);
                 }
                 //Additional action handling to be done here when more actions are added
             }
@@ -417,8 +423,12 @@ public class BaseService extends Service implements
     public void onEnvironmentDetected(List<Environment> currentList) {
         currentEnvironments = currentList;
         if (currentList == null || currentList.size() == 0) {
-            startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
-                    "Unknown Environment"));
+            if(SharedPreferencesHelper.isNotificationEnabled(this)) {
+                startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                        "Unknown Environment"));
+            } else {
+                stopForeground(true);
+            }
             Passphrase unknownPassphrase = User.getCurrentUser(this).getPassphraseForUnknownEnvironment(this);
             if(unknownPassphrase == null) {
                 unknownPassphrase = Passphrase.getMasterPassword(this);
@@ -449,8 +459,12 @@ public class BaseService extends Service implements
             } else {
                 Log.e(LOG_TAG, "Current user null!");
             }
-            startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
-                    "Environment: " + current.getName()));
+            if(SharedPreferencesHelper.isNotificationEnabled(this)) {
+                startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this,
+                        "Environment: " + current.getName()));
+            } else {
+                stopForeground(true);
+            }
         }
     }
 }

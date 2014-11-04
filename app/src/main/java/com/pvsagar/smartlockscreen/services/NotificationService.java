@@ -69,16 +69,14 @@ public class NotificationService extends NotificationListenerService{
                         boolean flag;
                         for (StatusBarNotification sbn : sbns) {
                             flag = false;
-                            for(int i = 0; i < currentNotifications.size(); i++){
-                                if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
-                                        currentNotifications.get(i).getId() == sbn.getId() ){
+                            for (LockScreenNotification currentNotification : currentNotifications) {
+                                if (currentNotification.getPackageName().equals(sbn.getPackageName()) &&
+                                        currentNotification.getId() == sbn.getId()) {
                                     flag = true;
                                     break;
                                 }
                             }
-                            if(flag){
-                                continue;
-                            } else {
+                            if(!flag) {
                                 currentNotifications.add(new LockScreenNotification(sbn));
                                 currentSBN.add(sbn);
                             }
