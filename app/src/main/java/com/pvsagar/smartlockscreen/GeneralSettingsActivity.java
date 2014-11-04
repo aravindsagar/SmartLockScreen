@@ -140,8 +140,14 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             if((Boolean) newValue) {
+                String notificationText;
+                if(BaseService.getCurrentEnvironments() == null || BaseService.getCurrentEnvironments().isEmpty()){
+                    notificationText = "Unknown Environment";
+                } else {
+                    notificationText = "Current Environment: " + BaseService.getCurrentEnvironments().get(0).getName();
+                }
                 mContext.startService(BaseService.getServiceIntent(mContext,
-                        "Current Environment: " + BaseService.getCurrentEnvironments().get(0).getName(), null));
+                        notificationText, null));
             } else {
                 mContext.startService(BaseService.getServiceIntent(mContext, null,
                         BaseService.ACTION_REMOVE_PERSISTENT_NOTIFICATION));
