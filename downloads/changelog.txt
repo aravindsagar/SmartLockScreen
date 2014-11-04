@@ -1,0 +1,9 @@
+alpha v1.2
+----------
+[*] Fixed crash in opening Camera from lockscreen, on certain devices/firmwares
+[*] Persistent notification by the app showing the current environment, can be disabled now. Go to General Settings page of SmartLockScreen Settings to do so.
+[*] Minor adjustments in Lockscreen animations
+
+alpha v1
+-------
+initial release. 
