@@ -152,7 +152,6 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void lockScreenDismiss(int direction, float endVelocity){
-        Log.d(LOG_TAG, "end veocity:" + endVelocity);
         if(endVelocity > 0) {
             if (direction == CustomFlingListener.DIRECTION_UP) {
                 layout.animate().translationY(-layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
