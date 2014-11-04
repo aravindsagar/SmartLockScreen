@@ -146,7 +146,6 @@ public class SmartLockScreenSettings extends ActionBarActivity
                         }
                         if(position != -1) {
                             prevPosition = position;
-                            position = -1;
                         }
                         break;
                     case NavigationDrawerListAdapter.ITEM_TYPE_SECONDARY:
@@ -170,6 +169,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 if(mTitle != null) {
                     setTitle(mTitle);
                 }
+                position = -1;
             }
 
             /** Called when a drawer has settled in a completely open state. */
