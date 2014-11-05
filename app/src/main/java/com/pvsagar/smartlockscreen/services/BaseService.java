@@ -126,6 +126,9 @@ public class BaseService extends Service implements
             startForeground(ONGOING_NOTIFICATION_ID, NotificationHelper.getAppNotification(this, null));
         }
         AdminActions.initializeAdminObjects(this);
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            startService(new Intent(this, AppLockService.class));
+        }
         mInProgress = false;
         mLocationClient = new LocationClient(this, this, this);
         requestAddGeofences();
