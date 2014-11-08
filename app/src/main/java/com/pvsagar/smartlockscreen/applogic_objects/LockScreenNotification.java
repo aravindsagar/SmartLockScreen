@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.services.NotificationService;
@@ -21,6 +22,8 @@ public class LockScreenNotification {
     private String tag;
     private boolean isClearable;
     private String key;
+    private CardView cardView;
+    private boolean isShown;
 
     private static String LOG_TAG = LockScreenNotification.class.getSimpleName();
 
@@ -32,6 +35,7 @@ public class LockScreenNotification {
         this.isClearable = isClearable;
         this.tag = tag;
         this.key = key;
+        this.isShown = false;
     }
     public LockScreenNotification(StatusBarNotification sbn){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
@@ -40,6 +44,7 @@ public class LockScreenNotification {
             this.packageName = sbn.getPackageName();
             this.isClearable = sbn.isClearable();
             this.tag = sbn.getTag();
+            this.isShown = false;
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 this.key = sbn.getKey();
             }
@@ -68,6 +73,29 @@ public class LockScreenNotification {
 
     public String getTag(){
         return tag;
+    }
+
+    public boolean containsCardView(){
+        if(cardView != null){
+            return true;
+        }
+        return false;
+    }
+
+    public void setCardView(CardView cardView){
+        this.cardView = cardView;
+    }
+
+    public CardView getCardView(){
+        return this.cardView;
+    }
+
+    public void setShown(boolean flag){
+        this.isShown = flag;
+    }
+
+    public boolean isShown(){
+        return this.isShown;
     }
 
     public void dismiss(Context context){

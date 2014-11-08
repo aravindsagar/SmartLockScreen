@@ -80,6 +80,8 @@ public class BaseService extends Service implements
     public static final String ACTION_DISMISS_PATTERN_OVERLAY_ONLY = PACKAGE_NAME + ".DISMISS_PATTERN_OVERLAY_ONLY";
     public static final String ACTION_UNLOCK = PACKAGE_NAME + ".UNLOCK";
     public static final String ACTION_NOTIFICATION_CHANGED = PACKAGE_NAME + ".NOTIFICATION_CHANGED";
+    public static final String ACTION_NOTIFICATION_POSTED = PACKAGE_NAME + ".NOTIFICATION_POSTED";
+    public static final String ACTION_NOTIFICATION_REMOVED = PACKAGE_NAME + ".NOTIFICATION_REMOVED";
     public static final String ACTION_REMOVE_PERSISTENT_NOTIFICATION = PACKAGE_NAME + ".REMOVE_PERSISTENT_NOTIFICATION";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
@@ -217,7 +219,11 @@ public class BaseService extends Service implements
                     //Bundle extras = intent.getExtras();
                     //LockScreenNotification lsn = (LockScreenNotification)
                     //        extras.getParcelable(NotificationService.EXTRAS_LOCK_SCREEN_NOTIFICATION);
-                    mLockScreenOverlayHelper.notificationChanged();
+                    mLockScreenOverlayHelper.initNotification();
+                } else if(action.equals(ACTION_NOTIFICATION_POSTED)){
+                    mLockScreenOverlayHelper.notificationPosted();
+                } else if(action.equals(ACTION_NOTIFICATION_REMOVED)) {
+                    mLockScreenOverlayHelper.notificationRemoved();
                 } else if(action.equals(ACTION_REMOVE_PERSISTENT_NOTIFICATION)){
                     stopForeground(true);
                 }
