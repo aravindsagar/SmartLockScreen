@@ -268,6 +268,22 @@ public class LockScreenOverlayHelper extends Overlay{
             LockScreenNotification lsn = NotificationService.removedNotifications.get(i);
             notificationCardsLayout.removeView(lsn.getCardView());
         }
+
+        while(noOfNotificationShown() <
+                ((MAX_NOTIFICATION_SHOWN < NotificationService.currentNotifications.size())?
+                        MAX_NOTIFICATION_SHOWN : NotificationService.currentNotifications.size())){
+            //Add a notification to the layout
+            for(int i=0; i< NotificationService.currentNotifications.size(); i++){
+                if(NotificationService.currentNotifications.get(i).isShown()){
+                    continue;
+                } else {
+                    // Show this notification
+                    Log.d(LOG_TAG, "Notification not shown");
+                    setNotificationCard(NotificationService.currentNotifications.get(i));
+                    break;
+                }
+            }
+        }
         setMoreCard();
     }
 
@@ -281,7 +297,7 @@ public class LockScreenOverlayHelper extends Overlay{
         TextView subTextTextView = (TextView) cardView.findViewById(R.id.notification_card_subtext);
         ImageView notificationImageView = (ImageView) cardView.findViewById(R.id.image_view_notification);
                 /* Populating the notification card */
-        final boolean isClearable = lsn.isClearable();
+        final boolean isOngoing = lsn.isOngoing();
         final Notification mNotification = lsn.getNotification();
         final Bundle extras = mNotification.extras;
         titleTextView.setText(extras.getString(KEY_NOTIFICATION_TITLE));
@@ -348,7 +364,7 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onRightToLeft(float endVelocity) {
                 Log.d(LOG_TAG,"Swipe right to left");
-                if(isClearable){
+                if(!isOngoing){
                     cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
                             .alpha(0f);
                     lsn.dismiss(context);
@@ -362,7 +378,7 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onLeftToRight(float endVelocity) {
                 Log.d(LOG_TAG,"Swipe left to right");
-                if(isClearable){
+                if(!isOngoing){
                     cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                             alpha(0f);
                     lsn.dismiss(context);

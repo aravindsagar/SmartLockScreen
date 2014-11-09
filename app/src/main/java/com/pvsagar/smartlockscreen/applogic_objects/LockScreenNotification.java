@@ -20,7 +20,7 @@ public class LockScreenNotification {
     private Notification mNotification;
     private String packageName;
     private String tag;
-    private boolean isClearable;
+    private boolean isOngoing;
     private String key;
     private CardView cardView;
     private boolean isShown;
@@ -28,11 +28,11 @@ public class LockScreenNotification {
     private static String LOG_TAG = LockScreenNotification.class.getSimpleName();
 
 
-    public LockScreenNotification(int notification_id, Notification mNotification,String packageName, boolean isClearable, String tag, String key){
+    public LockScreenNotification(int notification_id, Notification mNotification,String packageName, boolean isOngoing, String tag, String key){
         this.notification_id = notification_id;
         this.mNotification = mNotification;
         this.packageName = packageName;
-        this.isClearable = isClearable;
+        this.isOngoing = isOngoing;
         this.tag = tag;
         this.key = key;
         this.isShown = false;
@@ -42,7 +42,7 @@ public class LockScreenNotification {
             this.notification_id = sbn.getId();
             this.mNotification = sbn.getNotification();
             this.packageName = sbn.getPackageName();
-            this.isClearable = sbn.isClearable();
+            this.isOngoing = sbn.isOngoing();
             this.tag = sbn.getTag();
             this.isShown = false;
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
@@ -67,8 +67,8 @@ public class LockScreenNotification {
         return packageName;
     }
 
-    public boolean isClearable(){
-        return isClearable;
+    public boolean isOngoing(){
+        return isOngoing;
     }
 
     public String getTag(){
