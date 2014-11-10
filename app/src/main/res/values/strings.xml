@@ -91,6 +91,8 @@
     <string name="add_new_profile_text">Add new profile</string>
     <string name="user_type_device_owner">Device Owner</string>
     <string name="user_type_restricted_profile">Restricted Profile</string>
+    <string name="title_add_new_profile">New profile</string>
+    <string name="hint_enter_new_profile_name">Enter profile name</string>
 
     <string-array name="nav_drawer_main_items">
         <item>Manage Environments</item>
@@ -109,5 +111,8 @@
     <string name="title_activity_set_unknown_environment_password">Password for unknown environment</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_choose_picture">Choose Picture</string>
+    <string name="app_locked_message">App locked. Enter master password to unlock</string>
+    <string name="hint_enter_master_password">Enter master password</string>
+    <string name="exit">Exit</string>
 
 </resources>

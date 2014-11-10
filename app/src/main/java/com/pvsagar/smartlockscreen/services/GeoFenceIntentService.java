@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
-import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 
 import java.util.ArrayList;
 import java.util.List;

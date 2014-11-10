@@ -7,7 +7,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.List;

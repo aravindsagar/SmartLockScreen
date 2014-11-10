@@ -4,7 +4,8 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?listPreferredItemHeightSmall"
-    android:background="@color/nav_bar_add_new_profile_background">
+    android:background="@color/nav_bar_add_new_profile_background"
+    android:id="@+id/linear_layout_new_profile_button">
     <ImageView
         android:layout_width="@dimen/nav_bar_add_button"
         android:layout_height="@dimen/nav_bar_add_button"

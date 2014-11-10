@@ -14,6 +14,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,10 +22,13 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.adapters.NavigationDrawerListAdapter;
+import com.pvsagar.smartlockscreen.adapters.UserSpinnerAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.fragments.ManageEnvironmentFragment;
@@ -45,7 +49,8 @@ import java.util.List;
  */
 public class SmartLockScreenSettings extends ActionBarActivity
         implements SetMasterPasswordFragment.MasterPasswordSetListener,
-        ManageEnvironmentFragment.ActionModeListener{
+        ManageEnvironmentFragment.ActionModeListener,
+        UserSpinnerAdapter.OnUsersModifiedListener {
     private static final String LOG_TAG = SmartLockScreenSettings.class.getSimpleName();
 
     private static final int INDEX_MANAGE_ENVIRONMENTS = 0;
@@ -71,6 +76,10 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
     String mTitle;
     int position, prevPosition = -1;
+
+    Spinner usersSpinner;
+    UserSpinnerAdapter adapter;
+    int mSelectedUserIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,16 +114,11 @@ public class SmartLockScreenSettings extends ActionBarActivity
                     return;
                 }
                 switch (listAdapter.getItemViewType(position)){
-                    case NavigationDrawerListAdapter.ITEM_TYPE_PROFILE:
-                        listAdapter.setSelectedProfileIndex(listAdapter.getItemArrayIndex(position));
-                        break;
-                    case NavigationDrawerListAdapter.ITEM_TYPE_NEW_PROFILE:
-                        //TODO after user profiles are enabled
-                        break;
                     case NavigationDrawerListAdapter.ITEM_TYPE_MAIN:
                         FragmentManager fragmentManager = getFragmentManager();
                         FragmentTransaction ft;
                         boolean isValid = true;
+                        Log.d(LOG_TAG, "Position: " + position);
                         int itemArrayIndex = listAdapter.getItemArrayIndex(position);
                         switch (itemArrayIndex){
                             case INDEX_MANAGE_ENVIRONMENTS:
@@ -179,6 +183,17 @@ public class SmartLockScreenSettings extends ActionBarActivity
     }
 
     @Override
+    public void onUsersModified() {
+        refreshUserList();
+    }
+
+    private void refreshUserList(){
+        adapter = new UserSpinnerAdapter(this, R.layout.nav_drawer_list_item_profile,
+                User.getAllUserCursor(this), 0, this);
+        usersSpinner.setAdapter(adapter);
+    }
+
+    @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -213,7 +228,6 @@ public class SmartLockScreenSettings extends ActionBarActivity
     }
 
     private void setUpNavDrawer(){
-        List<User> userList = new ArrayList<User>(Arrays.asList(new User[]{User.getDefaultUser(this)}));
         mainItemList = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.nav_drawer_main_items)));
         List<Integer> mainItemRIds = new ArrayList<Integer>();
         mainItemRIds.add(R.drawable.ic_environment);
@@ -224,9 +238,30 @@ public class SmartLockScreenSettings extends ActionBarActivity
         secondaryItemIds.add(R.drawable.ic_settings);
         secondaryItemIds.add(R.drawable.ic_help);
         secondaryItemIds.add(R.drawable.ic_about);
-        listAdapter = new NavigationDrawerListAdapter(this, userList, mainItemList, mainItemRIds, secondaryItemList, secondaryItemIds);
+        listAdapter = new NavigationDrawerListAdapter(this, mainItemList, mainItemRIds, secondaryItemList, secondaryItemIds);
 
-        navDrawerListView = (ListView) findViewById(R.id.drawer_list_view);
+        LinearLayout navDrawerLayout = (LinearLayout) findViewById(R.id.linear_layout_nav_drawer);
+        navDrawerListView = (ListView) navDrawerLayout.findViewById(R.id.drawer_list_view);
+
+        usersSpinner = (Spinner) navDrawerLayout.findViewById(R.id.spinner_user_profiles);
+        refreshUserList();
+        usersSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSelectedUserIndex = position;
+                if (position == 0) {
+                    onDeviceOwnerSelected();
+                } else {
+                    onRestrictedProfileSelected();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                parent.setSelection(0);
+            }
+        });
+
         switch (getResources().getConfiguration().orientation){
             case Configuration.ORIENTATION_UNDEFINED:
             case Configuration.ORIENTATION_PORTRAIT:
@@ -236,16 +271,23 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 navDrawerListView.addFooterView(footerView, null, false);
                 break;
         }
-        navDrawerListView.setPadding(navDrawerListView.getPaddingLeft(), navDrawerListView.getPaddingTop() + mPaddingTop,
-                navDrawerListView.getPaddingRight(), navDrawerListView.getPaddingBottom());
+        navDrawerLayout.setPadding(navDrawerLayout.getPaddingLeft(), navDrawerLayout.getPaddingTop() + mPaddingTop,
+                navDrawerLayout.getPaddingRight(), navDrawerLayout.getPaddingBottom());
         navDrawerListView.setAdapter(listAdapter);
 
-        navDrawerListView.setSelection(userList.size() + 2);
+        navDrawerListView.setSelection(0);
         navDrawerListView.setOnItemClickListener(new DrawerItemClickListener());
-        listAdapter.setSelectedProfileIndex(0);
         listAdapter.setSelectedMainItemIndex(0);
         mTitle = mainItemList.get(0);
         position = prevPosition = navDrawerListView.getSelectedItemPosition();
+
+    }
+
+    private void onDeviceOwnerSelected(){
+
+    }
+
+    private void onRestrictedProfileSelected(){
 
     }
 

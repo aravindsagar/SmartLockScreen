@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 import java.util.ArrayList;

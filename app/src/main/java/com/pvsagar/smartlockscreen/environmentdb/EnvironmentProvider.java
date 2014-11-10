@@ -374,6 +374,9 @@ public class EnvironmentProvider extends ContentProvider {
             case ENVIRONMENT:
                 returnValue = deleteEnvironment(db, selection, selectionArgs);
                 break;
+            case USER_WITH_ID:
+                selection = UsersEntry._ID + " = ? ";
+                selectionArgs = new String[]{getIdFromUriAsString(uri)};
             case USER:
                 returnValue = deleteUser(db, selection, selectionArgs);
                 break;

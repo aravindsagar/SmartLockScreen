@@ -36,11 +36,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
-import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;

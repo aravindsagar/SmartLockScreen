@@ -84,7 +84,7 @@ public class User {
      * @param cursor should contain data from users table
      * @return list of users read from the cursor
      */
-    private static User getUserFromCursor(Cursor cursor){
+    public static User getUserFromCursor(Cursor cursor){
         try{
             String userName = cursor.getString(cursor.getColumnIndex(UsersEntry.COLUMN_USER_NAME));
             User user = new User(userName);
@@ -131,6 +131,7 @@ public class User {
             }
             Uri uri = context.getContentResolver().insert(UsersEntry.CONTENT_URI, getContentValues());
             id = UsersEntry.getUserIdFromUri(uri);
+            Log.d(LOG_TAG, "New user id: " + id);
         } else {
             userCursor.moveToFirst();
             User existingUser = getUserFromCursor(userCursor);
@@ -261,7 +262,7 @@ public class User {
      * @return list of all users
      */
     public static List<User> getAllUsers(Context context){
-        Cursor userCursor = context.getContentResolver().query(UsersEntry.CONTENT_URI, null, null, null, null);
+        Cursor userCursor = getAllUserCursor(context);
         ArrayList<User> allUsers = new ArrayList<User>();
         if(userCursor.moveToFirst()) {
             for(;!userCursor.isAfterLast(); userCursor.moveToNext()){
@@ -270,6 +271,10 @@ public class User {
         }
         userCursor.close();
         return allUsers;
+    }
+
+    public static Cursor getAllUserCursor(Context context){
+        return context.getContentResolver().query(UsersEntry.CONTENT_URI, null, null, null, null);
     }
 
     public Picture getUserPicture() {
@@ -353,6 +358,13 @@ public class User {
         } else {
             throw new SQLiteException("Cannot insert default user into database");
         }
+    }
+
+    public void deleteFromDatabase(Context context){
+        if(getDefaultUser(context).getId() == getId()){
+            return;
+        }
+        context.getContentResolver().delete(UsersEntry.buildUserUriWithId(getId()), null, null);
     }
 
     //TODO function to change device owner name

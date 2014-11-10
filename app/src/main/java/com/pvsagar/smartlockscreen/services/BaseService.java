@@ -29,11 +29,11 @@ import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultLis
 import com.google.android.gms.location.LocationStatusCodes;
 import com.pvsagar.smartlockscreen.DismissKeyguardActivity;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
-import com.pvsagar.smartlockscreen.applogic_objects.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.applogic_objects.LocationEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
-import com.pvsagar.smartlockscreen.applogic_objects.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;

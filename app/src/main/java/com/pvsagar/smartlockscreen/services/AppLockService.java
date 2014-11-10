@@ -7,9 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.view.WindowManager;
 
 import com.pvsagar.smartlockscreen.applogic.AppLocker;
 import com.pvsagar.smartlockscreen.baseclasses.OnForegroundAppChangedListener;
+import com.pvsagar.smartlockscreen.services.window_helpers.AppLockScreenOverlay;
 
 public class AppLockService extends Service {
     private static final String PACKAGE_NAME = AppLockService.class.getPackage().getName();
@@ -18,6 +20,8 @@ public class AppLockService extends Service {
     public static final String ACTION_CLEAR_PREVIOUS_PACKAGE = PACKAGE_NAME + ".CLEAR_PREVIOUS_PACKAGE";
     public static final String ACTION_START_SERVICE = PACKAGE_NAME + ".START_SERVICE";
     public static final String ACTION_STOP_SERVICE = PACKAGE_NAME + ".STOP_SERVICE";
+    public static final String ACTION_START_APP_LOCK_OVERLAY = PACKAGE_NAME + ".START_APP_LOCK_OVERLAY";
+    public static final String ACTION_CLEAR_APP_LOCK_OVERLAY = PACKAGE_NAME + ".CLEAR_APP_LOCK_OVERLAY";
 
     private String previousPackageName = "";
 
@@ -25,13 +29,25 @@ public class AppLockService extends Service {
 
     private AppLockThread mAppLockThread;
 
+    private AppLockScreenOverlay mAppLockScreenOverlay;
+
     public AppLockService() {
+    }
+
+    public static Intent getServiceIntent(Context context, final String action){
+        Intent intent = new Intent(context, AppLockService.class);
+        if(action != null && !action.isEmpty()) {
+            intent.setAction(action);
+        }
+        return intent;
     }
 
     @Override
     public void onCreate() {
         startThread();
         mOnForegroundAppChangedListener = new AppLocker(this);
+        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        mAppLockScreenOverlay = new AppLockScreenOverlay(this, windowManager);
         super.onCreate();
     }
 
@@ -42,14 +58,20 @@ public class AppLockService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String action = intent.getAction();
-        if(action != null && !action.isEmpty()){
-            if(action.equals(ACTION_CLEAR_PREVIOUS_PACKAGE)){
-                previousPackageName = "";
-            } else if(action.equals(ACTION_START_SERVICE)){
-                startThread();
-            } else if(action.equals(ACTION_STOP_SERVICE)){
-                stopThread();
+        if(intent != null) {
+            String action = intent.getAction();
+            if (action != null && !action.isEmpty()) {
+                if (action.equals(ACTION_CLEAR_PREVIOUS_PACKAGE)) {
+                    previousPackageName = "";
+                } else if (action.equals(ACTION_START_SERVICE)) {
+                    startThread();
+                } else if (action.equals(ACTION_STOP_SERVICE)) {
+                    stopThread();
+                } else if (action.equals(ACTION_START_APP_LOCK_OVERLAY)) {
+                    mAppLockScreenOverlay.execute();
+                } else if (action.equals(ACTION_CLEAR_APP_LOCK_OVERLAY)) {
+                    mAppLockScreenOverlay.remove();
+                }
             }
         }
         super.onStartCommand(intent, flags, startId);
@@ -83,7 +105,6 @@ public class AppLockService extends Service {
                 RunningTaskInfo foregroundTaskInfo = mActivityManager.getRunningTasks(1).get(0);
 
                 String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
-                PackageManager pm = getBaseContext().getPackageManager();
                 String foregroundTaskActivityName = foregroundTaskInfo.topActivity.getShortClassName();
 
                 if(foregroundTaskPackageName.equals(previousPackageName)){

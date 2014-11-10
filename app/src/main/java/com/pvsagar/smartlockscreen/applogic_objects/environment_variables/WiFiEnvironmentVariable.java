@@ -1,4 +1,4 @@
-package com.pvsagar.smartlockscreen.applogic_objects;
+package com.pvsagar.smartlockscreen.applogic_objects.environment_variables;
 
 import android.content.ContentValues;
 import android.content.Context;

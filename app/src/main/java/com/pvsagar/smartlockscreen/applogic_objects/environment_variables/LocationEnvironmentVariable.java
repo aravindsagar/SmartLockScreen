@@ -1,4 +1,4 @@
-package com.pvsagar.smartlockscreen.applogic_objects;
+package com.pvsagar.smartlockscreen.applogic_objects.environment_variables;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -66,7 +66,7 @@ public class LocationEnvironmentVariable extends EnvironmentVariable {
         } catch (Exception e){
             Log.e(LOG_TAG, "Internal application error, please file a bug report to developer."
                     + e.getMessage());
-            return (double) 0.0; //Should think of a better way, though it should never come to this.
+            return 0.0; //Should think of a better way, though it should never come to this.
         }
     }
 
