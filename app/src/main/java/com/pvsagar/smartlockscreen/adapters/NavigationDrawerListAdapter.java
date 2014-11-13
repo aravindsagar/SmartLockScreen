@@ -78,6 +78,12 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         this.selectedMainItemIndex = selectedMainItemIndex;
     }
 
+    public void setMainItems(List<String> mainItems, List<Integer>mainItemImageRIds){
+        mMainItems = mainItems;
+        mMainItemImageRIds = mainItemImageRIds;
+        notifyDataSetInvalidated();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);

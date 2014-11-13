@@ -15,7 +15,10 @@
     <dimen name="nav_bar_secondary_icon_padding">22dp</dimen>
     <dimen name="nav_bar_secondary_text_size">13sp</dimen>
 
-
+    <dimen name="lock_screen_user_picture_size">36dp</dimen>
+    <dimen name="user_grid_column_width">94dp</dimen>
+    <dimen name="user_grid_spacing">8dp</dimen>
+    <dimen name="user_grid_text_padding">2dp</dimen>
     <!-- Notifications -->
     <dimen name="notification_card_header_title_size">18sp</dimen>
 </resources>

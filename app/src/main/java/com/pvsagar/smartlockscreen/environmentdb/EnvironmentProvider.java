@@ -68,6 +68,7 @@ public class EnvironmentProvider extends ContentProvider {
     private static final int USER_WITH_ID = 501;
     private static final int USER_WITH_ID_AND_APP_WHITELIST = 502;
     private static final int USER_WITH_ID_ENVIRONMENT_AND_PASSWORD = 503;
+    private static final int USER_WITH_ID_AND_APP_WHITELIST_WITH_PACKAGE_NAME = 504;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private EnvironmentDbHelper mEnvironmentDbHelper;
@@ -207,6 +208,13 @@ public class EnvironmentProvider extends ContentProvider {
                 selectionArgs = new String[]{uri.getPathSegments().get(1)};
                 return db.query(AppWhitelistEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
+
+            case USER_WITH_ID_AND_APP_WHITELIST_WITH_PACKAGE_NAME:
+                selection = AppWhitelistEntry.COLUMN_USER_ID + " = ? AND " +
+                        AppWhitelistEntry.COLUMN_PACKAGE_NAME + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1), uri.getPathSegments().get(3)};
+                return db.query(AppWhitelistEntry.TABLE_NAME, projection, selection, selectionArgs,
+                        null, null, sortOrder);
         }
         return null;
     }
@@ -239,6 +247,7 @@ public class EnvironmentProvider extends ContentProvider {
             case USER_WITH_ID:
             case USER_WITH_ID_AND_APP_WHITELIST:
             case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
+            case USER_WITH_ID_AND_APP_WHITELIST_WITH_PACKAGE_NAME:
                 return UsersEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri : " + uri);
@@ -414,6 +423,12 @@ public class EnvironmentProvider extends ContentProvider {
             case USER_WITH_ID_ENVIRONMENT_AND_PASSWORD:
                 returnValue = deleteUserPasswordForEnvironment(db, uri);
                 break;
+            case USER_WITH_ID_AND_APP_WHITELIST_WITH_PACKAGE_NAME:
+                selection = AppWhitelistEntry.COLUMN_USER_ID + " + ? AND " +
+                        AppWhitelistEntry.COLUMN_PACKAGE_NAME + " = ? ";
+                selectionArgs = new String[]{uri.getPathSegments().get(1), uri.getPathSegments().get(3)};
+                returnValue = db.delete(AppWhitelistEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri " + uri);
         }
@@ -492,6 +507,8 @@ public class EnvironmentProvider extends ContentProvider {
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#", USER_WITH_ID);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/" +
                 AppWhitelistEntry.TABLE_NAME, USER_WITH_ID_AND_APP_WHITELIST);
+        matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/" +
+                AppWhitelistEntry.TABLE_NAME + "/*", USER_WITH_ID_AND_APP_WHITELIST_WITH_PACKAGE_NAME);
         matcher.addURI(authority, EnvironmentDatabaseContract.PATH_USERS + "/#/#/" +
                 PasswordEntry.TABLE_NAME, USER_WITH_ID_ENVIRONMENT_AND_PASSWORD);
         return matcher;

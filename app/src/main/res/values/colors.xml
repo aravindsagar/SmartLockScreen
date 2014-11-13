@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="card_background_grey">#ffe1e1e1</color>
+    <color name="translucent_black">#70000000</color>
     <color name="text_view_touched">#ffeeeeee</color>
     <color name="text_view_touched_darker">#ffd7d7d7</color>
     <color name="list_item_touched">#8ceeeeee</color>

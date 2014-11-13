@@ -9,9 +9,9 @@ import android.view.View;
  * TouchListener for cards which alter its elevation appropriately.
  */
 public class CardTouchListener implements View.OnTouchListener{
-    public static final float CARD_NORMAL_ELEVATION = 3f;
-    public static final float CARD_TOUCHED_ELEVATION = 0f;
-    public static final float CARD_SELECTED_ELEVATION = 8.5f;
+    public static final float CARD_NORMAL_ELEVATION = 0f;
+    public static final float CARD_TOUCHED_ELEVATION = 2f;
+    public static final float CARD_SELECTED_ELEVATION = 3.5f;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {

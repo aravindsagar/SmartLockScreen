@@ -45,7 +45,6 @@
                 android:singleLine="true"
                 android:paddingRight="0dp"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="akjdzkjscblkdchsKDcizHckjZNXckjbzc"
                 />
         </LinearLayout>
         <Switch

@@ -79,7 +79,6 @@ public class ManageEnvironmentFragment extends Fragment {
                 mPaddingTop += 24;
             }
         }
-        environmentsListView.addFooterView(inflater.inflate(R.layout.shadow_separator, environmentsListView, false));
         unknownEnvironmentView = getUnknownEnvironmentLayout(inflater);
         environmentsListView.addFooterView(unknownEnvironmentView);
         switch (getActivity().getResources().getConfiguration().orientation){

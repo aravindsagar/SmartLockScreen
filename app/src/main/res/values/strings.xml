@@ -83,6 +83,7 @@
     <string name="pattern_confirm">Confirm</string>
     <string name="reset">Reset</string>
     <string name="use_master_password">Use master passphrase</string>
+    <string name="title_activity_environment_overlap">Environment Overlap</string>
     <string name="title_activity_set_master_password">Set Master Password</string>
     <string name="master_password_set">Master password set</string>
     <string name="title_activity_smart_lock_screen_settings">SmartLockScreen Settings</string>
@@ -93,18 +94,9 @@
     <string name="user_type_restricted_profile">Restricted Profile</string>
     <string name="title_add_new_profile">New profile</string>
     <string name="hint_enter_new_profile_name">Enter profile name</string>
-
-    <string-array name="nav_drawer_main_items">
-        <item>Manage Environments</item>
-        <item>Environment Overlap</item>
-        <item>Set Master Password</item>
-    </string-array>
-    <string-array name="nav_drawer_secondary_items">
-        <item>General Settings</item>
-        <item>Help</item>
-        <item>About</item>
-    </string-array>
-
+    <string name="title_activity_allowed_apps">Allowed Apps</string>
+    <string name="title_activity_help">Help</string>
+    <string name="title_activity_about">About</string>
     <string name="drawer_open">Drawer Open</string>
     <string name="drawer_close">Drawer Close</string>
     <string name="no_overlap_detected">No overlap detected so far</string>
@@ -114,5 +106,6 @@
     <string name="app_locked_message">App locked. Enter master password to unlock</string>
     <string name="hint_enter_master_password">Enter master password</string>
     <string name="exit">Exit</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -21,6 +21,7 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -28,8 +29,11 @@ import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.adapters.NotificationListAdapter;
+import com.pvsagar.smartlockscreen.adapters.UserListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
+import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
@@ -40,6 +44,8 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
+import java.util.List;
+
 /**
  * Created by aravind on 19/9/14.
  * Helper class for managing LockScreenOverlay
@@ -48,7 +54,9 @@ public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();
     private NotificationListAdapter notificationListAdapter;
     private LinearLayout notificationCardsLayout;
+    private RelativeLayout rLayout;
     private LinearLayout layout;
+    private ImageView userImageView;
 
     public static int clickedCard = -1;
     public static final int MAX_NOTIFICATION_SHOWN = 4;
@@ -65,13 +73,16 @@ public class LockScreenOverlayHelper extends Overlay{
     private static final String EXTRA_NOTIFICATION_SUBSTRING_PREFIX = "+ ";
     private static final String EXTRA_NOTIFICATION_SUBSTRING_SUFFIX = " more";
 
+    private long mDeviceOwnerId;
+
     public LockScreenOverlayHelper(Context context, WindowManager windowManager){
         super(context, windowManager);
+        mDeviceOwnerId = SharedPreferencesHelper.getDeviceOwnerUserId(context);
     }
 
     @Override
     protected View getLayout(){
-        final RelativeLayout rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
+        rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
         layout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
 
@@ -125,17 +136,16 @@ public class LockScreenOverlayHelper extends Overlay{
             public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
                 if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                     float deltaY = event.getRawY() - downRawY;
-                    layout.setTranslationY(deltaY);
+                    setLayoutPropertiesOnVerticalMove(deltaY);
                 } else {
                     float deltaX = event.getRawX() - downRawX;
-                    layout.setTranslationX(deltaX);
+                    setLayoutPropertiesOnHorizontalMove(deltaX);
                 }
             }
 
             @Override
             public void onSwipeFail() {
-                layout.animate().translationY(0).start();
-                layout.animate().translationX(0).start();
+                resetLayoutPropertiesWithAnimation();
             }
 
             @Override
@@ -144,7 +154,71 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         });
 
+        setUpAllUsersOverlay();
+
         return rLayout;
+    }
+
+    private void setLayoutPropertiesOnVerticalMove(float deltaY){
+        layout.setTranslationY(deltaY);
+        userImageView.setAlpha(1.0f - Math.abs(deltaY)/(float)layout.getHeight());
+    }
+
+    private void setLayoutPropertiesOnHorizontalMove(float deltaX){
+        layout.setTranslationX(deltaX);
+        userImageView.setAlpha(1.0f - Math.abs(deltaX)/(float)layout.getWidth());
+    }
+
+    private void resetLayoutPropertiesWithAnimation(){
+        layout.animate().translationY(0).start();
+        layout.animate().translationX(0).start();
+        userImageView.animate().alpha(1).start();
+    }
+
+    private void setUpAllUsersOverlay(){
+        List<User> allUsers = User.getAllUsers(context);
+        int mDeviceOwnerIndex = 0;
+        for (int i = 0; i < allUsers.size(); i++) {
+            User user = allUsers.get(i);
+            if (user.getId() == mDeviceOwnerId) {
+                mDeviceOwnerIndex = i;
+                break;
+            }
+        }
+
+        final CardView userGridCardView = (CardView) rLayout.findViewById(R.id.card_view_user_grid);
+        final GridView userGridView = (GridView) userGridCardView.findViewById(R.id.grid_view_all_users);
+        userGridView.setAdapter(new UserListAdapter(context, R.layout.grid_item_user,
+                R.layout.grid_item_user, allUsers, mDeviceOwnerIndex, null));
+
+        final ImageView backgroundDimmer = (ImageView) rLayout.findViewById(R.id.image_view_background_dimmer);
+
+        userImageView = (ImageView) rLayout.findViewById(R.id.user_image_view);
+        userImageView.setImageDrawable(User.getCurrentUser(context).getUserPictureDrawable(context));
+        userImageView.setOnTouchListener(new Picture.PictureTouchListener());
+        userImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(userGridCardView.getVisibility() == View.GONE) {
+                    backgroundDimmer.setVisibility(View.VISIBLE);
+                    userGridCardView.setVisibility(View.VISIBLE);
+                } else {
+                    userGridCardView.setVisibility(View.GONE);
+                    backgroundDimmer.setVisibility(View.GONE);
+                }
+                rLayout.invalidate();
+            }
+        });
+
+        backgroundDimmer.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                userGridCardView.setVisibility(View.GONE);
+                backgroundDimmer.setVisibility(View.GONE);
+                rLayout.invalidate();
+                return true;
+            }
+        });
     }
 
     private void lockScreenDismiss(float endVelocity){
@@ -170,6 +244,7 @@ public class LockScreenOverlayHelper extends Overlay{
             layout.animate().translationY(-layout.getHeight()).setListener(new AnimateEndListener())
                     .setInterpolator(new AccelerateInterpolator()).start();
         }
+        userImageView.animate().alpha(0).start();
 
     }
 
@@ -337,7 +412,7 @@ public class LockScreenOverlayHelper extends Overlay{
                             cardView.setTranslationX(event.getRawX() - downRawX);
                         } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                             float deltaY = event.getRawY() - downRawY;
-                            layout.setTranslationY(deltaY);
+                            setLayoutPropertiesOnVerticalMove(deltaY);
                         }
                     }
 
@@ -349,7 +424,7 @@ public class LockScreenOverlayHelper extends Overlay{
                     @Override
                     public void onSwipeFail() {
                         cardView.animate().translationX(0).start();
-                        layout.animate().translationY(0).start();
+                        resetLayoutPropertiesWithAnimation();
                     }
                 });
                 notificationCardsLayout.addView(cardView);
@@ -398,17 +473,16 @@ public class LockScreenOverlayHelper extends Overlay{
                     public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
                         if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                             float deltaY = event.getRawY() - downRawY;
-                            layout.setTranslationY(deltaY);
+                            setLayoutPropertiesOnVerticalMove(deltaY);
                         } else {
                             float deltaX = event.getRawX() - downRawX;
-                            layout.setTranslationX(deltaX);
+                            setLayoutPropertiesOnHorizontalMove(deltaX);
                         }
                     }
 
                     @Override
                     public void onSwipeFail() {
-                        layout.animate().translationY(0).start();
-                        layout.animate().translationX(0).start();
+                        resetLayoutPropertiesWithAnimation();
                     }
 
                     @Override

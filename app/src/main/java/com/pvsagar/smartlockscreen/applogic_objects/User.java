@@ -18,6 +18,7 @@ import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
+import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.UsersEntry;
 import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 
@@ -277,6 +278,16 @@ public class User {
         return context.getContentResolver().query(UsersEntry.CONTENT_URI, null, null, null, null);
     }
 
+    public static User getUserWithId(Context context, long id){
+        Cursor userCursor = context.getContentResolver().query(UsersEntry.buildUserUriWithId(id),
+                null, null, null, null);
+        if(userCursor.moveToFirst()) {
+            return getUserFromCursor(userCursor);
+        } else {
+            return null;
+        }
+    }
+
     public Picture getUserPicture() {
         return userPicture;
     }
@@ -367,5 +378,31 @@ public class User {
         context.getContentResolver().delete(UsersEntry.buildUserUriWithId(getId()), null, null);
     }
 
+    public List<App> getAllowedApps(Context context){
+        Cursor appsCursor = context.getContentResolver().query(UsersEntry.buildUserUriWithAppWhitelist(getId()), null, null, null, null);
+        List<App> allowedApps = new ArrayList<App>();
+        if(appsCursor.moveToFirst()){
+            for(;!appsCursor.isAfterLast();appsCursor.moveToNext()){
+                allowedApps.add(App.getAppFromCursor(appsCursor, context));
+            }
+        }
+        return allowedApps;
+    }
+
+    public boolean isAppAllowed(Context context, String packageName){
+        Cursor appCursor = context.getContentResolver().query(UsersEntry.
+                buildUserUriWithAppWhitelistWithPackageName(getId(), packageName), null, null, null, null);
+        return appCursor.moveToFirst();
+    }
+
+    public void addToAllowedApps(Context context, String packageName){
+        ContentValues values = new ContentValues();
+        values.put(EnvironmentDatabaseContract.AppWhitelistEntry.COLUMN_PACKAGE_NAME, packageName);
+        context.getContentResolver().insert(UsersEntry.buildUserUriWithAppWhitelist(getId()), values);
+    }
+
+    public void removeFromAllowedApps(Context context, String packageName){
+        context.getContentResolver().delete(UsersEntry.buildUserUriWithAppWhitelistWithPackageName(getId(), packageName), null, null);
+    }
     //TODO function to change device owner name
 }

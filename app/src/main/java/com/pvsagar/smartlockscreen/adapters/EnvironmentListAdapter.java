@@ -4,8 +4,6 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
@@ -26,6 +24,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 import com.pvsagar.smartlockscreen.cards.CardAnimatorListener;
 import com.pvsagar.smartlockscreen.cards.CardTouchListener;
+import com.pvsagar.smartlockscreen.frontend_helpers.CustomSwitchHelper;
 
 import java.util.List;
 import java.util.Vector;
@@ -77,7 +76,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     /**
      * Colors for custom on-off switch
      */
-    private ColorDrawable switchOn, switchOff;
+    private Drawable switchOn, switchOff;
 
     /**
      * Stores which ImageView was clicked. Used in ChoosePictureActivity
@@ -103,8 +102,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         this.environmentPictures = environmentPictures;
         this.elevations = new Vector<Float>();
 
-        switchOn = new ColorDrawable(context.getResources().getColor(R.color.switch_color));
-        switchOff = new ColorDrawable(Color.LTGRAY);
+        switchOn = CustomSwitchHelper.getSwitchOnDrawable(getContext());
+        switchOff = CustomSwitchHelper.getSwitchOffDrawable();
 
         for (int i = 0; i < environmentNames.size(); i++) {
             elevations.add(CardTouchListener.CARD_NORMAL_ELEVATION);
@@ -163,17 +162,15 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         mSwitch.setChecked(enabledValues.get(position));
         if(!mSwitch.isChecked()){
             mSwitch.setThumbDrawable(switchOff);
+        } else {
+            mSwitch.setThumbDrawable(switchOn);
         }
-        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+        mSwitch.setOnCheckedChangeListener(new CustomSwitchHelper.CustomSwitchCheckedChangeListener(getContext()) {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            public void onCustomCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Environment.setEnabledInDatabase(context,environmentNames.get(position),
                         isChecked);
-                if(isChecked){
-                    mSwitch.setThumbDrawable(switchOn);
-                } else {
-                    mSwitch.setThumbDrawable(switchOff);
-                }
             }
         });
         final ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);

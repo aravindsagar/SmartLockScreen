@@ -42,6 +42,7 @@ public abstract class Overlay {
         }
         try {
             windowManager.addView(layout, params);
+            layout.invalidate();
         } catch (IllegalStateException e){
             //Dont do anything
         }

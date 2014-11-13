@@ -220,6 +220,11 @@ public class EnvironmentDatabaseContract {
                     appendPath(AppWhitelistEntry.TABLE_NAME).build();
         }
 
+        public static Uri buildUserUriWithAppWhitelistWithPackageName(long userId, String packageName){
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(userId)).
+                    appendPath(AppWhitelistEntry.TABLE_NAME).appendPath(packageName).build();
+        }
+
         public static long getUserIdFromUri(Uri uri){
             return Long.parseLong(uri.getPathSegments().get(1));
         }
