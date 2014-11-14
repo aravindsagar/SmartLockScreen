@@ -432,15 +432,15 @@ public class LockScreenOverlayHelper extends Overlay{
         if(notificationCardsLayout == null){
             return;
         }
-        if(NotificationService.currentNotifications.size() <= MAX_NOTIFICATION_SHOWN){
-            if(moreCard != null){
-                try {
-                    notificationCardsLayout.removeView(moreCard);
-                    moreCard = null;
-                } catch (Exception e){
-                    Log.e(LOG_TAG,e.toString());
-                }
+        if(moreCard != null){
+            try {
+                notificationCardsLayout.removeView(moreCard);
+                moreCard = null;
+            } catch (Exception e){
+                Log.e(LOG_TAG,e.toString());
             }
+        }
+        if(NotificationService.currentNotifications.size() <= MAX_NOTIFICATION_SHOWN){
             return;
         }
         moreCard = null;
