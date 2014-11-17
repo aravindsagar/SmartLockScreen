@@ -95,6 +95,7 @@
     <string name="title_add_new_profile">New profile</string>
     <string name="hint_enter_new_profile_name">Enter profile name</string>
     <string name="title_activity_allowed_apps">Allowed Apps</string>
+    <string name="title_activity_set_passphrase">Set Passphrase</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_about">About</string>
     <string name="drawer_open">Drawer Open</string>

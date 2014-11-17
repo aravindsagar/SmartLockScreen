@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
@@ -22,12 +23,13 @@ import com.pvsagar.smartlockscreen.services.BaseService;
 public class ScreenReceiver extends BroadcastReceiver {
     private static final String LOG_TAG = ScreenReceiver.class.getSimpleName();
     private static final String HANDLER_THREAD_NAME = "screen_receiver_thread";
-    public static final String WAKELOCK_TAG = "lockscreen_overlay_create_wakelock";
+    public static final String WAKE_LOCK_TAG = "lockscreen_overlay_create_wakelock";
+    public static final String SCREEN_ON_WAKE_LOCK_TAG = "screen_on_wakelock";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-            WakeLockHelper.acquireWakeLock(WAKELOCK_TAG, context);
+            WakeLockHelper.acquireWakeLock(WAKE_LOCK_TAG, PowerManager.PARTIAL_WAKE_LOCK, context);
             Log.d(LOG_TAG, "Screen off");
             context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_OVERLAY));
             context.startService(AppLockService.getServiceIntent(context, AppLockService.ACTION_CLEAR_PREVIOUS_PACKAGE));
@@ -35,6 +37,7 @@ public class ScreenReceiver extends BroadcastReceiver {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 //Might be useful later, while adding notifications etc
                 //TODO remove this and the action in intent filter if not required
+                WakeLockHelper.releaseWakeLock(SCREEN_ON_WAKE_LOCK_TAG);
                 Log.d(LOG_TAG, "Screen on");
             }
         }
@@ -63,5 +66,19 @@ public class ScreenReceiver extends BroadcastReceiver {
             context.registerReceiver(mReceiver, filter, null, handler);
             return null;
         }
+    }
+
+    public static void turnScreenOff(Context context){
+        if(!AdminActions.turnScreenOff()){
+            AdminActions.initializeAdminObjects(context);
+            if(!AdminActions.turnScreenOff()){
+                context.startService(BaseService.getServiceIntent(context, "Please enable administrator for the app.", null));
+            }
+        }
+    }
+
+    public static void turnScreenOn(Context context){
+        WakeLockHelper.acquireWakeLock(SCREEN_ON_WAKE_LOCK_TAG, PowerManager.FULL_WAKE_LOCK|
+                PowerManager.ACQUIRE_CAUSES_WAKEUP|PowerManager.ON_AFTER_RELEASE, context);
     }
 }

@@ -846,6 +846,7 @@ public class EditEnvironment extends ActionBarActivity {
                                     setPassphraseItemsVisible(true);
                                     passphraseEditText.setText("");
                                     passphraseConfirmationEditText.setText("");
+                                    passphraseEditText.setHint("Set " + Passphrase.passphraseTypes[Passphrase.INDEX_PASSPHRASE_TYPE_PASSWORD]);
                                     passphraseEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                                     passphraseConfirmationEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                                     passphraseEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());

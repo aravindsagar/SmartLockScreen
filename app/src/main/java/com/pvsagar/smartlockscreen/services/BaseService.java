@@ -69,6 +69,7 @@ public class BaseService extends Service implements
 
     private static final String PACKAGE_NAME = BaseService.class.getPackage().getName();
     public static final String ACTION_DETECT_ENVIRONMENT = PACKAGE_NAME + ".DETECT_ENVIRONMENT";
+    public static final String ACTION_DETECT_ENVIRONMENT_SWITCH_USER = PACKAGE_NAME + ".DETECT_ENVIRONMENT_SWITCH_USER";
     public static final String ACTION_ADD_GEOFENCES = PACKAGE_NAME + ".ADD_GEOFENCES";
     public static final String ACTION_REMOVE_GEOFENCES = PACKAGE_NAME + ".REMOVE_GEOFENCES";
     public static final String ACTION_DETECT_WIFI = PACKAGE_NAME + ".DETECT_WIFI";
@@ -104,7 +105,7 @@ public class BaseService extends Service implements
 
     private PatternLockOverlay mPatternLockOverlay;
 
-    private boolean mIsInCall = false;
+    private boolean mIsInCall = false, switchUser = false;
 
     public static Intent getServiceIntent(Context context, String extraText, String action){
         Intent serviceIntent  = new Intent();
@@ -167,6 +168,9 @@ public class BaseService extends Service implements
             if(action != null && !action.isEmpty()) {
                 if (action.equals(ACTION_DETECT_ENVIRONMENT)) {
                     new EnvironmentDetector().detectCurrentEnvironment(this, this);
+                } else if (action.equals(ACTION_DETECT_ENVIRONMENT_SWITCH_USER)){
+                    switchUser = true;
+                    new EnvironmentDetector().detectCurrentEnvironment(this, this);
                 } else if(action.equals(ACTION_ADD_GEOFENCES)) {
                     requestAddGeofences();
                 } else if(action.equals(ACTION_REMOVE_GEOFENCES)){
@@ -193,7 +197,7 @@ public class BaseService extends Service implements
                     if(!mIsInCall){
                         mLockScreenOverlayHelper.execute();
                     }
-                    WakeLockHelper.releaseWakeLock(ScreenReceiver.WAKELOCK_TAG);
+                    WakeLockHelper.releaseWakeLock(ScreenReceiver.WAKE_LOCK_TAG);
                 } else if(action.equals(ACTION_DISMISS_LOCKSCREEN_OVERLAY)){
                     mLockScreenOverlayHelper.remove();
                     if(intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, false)){
@@ -448,6 +452,9 @@ public class BaseService extends Service implements
             User user = User.getCurrentUser(this);
             if(user != null) {
                 Passphrase passphrase = user.getPassphraseForEnvironment(this, current);
+                if(passphrase == null){
+                    passphrase = user.getPassphraseForUnknownEnvironment(this);
+                }
                 if(passphrase != null){
                     if(!passphrase.setAsCurrentPassword(this)){
                         AdminActions.initializeAdminObjects(this);
@@ -468,6 +475,11 @@ public class BaseService extends Service implements
             } else {
                 stopForeground(true);
             }
+        }
+        if(switchUser){
+            switchUser = false;
+            ScreenReceiver.turnScreenOff(this);
+            ScreenReceiver.turnScreenOn(this);
         }
     }
 }

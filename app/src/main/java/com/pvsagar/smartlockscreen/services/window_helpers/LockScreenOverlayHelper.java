@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.services.window_helpers;
 
 import android.animation.Animator;
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -57,6 +59,8 @@ public class LockScreenOverlayHelper extends Overlay{
     private RelativeLayout rLayout;
     private LinearLayout layout;
     private ImageView userImageView;
+    private CardView userGridCardView;
+    private ImageView backgroundDimmer;
 
     public static int clickedCard = -1;
     public static final int MAX_NOTIFICATION_SHOWN = 4;
@@ -87,7 +91,7 @@ public class LockScreenOverlayHelper extends Overlay{
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
 
         layout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-//      WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
+
         //TODO add wallpaper support!
         ImageView wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
         Drawable wallpaper = context.getResources().getDrawable(R.drawable.background);
@@ -176,7 +180,7 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void setUpAllUsersOverlay(){
-        List<User> allUsers = User.getAllUsers(context);
+        final List<User> allUsers = User.getAllUsers(context);
         int mDeviceOwnerIndex = 0;
         for (int i = 0; i < allUsers.size(); i++) {
             User user = allUsers.get(i);
@@ -186,12 +190,27 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         }
 
-        final CardView userGridCardView = (CardView) rLayout.findViewById(R.id.card_view_user_grid);
-        final GridView userGridView = (GridView) userGridCardView.findViewById(R.id.grid_view_all_users);
+        userGridCardView = (CardView) rLayout.findViewById(R.id.card_view_user_grid);
+        GridView userGridView = (GridView) userGridCardView.findViewById(R.id.grid_view_all_users);
         userGridView.setAdapter(new UserListAdapter(context, R.layout.grid_item_user,
-                R.layout.grid_item_user, allUsers, mDeviceOwnerIndex, null));
+                R.layout.grid_item_settings, allUsers, mDeviceOwnerIndex, new UserListAdapter.OnUsersModifiedListener() {
+            @Override
+            public void onUsersModified() {}
 
-        final ImageView backgroundDimmer = (ImageView) rLayout.findViewById(R.id.image_view_background_dimmer);
+            @Override
+            public void onSettingsClicked() {
+                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY_UP);
+            }
+        }));
+        userGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                User.setCurrentUser(allUsers.get(position));
+                context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_DETECT_ENVIRONMENT_SWITCH_USER));
+            }
+        });
+
+        backgroundDimmer = (ImageView) rLayout.findViewById(R.id.image_view_background_dimmer);
 
         userImageView = (ImageView) rLayout.findViewById(R.id.user_image_view);
         userImageView.setImageDrawable(User.getCurrentUser(context).getUserPictureDrawable(context));
@@ -200,25 +219,32 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onClick(View v) {
                 if(userGridCardView.getVisibility() == View.GONE) {
-                    backgroundDimmer.setVisibility(View.VISIBLE);
-                    userGridCardView.setVisibility(View.VISIBLE);
+                    showUserGrid();
                 } else {
-                    userGridCardView.setVisibility(View.GONE);
-                    backgroundDimmer.setVisibility(View.GONE);
+                    hideUserGrid();
                 }
-                rLayout.invalidate();
             }
         });
 
         backgroundDimmer.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                userGridCardView.setVisibility(View.GONE);
-                backgroundDimmer.setVisibility(View.GONE);
-                rLayout.invalidate();
+                hideUserGrid();
                 return true;
             }
         });
+    }
+
+    private void showUserGrid(){
+        backgroundDimmer.setVisibility(View.VISIBLE);
+        userGridCardView.setVisibility(View.VISIBLE);
+        rLayout.invalidate();
+    }
+
+    private void hideUserGrid(){
+        userGridCardView.setVisibility(View.GONE);
+        backgroundDimmer.setVisibility(View.GONE);
+        rLayout.invalidate();
     }
 
     private void lockScreenDismiss(float endVelocity){
@@ -280,6 +306,7 @@ public class LockScreenOverlayHelper extends Overlay{
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void notificationChanged(){
         //NotificationListAdapter.currentNotifications.add(lsn);
         /*if(notificationListAdapter != null) {
@@ -288,8 +315,8 @@ public class LockScreenOverlayHelper extends Overlay{
         Log.d(LOG_TAG,"Entered notification changed");
         if(notificationCardsLayout != null){
             Log.d(LOG_TAG, "Linear Layout not null");
-            if(((LinearLayout)notificationCardsLayout).getChildCount() > 0){
-                ((LinearLayout)notificationCardsLayout).removeAllViews();
+            if(notificationCardsLayout.getChildCount() > 0){
+                notificationCardsLayout.removeAllViews();
             }
             //Update the notifications
             for(int i = 0; i < NotificationService.currentNotifications.size()

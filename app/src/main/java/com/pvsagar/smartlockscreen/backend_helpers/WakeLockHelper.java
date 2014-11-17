@@ -15,12 +15,11 @@ public class WakeLockHelper {
     private static final String LOG_TAG = WakeLockHelper.class.getSimpleName();
     private static HashMap<String, WakeLock> wakeLocks = new HashMap<String, PowerManager.WakeLock>();
 
-    public static void acquireWakeLock(final String TAG, Context context){
+    public static void acquireWakeLock(final String TAG, int levelAndFlags, Context context){
         WakeLock wakeLock = wakeLocks.get(TAG);
         if(wakeLock == null){
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    TAG);
+            wakeLock = powerManager.newWakeLock(levelAndFlags, TAG);
             wakeLocks.put(TAG, wakeLock);
             wakeLock.acquire();
         } else if(!wakeLock.isHeld()){

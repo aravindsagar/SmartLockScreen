@@ -118,4 +118,14 @@ public class AdminActions extends DeviceAdminReceiver {
         //TODO prompt for master password after a fixed number of wrong attempts
         super.onPasswordFailed(context, intent);
     }
+
+    public static boolean turnScreenOff(){
+        if(isAdminEnabled()){
+            mDPM.lockNow();
+            return true;
+        } else {
+            Log.e(LOG_TAG, "No admin privileges, cannot change password.");
+            return false;
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.pvsagar.smartlockscreen.adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.SmartLockScreenSettings;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
 
@@ -102,27 +104,36 @@ public class UserListAdapter extends BaseAdapter {
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle(R.string.title_add_new_profile);
-                    View newProfileDialogView = inflater.inflate(R.layout.dialog_add_profile, null, false);
-                    final EditText profileNameEditText = (EditText) newProfileDialogView.
-                            findViewById(R.id.edit_text_new_profile_name);
-                    builder.setView(newProfileDialogView);
-                    builder.setPositiveButton(R.string.ok,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (profileNameEditText.getText().toString().isEmpty()) {
-                                        return;
+                    if(mNewUserResource == R.layout.nav_drawer_new_profile) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle(R.string.title_add_new_profile);
+                        View newProfileDialogView = inflater.inflate(R.layout.dialog_add_profile, null, false);
+                        final EditText profileNameEditText = (EditText) newProfileDialogView.
+                                findViewById(R.id.edit_text_new_profile_name);
+                        builder.setView(newProfileDialogView);
+                        builder.setPositiveButton(R.string.ok,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (profileNameEditText.getText().toString().isEmpty()) {
+                                            return;
+                                        }
+                                        User newUser = new User(profileNameEditText.getText().toString());
+                                        newUser.insertIntoDatabase(getContext());
+                                        if (mListener != null) {
+                                            mListener.onUsersModified();
+                                        }
                                     }
-                                    User newUser = new User(profileNameEditText.getText().toString());
-                                    newUser.insertIntoDatabase(getContext());
-                                    if (mListener != null) {
-                                        mListener.onUsersModified();
-                                    }
-                                }
-                            });
-                    builder.create().show();
+                                });
+                        builder.create().show();
+                    } else {
+                        Intent intent = new Intent(getContext().getApplicationContext(), SmartLockScreenSettings.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivity(intent);
+                        if(mListener != null){
+                            mListener.onSettingsClicked();
+                        }
+                    }
                 }
             });
         }
@@ -160,5 +171,7 @@ public class UserListAdapter extends BaseAdapter {
 
     public static interface OnUsersModifiedListener {
         public void onUsersModified();
+
+        public void onSettingsClicked();
     }
 }

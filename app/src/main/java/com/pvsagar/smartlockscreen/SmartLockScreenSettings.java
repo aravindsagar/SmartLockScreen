@@ -33,10 +33,12 @@ import com.pvsagar.smartlockscreen.adapters.UserListAdapter;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
+import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.fragments.AllowedAppsFragment;
 import com.pvsagar.smartlockscreen.fragments.ManageEnvironmentFragment;
 import com.pvsagar.smartlockscreen.fragments.OverlappingEnvironmentsFragment;
 import com.pvsagar.smartlockscreen.fragments.SetMasterPasswordFragment;
+import com.pvsagar.smartlockscreen.fragments.SetPasswordFragment;
 import com.pvsagar.smartlockscreen.frontend_helpers.OneTimeInitializer;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -52,13 +54,15 @@ import java.util.List;
 public class SmartLockScreenSettings extends ActionBarActivity
         implements SetMasterPasswordFragment.MasterPasswordSetListener,
         ManageEnvironmentFragment.ActionModeListener,
-        UserListAdapter.OnUsersModifiedListener {
+        UserListAdapter.OnUsersModifiedListener,
+        SetPasswordFragment.SetPassphraseInterface{
     private static final String LOG_TAG = SmartLockScreenSettings.class.getSimpleName();
 
     private static final int INDEX_MANAGE_ENVIRONMENTS = 0;
     private static final int INDEX_ENVIRONMENT_OVERLAP = 1;
     private static final int INDEX_ALLOWED_APPS = 1;
     private static final int INDEX_MASTER_PASSWORD = 2;
+    private static final int INDEX_PASSWORD = 2;
     private static final int INDEX_SETTINGS = 0;
     private static final int INDEX_HELP = 1;
     private static final int INDEX_ABOUT = 2;
@@ -195,6 +199,11 @@ public class SmartLockScreenSettings extends ActionBarActivity
                     ft.replace(R.id.container, AllowedAppsFragment.getNewInstance(allUsers.get(mSelectedUserIndex).getId()))
                             .commit();
                     break;
+                case INDEX_PASSWORD:
+                    ft = fragmentManager.beginTransaction();
+                    ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
+                    ft.replace(R.id.container, new SetPasswordFragment())
+                            .commit();
                 default:
                     isValid = false;
             }
@@ -289,10 +298,12 @@ public class SmartLockScreenSettings extends ActionBarActivity
         restrictedMainItemList = new ArrayList<String>();
         restrictedMainItemList.add(INDEX_MANAGE_ENVIRONMENTS, getString(R.string.title_activity_manage_environment));
         restrictedMainItemList.add(INDEX_ALLOWED_APPS, getString(R.string.title_activity_allowed_apps));
+        restrictedMainItemList.add(INDEX_PASSWORD, getString(R.string.title_activity_set_passphrase));
 
         restrictedMainItemRIds = new ArrayList<Integer>();
         restrictedMainItemRIds.add(INDEX_MANAGE_ENVIRONMENTS, R.drawable.ic_environment);
         restrictedMainItemRIds.add(INDEX_ALLOWED_APPS, R.drawable.ic_master_password);
+        restrictedMainItemRIds.add(INDEX_PASSWORD, R.drawable.ic_master_password);
 
         //Secondary drawer items
         secondaryItemList = new ArrayList<String>();
@@ -368,7 +379,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
     @Override
     public void onMasterPasswordSet() {
-        Toast.makeText(this, "Master passphrase changed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Passphrase changed", Toast.LENGTH_SHORT).show();
         drawerLayout.openDrawer(Gravity.START);
     }
 
@@ -430,6 +441,9 @@ public class SmartLockScreenSettings extends ActionBarActivity
     }
 
     @Override
+    public void onSettingsClicked() {}
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == MASTER_PASSWORD_REQUEST){
             if(!(resultCode == RESULT_OK && AdminActions.isAdminEnabled())){
@@ -437,5 +451,17 @@ public class SmartLockScreenSettings extends ActionBarActivity
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onPassphraseEntered(Passphrase passphrase) {
+        allUsers.get(mSelectedUserIndex).setPassphraseForUnknownEnvironment(this, passphrase);
+        onMasterPasswordSet();
+    }
+
+
+    @Override
+    public Passphrase getCurrentPassphrase() {
+        return null;
     }
 }

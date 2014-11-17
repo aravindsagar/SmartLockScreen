@@ -4,8 +4,12 @@ import android.content.Context;
 import android.util.Log;
 
 import com.pvsagar.smartlockscreen.DismissKeyguardActivity;
+import com.pvsagar.smartlockscreen.applogic_objects.App;
+import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.baseclasses.OnForegroundAppChangedListener;
 import com.pvsagar.smartlockscreen.services.AppLockService;
+
+import java.util.List;
 
 /**
  * Created by aravind on 5/11/14.
@@ -23,6 +27,9 @@ public class AppLocker implements OnForegroundAppChangedListener {
 
     @Override
     public void onForegroundAppChanged(final String packageName, final String activityName) {
+        if(User.getCurrentUser(mContext).getId() == User.getDefaultUser(mContext).getId()){
+            return;
+        }
         Log.d(LOG_TAG, "Package Name: " + packageName + ", activity name: " + activityName);
         if(isBlockedApp(packageName, activityName)){
             mContext.startService(AppLockService.getServiceIntent(mContext, AppLockService.ACTION_START_APP_LOCK_OVERLAY));
@@ -33,7 +40,20 @@ public class AppLocker implements OnForegroundAppChangedListener {
 
     private boolean isBlockedApp(final String packageName, final String activityName){
         //TODO add additional program logic
-        return packageName.equals(APP_PACKAGE_NAME) &&
-                !activityName.equals("." + DismissKeyguardActivity.class.getSimpleName());
+        if(packageName.equals(APP_PACKAGE_NAME) &&
+                !activityName.equals("." + DismissKeyguardActivity.class.getSimpleName())){
+            return true;
+        }
+
+        List<App> apps = User.getCurrentUser(mContext).getAllowedApps(mContext);
+        Log.d(LOG_TAG, "current user has " + apps.size() + " allowed apps:\n");
+        boolean containsApp = true;
+        for (App app : apps) {
+            if(app.getPackageName().equals(packageName)){
+                containsApp = false;
+            }
+            Log.d(LOG_TAG, app.getPackageName() + ", " + app.getAppName() + "\n");
+        }
+        return containsApp;
     }
 }

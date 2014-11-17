@@ -8,11 +8,13 @@
       <w>geofence</w>
       <w>geofences</w>
       <w>lockscreen</w>
+      <w>nosensor</w>
       <w>passphrase</w>
       <w>passphrases</w>
       <w>pvsagar</w>
       <w>smartlockscreen</w>
       <w>ssid</w>
+      <w>wakelock</w>
       <w>whitelist</w>
     </words>
   </dictionary>

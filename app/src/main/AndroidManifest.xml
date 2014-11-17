@@ -92,7 +92,8 @@
             android:excludeFromRecents="true"
             android:label="@string/title_activity_dismiss_keyguard"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
+            android:screenOrientation="nosensor">
         </activity>
         <activity
             android:name="com.pvsagar.smartlockscreen.SetMasterPassword"
