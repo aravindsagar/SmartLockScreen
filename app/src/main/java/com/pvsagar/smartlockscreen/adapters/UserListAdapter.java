@@ -160,7 +160,7 @@ public class UserListAdapter extends BaseAdapter {
         }
     }
 
-    public Context getContext() {
+    private Context getContext() {
         return mContext;
     }
 

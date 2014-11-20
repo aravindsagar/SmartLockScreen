@@ -215,6 +215,11 @@ public class SetPasswordFragment extends Fragment {
                                     setPassphraseItemsEnabled(false);
                                     setPassphraseItemsVisible(false);
                                     setPatternTextViewVisible(true);
+                                    if(currentPassphraseTypeIndex == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN){
+                                        passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
+                                    } else {
+                                        passphraseEnterPatternTextView.setText("Set " + Passphrase.passphraseTypes[position]);
+                                    }
                                     passphraseCard.doExpand();
                                 } else if (position == Passphrase.INDEX_PASSPHRASE_TYPE_NONE) {
                                     setPassphraseItemsEnabled(false);
@@ -360,6 +365,7 @@ public class SetPasswordFragment extends Fragment {
             layout.addView(passphraseEditText);
             layout.addView(passphraseConfirmationEditText);
             relativeLayout.addView(layout);
+            relativeLayout.addView(passphraseEnterPatternTextView);
             parent.addView(relativeLayout);
             return layout;
         }

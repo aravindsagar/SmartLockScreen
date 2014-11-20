@@ -60,9 +60,9 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
     private static final int INDEX_MANAGE_ENVIRONMENTS = 0;
     private static final int INDEX_ENVIRONMENT_OVERLAP = 1;
-    private static final int INDEX_ALLOWED_APPS = 1;
     private static final int INDEX_MASTER_PASSWORD = 2;
-    private static final int INDEX_PASSWORD = 2;
+    private static final int INDEX_ALLOWED_APPS = 0;
+    private static final int INDEX_PASSWORD = 1;
     private static final int INDEX_SETTINGS = 0;
     private static final int INDEX_HELP = 1;
     private static final int INDEX_ABOUT = 2;
@@ -185,14 +185,19 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 default:
                     isValid = false;
             }
+            if (isValid) {
+                mTitle = mainItemList.get(itemArrayIndex);
+                listAdapter.setSelectedMainItemIndex(itemArrayIndex);
+                listAdapter.notifyDataSetChanged();
+            }
         } else {
             switch (itemArrayIndex){
-                case INDEX_MANAGE_ENVIRONMENTS:
+                /*case INDEX_MANAGE_ENVIRONMENTS:
                     ft = fragmentManager.beginTransaction();
                     ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
                     ft.replace(R.id.container, new ManageEnvironmentFragment())
                             .commit();
-                    break;
+                    break;*/
                 case INDEX_ALLOWED_APPS:
                     ft = fragmentManager.beginTransaction();
                     ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
@@ -204,14 +209,15 @@ public class SmartLockScreenSettings extends ActionBarActivity
                     ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
                     ft.replace(R.id.container, new SetPasswordFragment())
                             .commit();
+                    break;
                 default:
                     isValid = false;
             }
-        }
-        if (isValid) {
-            mTitle = mainItemList.get(itemArrayIndex);
-            listAdapter.setSelectedMainItemIndex(itemArrayIndex);
-            listAdapter.notifyDataSetChanged();
+            if (isValid) {
+                mTitle = restrictedMainItemList.get(itemArrayIndex);
+                listAdapter.setSelectedMainItemIndex(itemArrayIndex);
+                listAdapter.notifyDataSetChanged();
+            }
         }
         if(position != -1) {
             prevPosition = position;
@@ -296,13 +302,13 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
         //Main drawer items for Restricted profile
         restrictedMainItemList = new ArrayList<String>();
-        restrictedMainItemList.add(INDEX_MANAGE_ENVIRONMENTS, getString(R.string.title_activity_manage_environment));
+//        restrictedMainItemList.add(INDEX_MANAGE_ENVIRONMENTS, getString(R.string.title_activity_manage_environment));
         restrictedMainItemList.add(INDEX_ALLOWED_APPS, getString(R.string.title_activity_allowed_apps));
         restrictedMainItemList.add(INDEX_PASSWORD, getString(R.string.title_activity_set_passphrase));
 
         restrictedMainItemRIds = new ArrayList<Integer>();
-        restrictedMainItemRIds.add(INDEX_MANAGE_ENVIRONMENTS, R.drawable.ic_environment);
-        restrictedMainItemRIds.add(INDEX_ALLOWED_APPS, R.drawable.ic_master_password);
+//        restrictedMainItemRIds.add(INDEX_MANAGE_ENVIRONMENTS, R.drawable.ic_environment);
+        restrictedMainItemRIds.add(INDEX_ALLOWED_APPS, R.drawable.ic_apps);
         restrictedMainItemRIds.add(INDEX_PASSWORD, R.drawable.ic_master_password);
 
         //Secondary drawer items
@@ -336,7 +342,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                parent.setSelection(0);
+//                parent.setSelection(0);
             }
         });
 
@@ -366,7 +372,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
         navDrawerListView.setSelection(0);
         listAdapter.setSelectedMainItemIndex(0);
         mTitle = mainItemList.get(0);
-        position = prevPosition = navDrawerListView.getSelectedItemPosition();
+        position = prevPosition = 0;
+        handleMainItemClick();
     }
 
     private void onRestrictedProfileSelected(){
@@ -374,7 +381,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
         navDrawerListView.setSelection(0);
         listAdapter.setSelectedMainItemIndex(0);
         mTitle = mainItemList.get(0);
-        position = prevPosition = navDrawerListView.getSelectedItemPosition();
+        position = prevPosition = 0;
+        handleMainItemClick();
     }
 
     @Override
