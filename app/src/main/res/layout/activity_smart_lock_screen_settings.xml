@@ -7,24 +7,64 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/container"/>
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="@dimen/drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:id="@+id/linear_layout_nav_drawer"
-        android:orientation="vertical">
-        <Spinner
-            android:layout_width="match_parent"
+        android:background="@color/nav_bar_list_background">
+        <LinearLayout
+            android:id="@+id/linear_layout_current_user"
+            android:orientation="horizontal" android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/spinner_user_profiles"
-            android:background="@color/user_profiles_background"
-            android:animateLayoutChanges="true"/>
+            android:background="@color/user_profiles_background">
+            <ImageView
+                android:layout_width="@dimen/user_picture_dimen"
+                android:layout_height="@dimen/user_picture_dimen"
+                android:contentDescription="@string/user_picture_content_description"
+                android:layout_gravity="center_vertical"
+                android:scaleType="fitCenter"
+                android:layout_margin="@dimen/nav_bar_picture_padding"
+                android:id="@+id/user_image_view"/>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/user_name_text_view"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/nav_bar_text_size"
+                    android:layout_gravity="start"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/nav_bar_secondary_text_size"
+                    android:textColor="@android:color/white"
+                    android:layout_gravity="start"
+                    android:id="@+id/user_type_text_view"/>
+            </LinearLayout>
+            <ImageView
+                android:layout_width="@dimen/nav_bar_icon_dimen"
+                android:layout_height="@dimen/nav_bar_icon_dimen"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/drop_down_pic_content_description"
+                android:src="@drawable/ic_find_next_mtrl_alpha"
+                android:background="@android:color/transparent"
+                android:layout_margin="@dimen/nav_bar_picture_padding"
+                android:id="@+id/user_selected_tick_image_view"/>
+
+        </LinearLayout>
         <it.gmariotti.cardslib.library.view.component.CardShadowView
             xmlns:android="http://schemas.android.com/apk/res/android"
             style="@style/card.shadow_outer_layout"
             android:id="@+id/card_header_shadow_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_below="@id/linear_layout_current_user"/>
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -33,6 +73,13 @@
             android:divider="@android:color/transparent"
             android:dividerHeight="0dp"
             android:choiceMode="singleChoice"
-            android:background="@color/nav_bar_list_background"/>
-    </LinearLayout>
+            android:background="@color/nav_bar_list_background"
+            android:layout_below="@id/linear_layout_current_user"/>
+        <ListView
+            android:layout_below="@id/linear_layout_current_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/list_view_user_profiles"/>
+
+    </RelativeLayout>
 </android.support.v4.widget.DrawerLayout>

@@ -106,25 +106,15 @@ public class ManageEnvironmentFragment extends Fragment {
     private void init(){
 
         environments = Environment.getAllEnvironmentBarebones(getActivity());
-        enabledValues.clear();
-        environmentHints.clear();
-        environmentNames.clear();
-        environmentPictures.clear();
-        for(Environment e : environments){
-            environmentNames.add(e.getName());
-            environmentHints.add(e.getHint());
-            enabledValues.add(e.isEnabled());
-            environmentPictures.add(e.getEnvironmentPictureDrawable(getActivity()));
-        }
+
             /* Creating the adapter */
-        final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(),
-                environmentNames, enabledValues, environmentHints, environmentPictures);
+        final EnvironmentListAdapter listAdapter = new EnvironmentListAdapter(getActivity(), environments);
         environmentsListView.setAdapter(listAdapter);
         environmentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(),EditEnvironment.class);
-                intent.putExtra(EditEnvironment.INTENT_EXTRA_ENVIRONMENT,listAdapter.getItem(position));
+                intent.putExtra(EditEnvironment.INTENT_EXTRA_ENVIRONMENT,listAdapter.getItem(position).getName());
                 getActivity().startActivity(intent);
             }
         });
@@ -164,9 +154,8 @@ public class ManageEnvironmentFragment extends Fragment {
                         // Captures all selected ids with a loop
                         for (int i = (selected.size() - 1); i >= 0; i--) {
                             if (selected.valueAt(i)) {
-                                String selectedItem = listAdapter
-                                        .getItem(selected.keyAt(i));
-                                Environment.deleteEnvironmentFromDatabase(getActivity(),selectedItem);
+                                Environment selectedItem = listAdapter.getItem(selected.keyAt(i));
+                                Environment.deleteEnvironmentFromDatabase(getActivity(),selectedItem.getName());
                                 // Remove selected items following the ids
                                 listAdapter.remove(selectedItem);
                             }

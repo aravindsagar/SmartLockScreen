@@ -33,7 +33,7 @@ import java.util.Vector;
  * Created by PV on 9/2/2014.
  * A list adapter which populates items of the list shown in ManageEnvironmentFragment
  */
-public class EnvironmentListAdapter extends ArrayAdapter<String> {
+public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
 
     /**
      * Duration of the animation of "raising" the card when an environment is selected in multi-select mode.
@@ -42,30 +42,12 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
 
     private Context context;
 
-    /**
-     * The list of environment names to be populated in the list
-     */
-    private List<String> environmentNames;
+    private List<Environment> environments;
 
     /**
      * Used to store whether an item is selected in multi select mode
      */
     private SparseBooleanArray mSelectedItemsIds;
-
-    /**
-     * Stores whether environments are enabled or disabled
-     */
-    private List<Boolean> enabledValues;
-
-    /**
-     * Stores the environment hints to be displayed
-     */
-    private List<String> environmentHints;
-
-    /**
-     * Stores the drawables corresponding to each environment
-     */
-    private List<Drawable> environmentPictures;
 
     /**
      * This is used while animating cards. Current elevations of all the items are stored, so that if an animation
@@ -79,57 +61,43 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     private Drawable switchOn, switchOff;
 
     /**
-     * Stores which ImageView was clicked. Used in ChoosePictureActivity
-     */
-    private static ImageView clickedImageView;
-
-    /**
      * Constructor. Takes in all the details required to construct list items.
      * @param context Activity context of calling activity
-     * @param environmentNames
-     * @param enabledValues
-     * @param environmentHints
-     * @param environmentPictures
+     * @param environments
      */
-    public EnvironmentListAdapter(Context context, List<String> environmentNames,
-            List<Boolean> enabledValues, List<String> environmentHints, List<Drawable> environmentPictures){
-        super(context, R.layout.list_view_environments,environmentNames);
+    public EnvironmentListAdapter(Context context, List<Environment> environments){
+        super(context, R.layout.list_view_environments, environments);
+        this.environments = environments;
         this.context = context;
-        this.environmentNames = environmentNames;
         this.mSelectedItemsIds = new SparseBooleanArray();
-        this.enabledValues = enabledValues;
-        this.environmentHints = environmentHints;
-        this.environmentPictures = environmentPictures;
         this.elevations = new Vector<Float>();
 
         switchOn = CustomSwitchHelper.getSwitchOnDrawable(getContext());
         switchOff = CustomSwitchHelper.getSwitchOffDrawable();
 
-        for (int i = 0; i < environmentNames.size(); i++) {
+        for (int i = 0; i < environments.size(); i++) {
             elevations.add(CardTouchListener.CARD_NORMAL_ELEVATION);
         }
-    }
-
-    /**
-     * Gets the clicked image view. Returns non null value only after an image view has been clicked, and ChoosePicture activity is running.
-     * @return the image view which was clicked to launch choose picture activity
-     */
-    public static ImageView getClickedImageView() {
-        return clickedImageView;
     }
 
 
     @Override
     public View getView(final int position, final View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
+        View rootView;
+        final Environment environment = environments.get(position);
+        if(convertView == null) {
+            rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
+        } else {
+            rootView = convertView;
+        }
         CardView cardView = (CardView) rootView.findViewById(R.id.manage_environment_card_view);
         final Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
         TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
-        String environmentName = environmentNames.get(position);
+        final String environmentName = environment.getName();
         textView.setText(environmentName);
         TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
-        hintTextView.setText(environmentHints.get(position));
+        hintTextView.setText(environment.getHint());
         cardView.setPreventCornerOverlap(false);
         cardView.setMaxCardElevation(elevations.get(position));
         cardView.setCardElevation(elevations.get(position));
@@ -159,7 +127,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
             animator.start();
         }
 
-        mSwitch.setChecked(enabledValues.get(position));
+        mSwitch.setChecked(environment.isEnabled());
         if(!mSwitch.isChecked()){
             mSwitch.setThumbDrawable(switchOff);
         } else {
@@ -169,18 +137,22 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
         mSwitch.setOnCheckedChangeListener(new CustomSwitchHelper.CustomSwitchCheckedChangeListener(getContext()) {
             @Override
             public void onCustomCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Environment.setEnabledInDatabase(context,environmentNames.get(position),
+                Environment.setEnabledInDatabase(context,environment.getName(),
                         isChecked);
             }
         });
         final ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
-        environmentPicture.setImageDrawable(environmentPictures.get(position));
+        environmentPicture.setImageDrawable(environment.getEnvironmentPictureDrawable(getContext()));
         environmentPicture.setOnTouchListener(new Picture.PictureTouchListener());
         environmentPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), ChoosePicture.class);
-                clickedImageView = environmentPicture;
+                int[] location = new int[2];
+                environmentPicture.getLocationInWindow(location);
+                intent.putExtra(ChoosePicture.EXTRA_IMAGE_VIEW_START_LOCATION, location);
+                intent.putExtra(ChoosePicture.EXTRA_OBJECT_TYPE, ChoosePicture.ObjectType.USER);
+                intent.putExtra(ChoosePicture.EXTRA_OBJECT_ID, environment.getId());
                 getContext().startActivity(intent);
                 ((Activity)getContext()).overridePendingTransition(0, 0);
             }
@@ -189,14 +161,14 @@ public class EnvironmentListAdapter extends ArrayAdapter<String> {
     }
 
     @Override
-    public void remove(String object) {
-        environmentNames.remove(object);
+    public void remove(Environment object) {
+        environments.remove(object);
         notifyDataSetChanged();
     }
 
     @Override
-    public String getItem(int position) {
-        return environmentNames.get(position);
+    public Environment getItem(int position) {
+        return environments.get(position);
     }
 
     /**

@@ -2,8 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/user_profiles_background">
+    android:layout_height="wrap_content">
     <ImageView
         android:layout_width="@dimen/user_picture_dimen"
         android:layout_height="@dimen/user_picture_dimen"
@@ -22,14 +21,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/user_name_text_view"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/nav_bar_text_size"
             android:layout_gravity="start"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/nav_bar_secondary_text_size"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:layout_gravity="start"
             android:id="@+id/user_type_text_view"/>
     </LinearLayout>
@@ -38,7 +37,7 @@
         android:layout_height="@dimen/nav_bar_icon_dimen"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/drop_down_pic_content_description"
-        android:src="@android:drawable/ic_menu_delete"
+        android:src="@android:drawable/ic_delete"
         android:background="@android:color/transparent"
         android:layout_margin="@dimen/nav_bar_picture_padding"
         android:id="@+id/user_selected_tick_image_view"/>

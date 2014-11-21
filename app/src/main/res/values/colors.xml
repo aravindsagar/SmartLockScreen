@@ -21,8 +21,10 @@
     <color name="action_mode">#ff0d4661</color>
 
     <color name="user_profiles_background">#ff896a39</color>
-    <color name="nav_bar_add_new_profile_background">#ff242421</color>
-    <color name="nav_bar_list_background">#fff5f5f5</color>
+    <color name="nav_bar_add_new_profile_background">#ffffffff</color>
+    <color name="nav_bar_add_new_profile_background_old">#ff242421</color>
+    <color name="nav_bar_list_background">#ffffffff</color>
+    <color name="nav_bar_list_background_old">#fff5f5f5</color>
     <color name="nav_bar_main_item_background">#8cffffff</color>
     <color name="switch_color">#ff8da961</color>
 

@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:background="@color/nav_bar_add_new_profile_background"
     android:id="@+id/linear_layout_new_profile_button">
     <ImageView
@@ -17,14 +17,14 @@
         android:layout_marginTop="@dimen/nav_bar_picture_padding"
         android:layout_marginBottom="@dimen/nav_bar_picture_padding"
         android:id="@+id/user_image_view"
-        android:src="@drawable/ic_action_new"/>
+        android:src="@drawable/ic_action_new_dark"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:id="@+id/add_new_profile_text_view"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:text="@string/add_new_profile_text"/>
 
 </LinearLayout>

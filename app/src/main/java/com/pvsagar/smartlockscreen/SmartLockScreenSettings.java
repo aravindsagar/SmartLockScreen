@@ -1,5 +1,6 @@
 package com.pvsagar.smartlockscreen;
 
+import android.animation.Animator;
 import android.annotation.TargetApi;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -21,11 +22,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.adapters.NavigationDrawerListAdapter;
@@ -85,12 +91,16 @@ public class SmartLockScreenSettings extends ActionBarActivity
     String mTitle;
     int position, prevPosition = -1;
 
-    Spinner usersSpinner;
+    ListView usersList;
+    ImageView currentUserPicture;
+    TextView currentUserName, currentUserDescription;
+    ImageView userListDropDown;
     UserListAdapter adapter;
     int mSelectedUserIndex;
     private long mDeviceOwnerId;
     private int mDeviceOwnerIndex = 0;
     private List<User> allUsers;
+    private boolean isInUserList = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,7 +260,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
         }
         adapter = new UserListAdapter(this, R.layout.nav_drawer_list_item_profile,
                 R.layout.nav_drawer_new_profile, allUsers, mDeviceOwnerIndex, this);
-        usersSpinner.setAdapter(adapter);
+        usersList.setAdapter(adapter);
+        setCurrentUserView();
     }
 
     @Override
@@ -324,25 +335,42 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
         listAdapter = new NavigationDrawerListAdapter(this, mainItemList, mainItemRIds, secondaryItemList, secondaryItemIds);
 
-        LinearLayout navDrawerLayout = (LinearLayout) findViewById(R.id.linear_layout_nav_drawer);
+        RelativeLayout navDrawerLayout = (RelativeLayout) findViewById(R.id.linear_layout_nav_drawer);
+        final LinearLayout currentUserLinearLayout = (LinearLayout) navDrawerLayout.findViewById(R.id.linear_layout_current_user);
+        currentUserLinearLayout.bringToFront();
+        navDrawerLayout.requestLayout();
+        navDrawerLayout.invalidate();
+        currentUserPicture = (ImageView) currentUserLinearLayout.findViewById(R.id.user_image_view);
+        currentUserName = (TextView) currentUserLinearLayout.findViewById(R.id.user_name_text_view);
+        currentUserDescription = (TextView) currentUserLinearLayout.findViewById(R.id.user_type_text_view);
+        userListDropDown = (ImageView) currentUserLinearLayout.findViewById(R.id.user_selected_tick_image_view);
+        currentUserLinearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isInUserList){
+                    hideUserList();
+                } else {
+                    showUserList();
+                }
+                isInUserList = !isInUserList;
+            }
+        });
+
         navDrawerListView = (ListView) navDrawerLayout.findViewById(R.id.drawer_list_view);
 
-        usersSpinner = (Spinner) navDrawerLayout.findViewById(R.id.spinner_user_profiles);
+        usersList = (ListView) navDrawerLayout.findViewById(R.id.list_view_user_profiles);
         refreshUserList();
-        usersSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mSelectedUserIndex = position;
+                setCurrentUserView();
                 if (position == mDeviceOwnerIndex) {
                     onDeviceOwnerSelected();
                 } else {
                     onRestrictedProfileSelected();
                 }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-//                parent.setSelection(0);
+                currentUserLinearLayout.callOnClick();
             }
         });
 
@@ -367,13 +395,103 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(!isInUserList) {
+            usersList.setVisibility(View.GONE);
+            usersList.setTranslationY(-usersList.getHeight());
+        }
+    }
+
+    private void showUserList(){
+        usersList.clearAnimation();
+        usersList.setVisibility(View.VISIBLE);
+
+        usersList.animate().alpha(1f).translationY(0f).setInterpolator(new DecelerateInterpolator())
+                .setListener(null).start();
+        navDrawerListView.animate().scaleX(0f).scaleY(0f).alpha(0).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                navDrawerListView.setVisibility(View.GONE);
+                usersList.setBackgroundColor(Color.TRANSPARENT);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                navDrawerListView.setVisibility(View.GONE);
+                usersList.setBackgroundColor(Color.TRANSPARENT);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        }).setInterpolator(new AccelerateInterpolator()).start();
+
+        userListDropDown.animate().rotation(180).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+    }
+
+    private void hideUserList(){
+        usersList.clearAnimation();
+        usersList.setBackgroundColor(Color.WHITE);
+        usersList.animate().translationY(-usersList.getHeight()).setInterpolator(new AccelerateInterpolator()).
+                setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        usersList.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        usersList.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                }).start();
+
+        navDrawerListView.setVisibility(View.VISIBLE);
+        navDrawerListView.animate().scaleX(1f).scaleY(1f).alpha(1f).setListener(null).
+                setInterpolator(new DecelerateInterpolator()).start();
+        userListDropDown.animate().rotation(0).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+    }
+
+    private void setCurrentUserView(){
+        User currentUser = allUsers.get(mSelectedUserIndex);
+        currentUserPicture.setImageDrawable(currentUser.getUserPictureDrawable(this));
+        currentUserName.setText(currentUser.getUserName());
+        if(currentUser.getId() == mDeviceOwnerId){
+            currentUserDescription.setText(this.getString(R.string.user_type_device_owner));
+        } else {
+            currentUserDescription.setText(this.getString(R.string.user_type_restricted_profile));
+        }
+        if(usersList.getVisibility() == View.VISIBLE){
+            userListDropDown.setImageResource(R.drawable.ic_find_previous_mtrl_alpha);
+        } else {
+            userListDropDown.setImageResource(R.drawable.ic_find_next_mtrl_alpha);
+        }
+    }
+
     private void onDeviceOwnerSelected(){
         listAdapter.setMainItems(mainItemList, mainItemRIds);
         navDrawerListView.setSelection(0);
         listAdapter.setSelectedMainItemIndex(0);
         mTitle = mainItemList.get(0);
-        position = prevPosition = 0;
-        handleMainItemClick();
+        position = 0;
+        prevPosition = -1;
     }
 
     private void onRestrictedProfileSelected(){
@@ -381,8 +499,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
         navDrawerListView.setSelection(0);
         listAdapter.setSelectedMainItemIndex(0);
         mTitle = mainItemList.get(0);
-        position = prevPosition = 0;
-        handleMainItemClick();
+        position = 0;
+        prevPosition = -1;
     }
 
     @Override
