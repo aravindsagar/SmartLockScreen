@@ -3,6 +3,7 @@ package com.pvsagar.smartlockscreen.services.window_helpers;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -37,12 +38,13 @@ public class PatternLockOverlay extends Overlay {
     protected WindowManager.LayoutParams getLayoutParams() {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
-                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
                         WindowManager.LayoutParams.FLAG_DIM_BEHIND | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
         params.dimAmount = 0.5f;
         params.x = 0;
         params.y = 0;
+        params.systemUiVisibility = getSystemUiVisibility();
         return params;
     }
 
@@ -54,7 +56,7 @@ public class PatternLockOverlay extends Overlay {
         final TextView statusView = (TextView) enterPatternLayout.findViewById(R.id.enter_pattern_status_textview);
         final PatternGridView patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
 
-        enterPatternLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        setSystemUiVisibility(enterPatternLayout);
         enterPatternLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,6 +97,26 @@ public class PatternLockOverlay extends Overlay {
             }
         });
         return enterPatternLayout;
+    }
+
+    private void setSystemUiVisibility(final View layout) {
+        layout.setSystemUiVisibility(getSystemUiVisibility());
+        layout.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                setSystemUiVisibility(layout);
+            }
+        });
+    }
+
+    private int getSystemUiVisibility(){
+        int systemUiVisibility;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            systemUiVisibility = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        } else {
+            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        }
+        return systemUiVisibility;
     }
 
     @Override

@@ -37,7 +37,7 @@
         android:layout_height="@dimen/nav_bar_icon_dimen"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/drop_down_pic_content_description"
-        android:src="@android:drawable/ic_delete"
+        android:src="@drawable/ic_delete_user"
         android:background="@android:color/transparent"
         android:layout_margin="@dimen/nav_bar_picture_padding"
         android:id="@+id/user_selected_tick_image_view"/>

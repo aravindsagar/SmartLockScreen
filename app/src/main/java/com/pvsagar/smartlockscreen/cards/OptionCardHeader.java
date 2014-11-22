@@ -3,7 +3,7 @@ package com.pvsagar.smartlockscreen.cards;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
@@ -12,14 +12,15 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 
 /**
  * Created by aravind on 3/10/14.
- * Card header with a title and checkbox
+ * Card header with a title and radio button
  * For the 3rd party card library in use.
  */
-public class EnableDisableCardHeader extends CardHeader {
-    CheckBox checkBox;
+public class OptionCardHeader extends CardHeader {
+    RadioButton radioButton;
     TextView titleView;
-    InnerViewElementsSetUpListener<EnableDisableCardHeader> listener;
-    public EnableDisableCardHeader(Context context, InnerViewElementsSetUpListener<EnableDisableCardHeader> listener) {
+    InnerViewElementsSetUpListener<OptionCardHeader> listener;
+
+    public OptionCardHeader(Context context, InnerViewElementsSetUpListener<OptionCardHeader> listener) {
         super(context);
         this.listener = listener;
     }
@@ -27,15 +28,15 @@ public class EnableDisableCardHeader extends CardHeader {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         super.setupInnerViewElements(parent, view);
-        checkBox = (CheckBox) parent.findViewById(R.id.card_header_checkbox);
+        radioButton = (RadioButton) parent.findViewById(R.id.radio_button_picture_card);
         titleView = (TextView) parent.findViewById(R.id.card_header_title);
         if(listener != null){
             listener.onInnerViewElementsSetUp(this);
         }
     }
 
-    public CheckBox getCheckBox(){
-        return checkBox;
+    public RadioButton getRadioButton(){
+        return radioButton;
     }
 
     @Override

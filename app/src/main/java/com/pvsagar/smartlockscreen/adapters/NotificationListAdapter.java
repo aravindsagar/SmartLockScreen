@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
+import com.pvsagar.smartlockscreen.cards.InnerViewElementsSetUpListener;
 import com.pvsagar.smartlockscreen.cards.NotificationCardHeader;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
@@ -53,7 +54,7 @@ public class NotificationListAdapter extends ArrayAdapter<LockScreenNotification
 
         final CardView cardView = (CardView) rootView.findViewById(R.id.card_view_notification);
         Card card = new Card(getContext());
-        CardHeader cardHeader = new NotificationCardHeader(getContext(),new NotificationCardHeader.InnerViewElementsSetUpListener() {
+        CardHeader cardHeader = new NotificationCardHeader(getContext(),new InnerViewElementsSetUpListener<NotificationCardHeader>() {
             @Override
             public void onInnerViewElementsSetUp(NotificationCardHeader header) {
                 //notification.

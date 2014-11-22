@@ -30,6 +30,7 @@ import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.StorePattern;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
+import com.pvsagar.smartlockscreen.cards.InnerViewElementsSetUpListener;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -160,7 +161,7 @@ public class SetPasswordFragment extends Fragment {
         passphraseCard.setViewToClickToExpand(viewToClickToExpand);
 
         PassphraseCardHeader passphraseCardHeader = new PassphraseCardHeader(getActivity(),
-                new PassphraseCardHeader.InnerViewElementsSetUpListener() {
+                new InnerViewElementsSetUpListener<PassphraseCardHeader>() {
                     @Override
                     public void onInnerViewElementsSetUp(PassphraseCardHeader header) {
                         header.setTitle(getString(R.string.text_view_passphrase));

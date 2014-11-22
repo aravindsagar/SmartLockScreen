@@ -16,8 +16,8 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
  */
 public class EnvironmentCardHeader extends CardHeader {
     TextView titleView;
-    InnerViewElementsSetUpListener listener;
-    public EnvironmentCardHeader(Context context, InnerViewElementsSetUpListener listener) {
+    InnerViewElementsSetUpListener<EnvironmentCardHeader> listener;
+    public EnvironmentCardHeader(Context context, InnerViewElementsSetUpListener<EnvironmentCardHeader> listener) {
         super(context);
         this.listener = listener;
     }
@@ -45,9 +45,5 @@ public class EnvironmentCardHeader extends CardHeader {
             return;
         }
         titleView.setText(title);
-    }
-
-    public interface InnerViewElementsSetUpListener {
-        public void onInnerViewElementsSetUp(EnvironmentCardHeader header);
     }
 }

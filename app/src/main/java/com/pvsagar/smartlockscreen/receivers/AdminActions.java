@@ -89,6 +89,7 @@ public class AdminActions extends DeviceAdminReceiver {
             password = (String) masterPassphrase.getPassphraseRepresentation();
         }
         if(isAdminEnabled()) {
+            mDPM.setPasswordMinimumLength(mDeviceAdmin, 0);
             mDPM.resetPassword(password, 0);
             return true;
         }

@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
+import com.pvsagar.smartlockscreen.cards.InnerViewElementsSetUpListener;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
@@ -81,7 +82,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
         initPassphraseElements();
         setUpButtons();
 
-        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(240));
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(expandedHeight));
     }
 
     protected Activity getActivity(){
@@ -118,7 +119,7 @@ public class SetUnknownEnvironmentPassword extends Activity {
         passphraseCard.setViewToClickToExpand(viewToClickToExpand);
 
         PassphraseCardHeader passphraseCardHeader = new PassphraseCardHeader(getActivity(),
-                new PassphraseCardHeader.InnerViewElementsSetUpListener() {
+                new InnerViewElementsSetUpListener<PassphraseCardHeader>() {
                     @Override
                     public void onInnerViewElementsSetUp(PassphraseCardHeader header) {
                         header.setTitle(getString(R.string.text_view_passphrase));

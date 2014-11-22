@@ -46,11 +46,17 @@ public class UserListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
+        if(position >= mUsers.size()){
+            return null;
+        }
         return mUsers.get(position);
     }
 
     @Override
     public long getItemId(int position) {
+        if(position >= mUsers.size()){
+            return -1;
+        }
         return mUsers.get(position).getId();
     }
 

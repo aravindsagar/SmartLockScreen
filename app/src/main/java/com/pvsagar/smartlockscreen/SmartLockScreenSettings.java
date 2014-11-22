@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -410,7 +409,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
         usersList.animate().alpha(1f).translationY(0f).setInterpolator(new DecelerateInterpolator())
                 .setListener(null).start();
-        navDrawerListView.animate().scaleX(0f).scaleY(0f).alpha(0).setListener(new Animator.AnimatorListener() {
+        navDrawerListView.animate().translationY(usersList.getHeight()).alpha(0).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -432,7 +431,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
             public void onAnimationRepeat(Animator animation) {
 
             }
-        }).setInterpolator(new AccelerateInterpolator()).start();
+        }).setInterpolator(new DecelerateInterpolator()).start();
 
         userListDropDown.animate().rotation(180).setInterpolator(new AccelerateDecelerateInterpolator()).start();
     }
@@ -440,7 +439,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
     private void hideUserList(){
         usersList.clearAnimation();
         usersList.setBackgroundColor(Color.WHITE);
-        usersList.animate().translationY(-usersList.getHeight()).setInterpolator(new AccelerateInterpolator()).
+        usersList.animate().translationY(-usersList.getHeight()).setInterpolator(new AccelerateDecelerateInterpolator()).
                 setListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -464,8 +463,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 }).start();
 
         navDrawerListView.setVisibility(View.VISIBLE);
-        navDrawerListView.animate().scaleX(1f).scaleY(1f).alpha(1f).setListener(null).
-                setInterpolator(new DecelerateInterpolator()).start();
+        navDrawerListView.animate().translationY(0).alpha(1f).setListener(null).
+                setInterpolator(new AccelerateDecelerateInterpolator()).start();
         userListDropDown.animate().rotation(0).setInterpolator(new AccelerateDecelerateInterpolator()).start();
     }
 
@@ -477,11 +476,6 @@ public class SmartLockScreenSettings extends ActionBarActivity
             currentUserDescription.setText(this.getString(R.string.user_type_device_owner));
         } else {
             currentUserDescription.setText(this.getString(R.string.user_type_restricted_profile));
-        }
-        if(usersList.getVisibility() == View.VISIBLE){
-            userListDropDown.setImageResource(R.drawable.ic_find_previous_mtrl_alpha);
-        } else {
-            userListDropDown.setImageResource(R.drawable.ic_find_next_mtrl_alpha);
         }
     }
 

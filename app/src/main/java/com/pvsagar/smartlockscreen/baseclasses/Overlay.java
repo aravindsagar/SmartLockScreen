@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.Context;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -62,5 +63,17 @@ public abstract class Overlay {
         } catch (Exception e){
             //Do nothing
         }
+    }
+
+    protected int getDisplayWidth(){
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displaymetrics);
+        return displaymetrics.widthPixels;
+    }
+
+    protected int getDisplayHeight(){
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(displaymetrics);
+        return displaymetrics.heightPixels;
     }
 }

@@ -18,8 +18,8 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 public class PassphraseCardHeader extends CardHeader {
     Spinner spinner;
     TextView titleView;
-    InnerViewElementsSetUpListener listener;
-    public PassphraseCardHeader(Context context, InnerViewElementsSetUpListener listener) {
+    InnerViewElementsSetUpListener<PassphraseCardHeader> listener;
+    public PassphraseCardHeader(Context context, InnerViewElementsSetUpListener<PassphraseCardHeader> listener) {
         super(context);
         this.listener = listener;
     }
@@ -52,9 +52,5 @@ public class PassphraseCardHeader extends CardHeader {
             return;
         }
         titleView.setText(title);
-    }
-
-    public interface InnerViewElementsSetUpListener {
-        public void onInnerViewElementsSetUp(PassphraseCardHeader header);
     }
 }

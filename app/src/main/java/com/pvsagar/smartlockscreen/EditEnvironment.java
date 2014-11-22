@@ -36,16 +36,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
 import com.pvsagar.smartlockscreen.cards.EnvironmentCardHeader;
+import com.pvsagar.smartlockscreen.cards.InnerViewElementsSetUpListener;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -412,7 +413,7 @@ public class EditEnvironment extends ActionBarActivity {
             environmentCard.setViewToClickToExpand(viewToClickToExpand);
 
             CardHeader environmentCardHeader = new EnvironmentCardHeader(getActivity(),
-                    new EnvironmentCardHeader.InnerViewElementsSetUpListener() {
+                    new InnerViewElementsSetUpListener<EnvironmentCardHeader>() {
                         @Override
                         public void onInnerViewElementsSetUp(EnvironmentCardHeader header) {
                             header.setTitle("Environment");
@@ -495,7 +496,7 @@ public class EditEnvironment extends ActionBarActivity {
 
             bluetoothCard.addCardExpand(new CardBluetoothExpand(getActivity()));
             EnableDisableCardHeader bluetoothCardHeader = new EnableDisableCardHeader(getActivity(),
-                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                    new InnerViewElementsSetUpListener<EnableDisableCardHeader>() {
                         @Override
                         public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
                             setBluetoothItemsEnabled(false);
@@ -594,7 +595,7 @@ public class EditEnvironment extends ActionBarActivity {
 
             wifiCard.addCardExpand(new CardWifiExpand(getActivity()));
             EnableDisableCardHeader wifiCardHeader = new EnableDisableCardHeader(getActivity(),
-                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                    new InnerViewElementsSetUpListener<EnableDisableCardHeader>() {
                         @Override
                         public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
                             setWiFiItemsEnabled(false);
@@ -712,7 +713,7 @@ public class EditEnvironment extends ActionBarActivity {
 
             locationCard.addCardExpand(new CardLocationExpand(getActivity()));
             EnableDisableCardHeader locationCardHeader = new EnableDisableCardHeader(getActivity(),
-                    new EnableDisableCardHeader.InnerViewElementsSetUpListener() {
+                    new InnerViewElementsSetUpListener<EnableDisableCardHeader>() {
                         @Override
                         public void onInnerViewElementsSetUp(EnableDisableCardHeader header) {
                             setLocationItemsEnabled(false);
@@ -773,7 +774,7 @@ public class EditEnvironment extends ActionBarActivity {
 
             passphraseCard.addCardExpand(new CardPassphraseExpand(getActivity()));
             PassphraseCardHeader passphraseCardHeader = new PassphraseCardHeader(getActivity(),
-                    new PassphraseCardHeader.InnerViewElementsSetUpListener() {
+                    new InnerViewElementsSetUpListener<PassphraseCardHeader>() {
                         @Override
                         public void onInnerViewElementsSetUp(PassphraseCardHeader header) {
                             header.setTitle(getString(R.string.text_view_passphrase));

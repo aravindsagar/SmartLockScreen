@@ -17,12 +17,12 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
  */
 public class NotificationCardHeader extends CardHeader {
 
-    InnerViewElementsSetUpListener listener;
+    InnerViewElementsSetUpListener<NotificationCardHeader> listener;
     ImageView notificationImageView;
     TextView titleTextView;
     TextView textTextView;
 
-    public NotificationCardHeader(Context context, InnerViewElementsSetUpListener listener) {
+    public NotificationCardHeader(Context context, InnerViewElementsSetUpListener<NotificationCardHeader> listener) {
         super(context);
         this.listener = listener;
     }
@@ -80,9 +80,5 @@ public class NotificationCardHeader extends CardHeader {
             return;
         }
         notificationImageView.setImageBitmap(bitmap);
-    }
-
-    public interface InnerViewElementsSetUpListener {
-        public void onInnerViewElementsSetUp(NotificationCardHeader header);
     }
 }

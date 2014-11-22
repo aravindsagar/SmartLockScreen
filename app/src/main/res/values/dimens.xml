@@ -21,4 +21,5 @@
     <dimen name="user_grid_text_padding">2dp</dimen>
     <!-- Notifications -->
     <dimen name="notification_card_header_title_size">18sp</dimen>
+    <dimen name="lockscreen_clock_padding">25sp</dimen>
 </resources>
