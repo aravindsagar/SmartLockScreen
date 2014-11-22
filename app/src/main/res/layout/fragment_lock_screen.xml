@@ -119,8 +119,7 @@
         android:layout_width="match_parent"
         android:layout_below="@id/user_image_view"
 
-        app:cardElevation="5dp"
-        android:visibility="gone">
+        app:cardElevation="5dp">
         <!--android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="@dimen/activity_vertical_margin"-->

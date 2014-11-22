@@ -308,18 +308,45 @@ public class LockScreenOverlayHelper extends Overlay{
                 return true;
             }
         });
+        userGridCardView.setTranslationY(-userGridCardView.getHeight());
+        userGridCardView.setAlpha(0f);
+        userGridCardView.setVisibility(View.GONE);
     }
 
     private void showUserGrid(){
+        backgroundDimmer.setAlpha(0f);
         backgroundDimmer.setVisibility(View.VISIBLE);
+        backgroundDimmer.animate().alpha(1f).setListener(null).start();
         userGridCardView.setVisibility(View.VISIBLE);
+        userGridCardView.animate().alpha(1f).translationY(0).setListener(null).
+                setInterpolator(new DecelerateInterpolator()).start();
         rLayout.invalidate();
     }
 
     private void hideUserGrid(){
-        userGridCardView.setVisibility(View.GONE);
-        backgroundDimmer.setVisibility(View.GONE);
-        rLayout.invalidate();
+        backgroundDimmer.animate().alpha(0).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {}
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                backgroundDimmer.setVisibility(View.GONE);
+                userGridCardView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                backgroundDimmer.setVisibility(View.GONE);
+                userGridCardView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+        }).start();
+
+        userGridCardView.animate().translationY(-userGridCardView.getHeight()).alpha(0).start();
+
+//        rLayout.invalidate();
     }
 
     private void lockScreenDismiss(float endVelocity){
