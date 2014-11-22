@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -236,6 +237,11 @@ public class SmartLockScreenSettings extends ActionBarActivity
             case INDEX_SETTINGS:
                 startActivity(new Intent(SmartLockScreenSettings.this, GeneralSettingsActivity.class));
                 break;
+            case INDEX_ABOUT:
+            case INDEX_HELP:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://forum.xda-developers.com/android/apps-games/app-smartlockscreen-android-enjoy-t2919989"));
+                        startActivity(browserIntent);
             default:
                 Toast.makeText(SmartLockScreenSettings.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
         }
