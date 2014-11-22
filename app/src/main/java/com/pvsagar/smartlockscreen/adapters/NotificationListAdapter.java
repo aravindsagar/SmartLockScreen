@@ -115,7 +115,6 @@ public class NotificationListAdapter extends ArrayAdapter<LockScreenNotification
         card.setOnClickListener(new Card.OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                Log.d(LOG_TAG, "Card clicked");
                 if(clickedCard == position){
                     try {
                         mNotification.contentIntent.send();

@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
@@ -30,15 +29,11 @@ public class ScreenReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             WakeLockHelper.acquireWakeLock(WAKE_LOCK_TAG, PowerManager.PARTIAL_WAKE_LOCK, context);
-            Log.d(LOG_TAG, "Screen off");
             context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_START_LOCKSCREEN_OVERLAY));
             context.startService(AppLockService.getServiceIntent(context, AppLockService.ACTION_CLEAR_PREVIOUS_PACKAGE));
         } else {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                //Might be useful later, while adding notifications etc
-                //TODO remove this and the action in intent filter if not required
                 WakeLockHelper.releaseWakeLock(SCREEN_ON_WAKE_LOCK_TAG);
-                Log.d(LOG_TAG, "Screen on");
             }
         }
     }

@@ -40,7 +40,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
                             device.getAddress()));
         } else return;
         Toast.makeText(context, device.getName() + " connected.", Toast.LENGTH_SHORT).show();
-        Log.d(LOG_TAG, "Currently connected device count: " + currentlyConnectedBluetoothDevices.size());
         context.startService(BaseService.getServiceIntent(context, null,
                 BaseService.ACTION_DETECT_ENVIRONMENT));
     }

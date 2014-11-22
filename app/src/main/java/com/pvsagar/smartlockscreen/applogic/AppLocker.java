@@ -1,7 +1,6 @@
 package com.pvsagar.smartlockscreen.applogic;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.DismissKeyguardActivity;
 import com.pvsagar.smartlockscreen.applogic_objects.App;
@@ -30,7 +29,6 @@ public class AppLocker implements OnForegroundAppChangedListener {
         if(User.getCurrentUser(mContext).getId() == User.getDefaultUser(mContext).getId()){
             return;
         }
-        Log.d(LOG_TAG, "Package Name: " + packageName + ", activity name: " + activityName);
         if(isBlockedApp(packageName, activityName)){
             mContext.startService(AppLockService.getServiceIntent(mContext, AppLockService.ACTION_START_APP_LOCK_OVERLAY));
         } else {
@@ -46,13 +44,11 @@ public class AppLocker implements OnForegroundAppChangedListener {
         }
 
         List<App> apps = User.getCurrentUser(mContext).getAllowedApps(mContext);
-        Log.d(LOG_TAG, "current user has " + apps.size() + " allowed apps:\n");
         boolean containsApp = true;
         for (App app : apps) {
             if(app.getPackageName().equals(packageName)){
                 containsApp = false;
             }
-            Log.d(LOG_TAG, app.getPackageName() + ", " + app.getAppName() + "\n");
         }
         return containsApp;
     }

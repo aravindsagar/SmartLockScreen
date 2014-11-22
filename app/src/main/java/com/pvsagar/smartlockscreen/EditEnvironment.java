@@ -341,7 +341,6 @@ public class EditEnvironment extends ActionBarActivity {
             for(int i = 0; i < bluetoothDevices.size(); i++){
                 for (BluetoothEnvironmentVariable bluetoothVariable : bluetoothVariables) {
                     if (bluetoothVariable.getDeviceAddress().equals(bluetoothDevices.get(i).getAddress())) {
-                        Log.d(LOG_TAG, "Adding " + bluetoothDevices.get(i).getName() + " to mSelectedBluetoothDevices.");
                         mSelectedBluetoothDevices.add(bluetoothDevices.get(i));
                         mSelectedBluetoothItems.add(i);
                     }
@@ -934,7 +933,6 @@ public class EditEnvironment extends ActionBarActivity {
                 return;
             } else{
                 if(!environmentName.equals(this.environmentName)) {
-                    Toast.makeText(getActivity(),"Name Check",Toast.LENGTH_SHORT).show();
                     for (String s : Environment.getAllEnvironmentNames(getActivity())) {
                         if (s.equals(environmentName)){
                             //Error
@@ -1053,7 +1051,6 @@ public class EditEnvironment extends ActionBarActivity {
                     passphraseConfirmationEditText.getText().toString().equals(passphraseEditText.getText().toString())) ||
                     pattern != null){
                 //Password changed
-                Log.d(LOG_TAG, "Password changed. Updating in db.");
                 Passphrase passphrase = PassphraseFactory.getPassphraseInstance(selectedPassphrasetype,
                         passphraseEditText.getText().toString(), passphraseEditText.getText().toString(),
                         pattern);

@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
@@ -63,7 +62,6 @@ public class ChoosePicture extends Activity {
         } else {
             initX = initY = 0;
         }
-        Log.d(LOG_TAG, "x = " + initX + ", y = " + initY);
 
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.getLayoutParams();
         params.setMargins(initX, initY, 0, 0);

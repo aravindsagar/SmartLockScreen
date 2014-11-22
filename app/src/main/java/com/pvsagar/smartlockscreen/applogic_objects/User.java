@@ -132,7 +132,7 @@ public class User {
             }
             Uri uri = context.getContentResolver().insert(UsersEntry.CONTENT_URI, getContentValues());
             id = UsersEntry.getUserIdFromUri(uri);
-            Log.d(LOG_TAG, "New user id: " + id);
+//            Log.d(LOG_TAG, "New user id: " + id);
         } else {
             userCursor.moveToFirst();
             User existingUser = getUserFromCursor(userCursor);
