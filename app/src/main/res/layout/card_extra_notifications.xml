@@ -9,17 +9,19 @@
         android:id="@+id/linear_layout_extra_notification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
         android:orientation="horizontal"
         >
         <TextView
             android:id="@+id/text_view_extra_notifications"
             android:layout_gravity="center_vertical"
             android:textSize="20sp"
-            android:gravity="center"
+            android:gravity="start"
             android:textColor="#FF000000"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:layout_marginStart="@dimen/activity_vertical_margin"/>
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

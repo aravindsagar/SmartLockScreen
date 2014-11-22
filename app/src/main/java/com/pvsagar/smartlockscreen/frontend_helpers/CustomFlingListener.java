@@ -22,7 +22,7 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
     float last1MoveX = -1, last1MoveY = -1, last2MoveX = -1, last2MoveY = -1;
     long last1MoveTime = -1, last2MoveTime = -1;
     float downRawX, downRawY;
-    long upTime;
+    long downTime, upTime;
     float velocityX,velocityY,distX,distY;
     static final int MIN_SWIPE_DIST = 60;
     static final int MIN_THRESHOLD_VELOCITY = 100;
@@ -40,6 +40,7 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 downRawX = last1MoveX = event.getRawX();
                 downRawY = last1MoveY = event.getRawY();
+                downTime = new Date().getTime();
                 directionKnown = false;
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -90,6 +91,13 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                     distY = convertPxToDip((int)(upRawY-last2MoveY));
                     velocityX = distX / ((upTime - last2MoveTime)/1000.0f);
                     velocityY = distY / ((upTime - last2MoveTime)/1000.0f);
+                }
+
+                if(velocityX == 0 && velocityY == 0){
+                    distX = convertPxToDip((int)(upRawX-downRawX));
+                    distY = convertPxToDip((int)(upRawY-downRawY));
+                    velocityX = distX / ((upTime - downTime)/1000.0f);
+                    velocityY = distY / ((upTime - downTime)/1000.0f);
                 }
 
                 if(directionKnown) {

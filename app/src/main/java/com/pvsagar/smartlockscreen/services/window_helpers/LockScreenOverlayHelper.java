@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -82,7 +83,7 @@ public class LockScreenOverlayHelper extends Overlay{
     private static final String EXTRA_NOTIFICATION_SUBSTRING_PREFIX = "+ ";
     private static final String EXTRA_NOTIFICATION_SUBSTRING_SUFFIX = " more";
     private static final float CARDS_MIN_ALPHA = 0.0f;
-    private static final float CARDS_MAX_ALPHA = 0.8f;
+    private static final float CARDS_MAX_ALPHA = 0.85f;
 
     private long mDeviceOwnerId;
     private int verticalPadding, horizontalPadding;
@@ -459,7 +460,7 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         }
             // Just change the last card
-            setMoreCard();
+        setMoreCard();
     }
 
     public void notificationRemoved(){
@@ -603,31 +604,30 @@ public class LockScreenOverlayHelper extends Overlay{
                 lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
             }
 
-                    @Override
-                    public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
-                        if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
-                            // Horizontal motion
-                            Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
-                            cardView.setTranslationX(event.getRawX() - downRawX);
-                        } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
-                            float deltaY = event.getRawY() - downRawY;
-                            setLayoutPropertiesOnVerticalMove(deltaY);
-                        }
-                    }
-
-                    @Override
-                    public void onSwipeFail() {
-                        cardView.animate().translationX(0).start();
-                        resetLayoutPropertiesWithAnimation();
-                    }
-                });
-            lsn.setCardView(cardView);
-            lsn.setShown(true);
-            notificationCardsLayout.addView(cardView);
+            @Override
+            public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
+                    // Horizontal motion
+                    Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
+                    cardView.setTranslationX(event.getRawX() - downRawX);
+                } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                    float deltaY = event.getRawY() - downRawY;
+                    setLayoutPropertiesOnVerticalMove(deltaY);
+                }
             }
-        
-    
 
+            @Override
+            public void onSwipeFail() {
+                cardView.animate().translationX(0).start();
+                resetLayoutPropertiesWithAnimation();
+            }
+        });
+    lsn.setCardView(cardView);
+    lsn.setShown(true);
+    notificationCardsLayout.addView(cardView);
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private void setMoreCard(){
         if(notificationCardsLayout == null){
             return;
@@ -647,11 +647,34 @@ public class LockScreenOverlayHelper extends Overlay{
         final CardView cardView;
         moreCard = (CardView) inflater.inflate(R.layout.card_extra_notifications, notificationCardsLayout, false);
         cardView = moreCard;
-        TextView cardExtraTextView = (TextView) cardView.findViewById(R.id.text_view_extra_notifications);
+        LinearLayout moreCardLayout = (LinearLayout) cardView.findViewById(R.id.linear_layout_extra_notification);
+        TextView cardExtraTextView = (TextView) moreCardLayout.findViewById(R.id.text_view_extra_notifications);
         String title = EXTRA_NOTIFICATION_SUBSTRING_PREFIX +
                 (NotificationService.currentNotifications.size() - MAX_NOTIFICATION_SHOWN)
                 + EXTRA_NOTIFICATION_SUBSTRING_SUFFIX;
         cardExtraTextView.setText(title);
+        try {
+            for (LockScreenNotification lsn : NotificationService.currentNotifications) {
+                if (lsn.isShown()) continue;
+                Notification mNotification = lsn.getNotification();
+
+                Bitmap img = (Bitmap) mNotification.extras.get(Notification.EXTRA_LARGE_ICON);
+                if (img == null) {
+                    Drawable app_icon = context.getPackageManager().getApplicationIcon(lsn.getPackageName());
+                    img = ((BitmapDrawable) app_icon).getBitmap();
+                }
+
+                ImageView notificationImageView = new ImageView(context);
+                int picSize = context.getResources().getDimensionPixelSize(R.dimen.nav_bar_icon_dimen), picMargin = context.getResources().getDimensionPixelSize(R.dimen.nav_bar_picture_padding);
+                LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(picSize, picSize);
+                params1.setMargins(picMargin, picMargin, picMargin, picMargin);
+                params1.gravity = Gravity.CENTER_VERTICAL;
+                notificationImageView.setImageBitmap(Picture.getCroppedBitmap(img, Color.DKGRAY));
+                moreCardLayout.addView(notificationImageView, params1);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
