@@ -254,10 +254,9 @@ public class LockScreenOverlayHelper extends Overlay{
                     break;
                 }
             }
-        } else {
+        }
             // Just change the last card
             setMoreCard();
-        }
     }
 
     public void notificationRemoved(){
