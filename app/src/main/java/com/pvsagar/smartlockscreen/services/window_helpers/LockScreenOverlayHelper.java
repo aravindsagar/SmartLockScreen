@@ -50,6 +50,8 @@ import com.pvsagar.smartlockscreen.services.NotificationService;
 
 import java.util.List;
 
+import java.util.ArrayList;
+
 /**
  * Created by aravind on 19/9/14.
  * Helper class for managing LockScreenOverlay
@@ -65,6 +67,8 @@ public class LockScreenOverlayHelper extends Overlay{
     private ImageView backgroundDimmer;
     private DigitalClock digitalClock;
     private ImageView phoneIcon, cameraIcon, phoneIconBackground, cameraIconBackground;
+    private ArrayList<CardView> notificationCards;
+    private CardView moreCard;
 
     public static int clickedCard = -1;
     public static final int MAX_NOTIFICATION_SHOWN = 4;
@@ -103,6 +107,7 @@ public class LockScreenOverlayHelper extends Overlay{
                 digitalClock.getPaddingTop() + horizontalPadding,
                 digitalClock.getPaddingRight() + verticalPadding, digitalClock.getPaddingBottom());
         notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
+        notificationCardsLayout.removeAllViews();
         notificationCardsLayout.bringToFront();
         notificationCardsLayout.setAlpha(CARDS_MAX_ALPHA);
 
@@ -123,9 +128,10 @@ public class LockScreenOverlayHelper extends Overlay{
         });
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Intent intent = new Intent(context,NotificationService.class);
-            intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION);
+            intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS);
             context.startService(intent);
-            notificationChanged();
+            //initNotification();
+            //notificationChanged();
         }
 
         rLayout.setOnTouchListener(new CustomFlingListener(context) {
@@ -424,130 +430,187 @@ public class LockScreenOverlayHelper extends Overlay{
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void notificationChanged(){
-        //NotificationListAdapter.currentNotifications.add(lsn);
-        /*if(notificationListAdapter != null) {
-            notificationListAdapter.notifyDataSetChanged();
-        }*/
+    public void initNotification(){
         Log.d(LOG_TAG,"Entered notification changed");
         if(notificationCardsLayout != null){
             Log.d(LOG_TAG, "Linear Layout not null");
-            if(notificationCardsLayout.getChildCount() > 0){
-                notificationCardsLayout.removeAllViews();
+            if(((LinearLayout)notificationCardsLayout).getChildCount() > 0){
+                ((LinearLayout)notificationCardsLayout).removeAllViews();
             }
+
             //Update the notifications
-            for(int i = 0; i < NotificationService.currentNotifications.size()
-                    && i < MAX_NOTIFICATION_SHOWN; i++){
-                final LockScreenNotification lsn =  NotificationService.currentNotifications.get(i);
-                final int position = i;
-                final CardView cardView = (CardView) inflater.inflate(R.layout.list_item_notification, notificationCardsLayout, false);
-                TextView titleTextView = (TextView) cardView.findViewById(R.id.notification_card_title);
-                TextView subTextTextView = (TextView) cardView.findViewById(R.id.notification_card_subtext);
-                ImageView notificationImageView = (ImageView) cardView.findViewById(R.id.image_view_notification);
+            for(int i = 0; i < NotificationService.currentNotifications.size(); i++){
+                if(i >= MAX_NOTIFICATION_SHOWN){
+                    NotificationService.currentNotifications.get(i).setShown(false);
+                    continue;
+                }
+                setNotificationCard(NotificationService.currentNotifications.get(i));
+            }
+
+            if(NotificationService.currentNotifications.size() > MAX_NOTIFICATION_SHOWN){
+                setMoreCard();
+            }
+        }
+    }
+
+    public void notificationPosted(){
+        if(noOfNotificationShown() < MAX_NOTIFICATION_SHOWN){
+            Log.d(LOG_TAG,"No of notification shown: "+noOfNotificationShown());
+            //Show the new notification
+            for(int i=0; i< NotificationService.currentNotifications.size(); i++){
+                if(NotificationService.currentNotifications.get(i).isShown()){
+                    continue;
+                } else {
+                    // Show this notification
+                    Log.d(LOG_TAG, "Notification not shown");
+                    setNotificationCard(NotificationService.currentNotifications.get(i));
+                    break;
+                }
+            }
+        }
+            // Just change the last card
+            setMoreCard();
+    }
+
+    public void notificationRemoved(){
+        if(notificationCardsLayout == null){
+            return;
+        }
+        for(int i=0; i< NotificationService.removedNotifications.size(); i++){
+            LockScreenNotification lsn = NotificationService.removedNotifications.get(i);
+            notificationCardsLayout.removeView(lsn.getCardView());
+        }
+
+        while(noOfNotificationShown() <
+                ((MAX_NOTIFICATION_SHOWN < NotificationService.currentNotifications.size())?
+                        MAX_NOTIFICATION_SHOWN : NotificationService.currentNotifications.size())){
+            //Add a notification to the layout
+            for(int i=0; i< NotificationService.currentNotifications.size(); i++){
+                if(NotificationService.currentNotifications.get(i).isShown()){
+                    continue;
+                } else {
+                    // Show this notification
+                    Log.d(LOG_TAG, "Notification not shown");
+                    setNotificationCard(NotificationService.currentNotifications.get(i));
+                    break;
+                }
+            }
+        }
+        setMoreCard();
+    }
+
+    private void setNotificationCard(LockScreenNotification lockScreenNotification){
+        if(notificationCardsLayout == null){
+            return;
+        }
+        final LockScreenNotification lsn = lockScreenNotification;
+        final CardView cardView = (CardView) inflater.inflate(R.layout.list_item_notification, notificationCardsLayout, false);
+        TextView titleTextView = (TextView) cardView.findViewById(R.id.notification_card_title);
+        TextView subTextTextView = (TextView) cardView.findViewById(R.id.notification_card_subtext);
+        ImageView notificationImageView = (ImageView) cardView.findViewById(R.id.image_view_notification);
                 /* Populating the notification card */
-                final boolean isClearable = lsn.isClearable();
-                final Notification mNotification = lsn.getNotification();
-                final Bundle extras = mNotification.extras;
-                titleTextView.setText(extras.getString(KEY_NOTIFICATION_TITLE));
-                CharSequence charSequence = (CharSequence) extras.getCharSequence(KEY_NOTIFICATION_TEXT);
-                if(charSequence != null){
-                    subTextTextView.setText(charSequence.toString());
-                }
-                try {
-                    int icon = mNotification.icon;
-                    //Resources res = getContext().getPackageManager().getResourcesForApplication(lsn.getPackageName());
-                    Bitmap img = (Bitmap) mNotification.extras.get(Notification.EXTRA_LARGE_ICON);
-                    if (img == null) {
-                        Drawable app_icon = context.getPackageManager().getApplicationIcon(lsn.getPackageName());
-                        img = ((BitmapDrawable) app_icon).getBitmap();
+        final boolean isOngoing = lsn.isOngoing();
+        final Notification mNotification = lsn.getNotification();
+        final Bundle extras = mNotification.extras;
+        titleTextView.setText(extras.getString(KEY_NOTIFICATION_TITLE));
+        CharSequence charSequence = (CharSequence) extras.getCharSequence(KEY_NOTIFICATION_TEXT);
+        if(charSequence != null){
+            subTextTextView.setText(charSequence.toString());
+        }
+        try {
+            int icon = mNotification.icon;
+            //Resources res = getContext().getPackageManager().getResourcesForApplication(lsn.getPackageName());
+            Bitmap img = (Bitmap) mNotification.extras.get(Notification.EXTRA_LARGE_ICON);
+            if (img == null) {
+                Drawable app_icon = context.getPackageManager().getApplicationIcon(lsn.getPackageName());
+                img = ((BitmapDrawable) app_icon).getBitmap();
+            }
+            notificationImageView.setImageBitmap(Picture.getCroppedBitmap(img, Color.DKGRAY));
+        } catch (Exception e){
+            Log.e(LOG_TAG, e.toString());
+        }
+
+        cardView.setMaxCardElevation(CARD_NORMAL_ELEVATION);
+        cardView.setCardElevation(CARD_NORMAL_ELEVATION);
+        cardView.getBackground().setAlpha(CARD_VIEW_NORMAL_ALPHA);
+
+        //cardView.setOnTouchListener(new CardTouchListener());
+        cardView.setOnClickListener(new View.OnClickListener() {
+            boolean isClicked = false;
+            @Override
+            public void onClick(View v) {
+                if(isClicked){
+                    try {
+                        mNotification.contentIntent.send();
+                        lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
+                    } catch (Exception e){
+                        Log.e(LOG_TAG,e.toString());
                     }
-                    notificationImageView.setImageBitmap(Picture.getCroppedBitmap(img, Color.DKGRAY));
-                } catch (Exception e){
-                    Log.e(LOG_TAG, e.toString());
-                }
+                    cardView.setMaxCardElevation(CARD_NORMAL_ELEVATION);
+                    cardView.setCardElevation(CARD_NORMAL_ELEVATION);
+                    cardView.getBackground().setAlpha(CARD_VIEW_NORMAL_ALPHA);
+                } else{
+                    isClicked = true;
+                    cardView.setMaxCardElevation(CARD_TOUCHED_ELEVATION);
+                    cardView.setCardElevation(CARD_TOUCHED_ELEVATION);
+                    cardView.getBackground().setAlpha(CARD_VIEW_SELECTED_ALPHA);
+                    CountDownTimer cdt = new CountDownTimer((long)2000,(long)2000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
 
-                cardView.setMaxCardElevation(CARD_NORMAL_ELEVATION);
-                cardView.setCardElevation(CARD_NORMAL_ELEVATION);
-                cardView.getBackground().setAlpha(CARD_VIEW_NORMAL_ALPHA);
-
-                //cardView.setOnTouchListener(new CardTouchListener());
-                cardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d(LOG_TAG, "Card clicked: "+position);
-                        if(clickedCard == position){
-                            try {
-                                mNotification.contentIntent.send();
-                                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
-                            } catch (Exception e){
-                                Log.e(LOG_TAG,e.toString());
-                            }
+                        }
+                        @Override
+                        public void onFinish() {
+                            isClicked = false;
                             cardView.setMaxCardElevation(CARD_NORMAL_ELEVATION);
                             cardView.setCardElevation(CARD_NORMAL_ELEVATION);
                             cardView.getBackground().setAlpha(CARD_VIEW_NORMAL_ALPHA);
-                        } else{
-                            clickedCard = position;
-                            cardView.setMaxCardElevation(CARD_TOUCHED_ELEVATION);
-                            cardView.setCardElevation(CARD_TOUCHED_ELEVATION);
-                            cardView.getBackground().setAlpha(CARD_VIEW_SELECTED_ALPHA);
-                            CountDownTimer cdt = new CountDownTimer((long)2000,(long)2000) {
-                                @Override
-                                public void onTick(long millisUntilFinished) {
-
-                                }
-                                @Override
-                                public void onFinish() {
-                                    clickedCard = -1;
-                                    cardView.setMaxCardElevation(CARD_NORMAL_ELEVATION);
-                                    cardView.setCardElevation(CARD_NORMAL_ELEVATION);
-                                    cardView.getBackground().setAlpha(CARD_VIEW_NORMAL_ALPHA);
-                                    //notificationChanged();
-                                }
-                            }.start();
+                            //notificationChanged();
                         }
-                    }
-                });
+                    }.start();
+                }
+            }
+        });
 
-                cardView.setOnTouchListener(new CustomFlingListener(context) {
-                    @Override
-                    public void onRightToLeft(float endVelocity) {
-                        Log.d(LOG_TAG,"Swipe right to left");
-                        if(isClearable){
-                            cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
-                                    .alpha(0f);
-                            lsn.dismiss(context);
-                            notificationCardsLayout.removeView(cardView);
-                        } else {
-                            cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
-                                    alpha(1f);
-                        }
-                    }
+        cardView.setOnTouchListener(new CustomFlingListener(context) {
+            @Override
+            public void onRightToLeft(float endVelocity) {
+                Log.d(LOG_TAG,"Swipe right to left");
+                if(!isOngoing){
+                    cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
+                            .alpha(0f);
+                    lsn.dismiss(context);
+                    notificationCardsLayout.removeView(cardView);
+                } else {
+                    cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
+                            alpha(1f);
+                }
+            }
 
-                    @Override
-                    public void onLeftToRight(float endVelocity) {
-                        Log.d(LOG_TAG, "Swipe left to right");
-                        if(isClearable){
-                            cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
-                                    alpha(0f);
-                            lsn.dismiss(context);
-                            notificationCardsLayout.removeView(cardView);
-                        } else {
-                            cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
-                                    alpha(1f);
-                        }
-                    }
+            @Override
+            public void onLeftToRight(float endVelocity) {
+                Log.d(LOG_TAG,"Swipe left to right");
+                if(!isOngoing){
+                    cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
+                            alpha(0f);
+                    lsn.dismiss(context);
+                    notificationCardsLayout.removeView(cardView);
+                } else {
+                    cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
+                            alpha(1f);
+                }
+            }
 
-                    @Override
-                    public void onTopToBottom(float endVelocity) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
-                        NotificationAreaHelper.expand(context);
-                    }
+            @Override
+            public void onTopToBottom(float endVelocity) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
+                NotificationAreaHelper.expand(context);
+            }
 
-                    @Override
-                    public void onBottomToTop(float endVelocity) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
-                    }
+            @Override
+            public void onBottomToTop(float endVelocity) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+            }
 
                     @Override
                     public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
@@ -567,47 +630,67 @@ public class LockScreenOverlayHelper extends Overlay{
                         resetLayoutPropertiesWithAnimation();
                     }
                 });
-                notificationCardsLayout.addView(cardView);
+            lsn.setCardView(cardView);
+            lsn.setShown(true);
+            notificationCardsLayout.addView(cardView);
+            }
+        
+    
+
+    private void setMoreCard(){
+        if(notificationCardsLayout == null){
+            return;
+        }
+        if(moreCard != null){
+            try {
+                notificationCardsLayout.removeView(moreCard);
+                moreCard = null;
+            } catch (Exception e){
+                Log.e(LOG_TAG,e.toString());
+            }
+        }
+        if(NotificationService.currentNotifications.size() <= MAX_NOTIFICATION_SHOWN){
+            return;
+        }
+        moreCard = null;
+        final CardView cardView;
+        moreCard = (CardView) inflater.inflate(R.layout.card_extra_notifications, notificationCardsLayout, false);
+        cardView = moreCard;
+        TextView cardExtraTextView = (TextView) cardView.findViewById(R.id.text_view_extra_notifications);
+        String title = EXTRA_NOTIFICATION_SUBSTRING_PREFIX +
+                (NotificationService.currentNotifications.size() - MAX_NOTIFICATION_SHOWN)
+                + EXTRA_NOTIFICATION_SUBSTRING_SUFFIX;
+        cardExtraTextView.setText(title);
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, DEFAULT_START_ANIMATION_VELOCITY_DOWN);
+                NotificationAreaHelper.expand(context);
+            }
+        });
+        cardView.setOnTouchListener(new CustomFlingListener(context) {
+            @Override
+            public void onRightToLeft(float endVelocity) {
+                ExternalIntents.launchCamera(context);
+                lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
             }
 
-            if(NotificationService.currentNotifications.size() > MAX_NOTIFICATION_SHOWN){
-                final CardView cardView;
-                cardView = (CardView) inflater.inflate(R.layout.card_extra_notifications, notificationCardsLayout, false);
-                TextView cardExtraTextView = (TextView) cardView.findViewById(R.id.text_view_extra_notifications);
-                String title = EXTRA_NOTIFICATION_SUBSTRING_PREFIX +
-                        (NotificationService.currentNotifications.size() - MAX_NOTIFICATION_SHOWN)
-                        + EXTRA_NOTIFICATION_SUBSTRING_SUFFIX;
-                cardExtraTextView.setText(title);
-                cardView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, DEFAULT_START_ANIMATION_VELOCITY_DOWN);
-                        NotificationAreaHelper.expand(context);
-                    }
-                });
-                cardView.setOnTouchListener(new CustomFlingListener(context) {
-                    @Override
-                    public void onRightToLeft(float endVelocity) {
-                        ExternalIntents.launchCamera(context);
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
-                    }
+            @Override
+            public void onLeftToRight(float endVelocity) {
+                ExternalIntents.launchDialer(context);
+                lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
+            }
 
-                    @Override
-                    public void onLeftToRight(float endVelocity) {
-                        ExternalIntents.launchDialer(context);
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
-                    }
+            @Override
+            public void onTopToBottom(float endVelocity) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
+                NotificationAreaHelper.expand(context);
+            }
 
-                    @Override
-                    public void onTopToBottom(float endVelocity) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
-                        NotificationAreaHelper.expand(context);
-                    }
-
-                    @Override
-                    public void onBottomToTop(float endVelocity) {
-                        lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
-                    }
+            @Override
+            public void onBottomToTop(float endVelocity) {
+                lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+            }
 
                     @Override
                     public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
@@ -628,7 +711,19 @@ public class LockScreenOverlayHelper extends Overlay{
                 cardView.getBackground().setAlpha(60);
                 notificationCardsLayout.addView(cardView);
             }
+        });
+        cardView.getBackground().setAlpha(60);
+        notificationCardsLayout.addView(cardView);
+    }
+
+    public static int noOfNotificationShown(){
+        int count = 0;
+        for(int i=0; i<NotificationService.currentNotifications.size(); i++){
+            if(NotificationService.currentNotifications.get(i).isShown()){
+                count++;
+            }
         }
+        return count;
     }
 
     @Override

@@ -26,10 +26,12 @@ public class NotificationService extends NotificationListenerService{
     public static String EXTRAS_LOCK_SCREEN_NOTIFICATION_ID = ".LockScreenNotification.id";
     public static ArrayList<StatusBarNotification> currentSBN = new ArrayList<StatusBarNotification>();
     public static ArrayList<LockScreenNotification> currentNotifications;
+    public static ArrayList<LockScreenNotification> removedNotifications = new ArrayList<LockScreenNotification>();
 
     //Actions
     public static String ACTION_CANCEL_NOTIFICATION = PACKAGE_NAME + ".cancel_notification";
     public static String ACTION_GET_CURRENT_NOTIFICATION = PACKAGE_NAME + ".get_current_notification";
+    public static String ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS = PACKAGE_NAME + ".get_current_notification_clear_previous";
 
     //Extras
     public static String EXTRAS_CANCEL_NOTIFICATION_KEY = PACKAGE_NAME + ".cancel_notification_key";
@@ -85,6 +87,20 @@ public class NotificationService extends NotificationListenerService{
                         baseIntent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
                         startService(baseIntent);
                     }
+                } else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS)) {
+                    StatusBarNotification[] sbns = getActiveNotifications();
+                    if(sbns != null){
+                        currentNotifications.clear();
+                        currentSBN.clear();
+                        for (StatusBarNotification sbn : sbns) {
+                            LockScreenNotification lsn = new LockScreenNotification(sbn);
+                            currentNotifications.add(lsn);
+                            currentSBN.add(sbn);
+                        }
+                        Intent baseIntent = new Intent(this,BaseService.class);
+                        baseIntent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
+                        startService(baseIntent);
+                    }
                 }
             }
         }
@@ -106,11 +122,7 @@ public class NotificationService extends NotificationListenerService{
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         Log.d(LOG_TAG,"Added:\n"+sbn.toString());
-        //Log.d(LOG_TAG,"Extras: \n"+sbn.getNotification().extras.get(KEY_NOTIFICATION_TITLE));
-        /*LockScreenNotification lsn = new LockScreenNotification(sbn.getId(),sbn.getNotification(),
-                sbn.getPackageName(), sbn.isClearable(), sbn.getTag()); */
         LockScreenNotification lsn = new LockScreenNotification(sbn);
-        //
         for(int i = 0; i < currentNotifications.size(); i++){
             if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
                     currentNotifications.get(i).getId() == sbn.getId() ){
@@ -123,7 +135,7 @@ public class NotificationService extends NotificationListenerService{
         currentNotifications.add(lsn);
         currentSBN.add(sbn);
         Intent intent = new Intent(this,BaseService.class);
-        intent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
+        intent.setAction(BaseService.ACTION_NOTIFICATION_POSTED);
         startService(intent);
 
     }
@@ -138,13 +150,14 @@ public class NotificationService extends NotificationListenerService{
             if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
                     currentNotifications.get(i).getId() == id ){
                 //Log.d(LOG_TAG,"Removing: \n"+NotificationListAdapter.currentNotifications.get(i).getNotification().toString());
+                removedNotifications.add(currentNotifications.get(i));
                 currentNotifications.remove(i);
                 currentSBN.remove(i);
                 break;
             }
         }
         Intent intent = new Intent(this,BaseService.class);
-        intent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
+        intent.setAction(BaseService.ACTION_NOTIFICATION_REMOVED);
         startService(intent);
     }
 }

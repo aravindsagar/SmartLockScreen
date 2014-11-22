@@ -140,8 +140,8 @@ public class NotificationListAdapter extends ArrayAdapter<LockScreenNotification
             }
         });
 
-        card.setSwipeable(lsn.isClearable());
-        if(lsn.isClearable()){
+        card.setSwipeable(!lsn.isOngoing());
+        if(!lsn.isOngoing()){
             card.setOnSwipeListener(new Card.OnSwipeListener() {
                 @Override
                 public void onSwipe(Card card) {
