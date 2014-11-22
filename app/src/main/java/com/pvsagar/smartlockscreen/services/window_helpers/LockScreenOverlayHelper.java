@@ -23,7 +23,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.DigitalClock;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -48,9 +47,8 @@ import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
-import java.util.List;
-
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by aravind on 19/9/14.
@@ -79,9 +77,8 @@ public class LockScreenOverlayHelper extends Overlay{
     public static final float CARD_TOUCHED_ELEVATION = 0f;
     public static final int CARD_VIEW_NORMAL_ALPHA = 200;
     public static final int CARD_VIEW_SELECTED_ALPHA = 255;
-    private static final int DEFAULT_START_ANIMATION_VELOCITY = 0;
     private static final int DEFAULT_START_ANIMATION_VELOCITY_DOWN = 1;
-    private static final int DEFAULT_START_ANIMATION_VELOCITY_UP = -1;
+    private static final int DEFAULT_START_ANIMATION_VELOCITY = 0;
     private static final String EXTRA_NOTIFICATION_SUBSTRING_PREFIX = "+ ";
     private static final String EXTRA_NOTIFICATION_SUBSTRING_SUFFIX = " more";
     private static final float CARDS_MIN_ALPHA = 0.0f;
@@ -119,13 +116,6 @@ public class LockScreenOverlayHelper extends Overlay{
         wallpaper.setColorFilter(Color.argb(100, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
         wallpaperView.setImageDrawable(wallpaper);
 
-        Button unlockButton = (Button) layout.findViewById(R.id.unlock_button);
-        unlockButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
-            }
-        });
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Intent intent = new Intent(context,NotificationService.class);
             intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS);
@@ -280,7 +270,7 @@ public class LockScreenOverlayHelper extends Overlay{
 
             @Override
             public void onSettingsClicked() {
-                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY_UP);
+                lockScreenDismiss(DEFAULT_START_ANIMATION_VELOCITY);
             }
         }));
         userGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -385,9 +375,9 @@ public class LockScreenOverlayHelper extends Overlay{
             userImageView.animate().alpha(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
         } else {
             notificationCardsLayout.animate().translationY(-layout.getHeight()).setListener(new AnimateEndListener())
-                    .alpha(CARDS_MIN_ALPHA).setInterpolator(new AccelerateInterpolator()).start();
-            digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
-            userImageView.animate().alpha(0).setInterpolator(new AccelerateInterpolator()).start();
+                    .alpha(CARDS_MIN_ALPHA).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            userImageView.animate().alpha(0).setInterpolator(new AccelerateDecelerateInterpolator()).start();
         }
     }
 
@@ -434,8 +424,8 @@ public class LockScreenOverlayHelper extends Overlay{
         Log.d(LOG_TAG,"Entered notification changed");
         if(notificationCardsLayout != null){
             Log.d(LOG_TAG, "Linear Layout not null");
-            if(((LinearLayout)notificationCardsLayout).getChildCount() > 0){
-                ((LinearLayout)notificationCardsLayout).removeAllViews();
+            if((notificationCardsLayout).getChildCount() > 0){
+                (notificationCardsLayout).removeAllViews();
             }
 
             //Update the notifications
@@ -499,6 +489,7 @@ public class LockScreenOverlayHelper extends Overlay{
         setMoreCard();
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private void setNotificationCard(LockScreenNotification lockScreenNotification){
         if(notificationCardsLayout == null){
             return;
@@ -669,48 +660,44 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         });
         cardView.setOnTouchListener(new CustomFlingListener(context) {
-            @Override
-            public void onRightToLeft(float endVelocity) {
-                ExternalIntents.launchCamera(context);
-                lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
-            }
+                @Override
+                public void onRightToLeft(float endVelocity) {
+                    ExternalIntents.launchCamera(context);
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
+                }
 
-            @Override
-            public void onLeftToRight(float endVelocity) {
-                ExternalIntents.launchDialer(context);
-                lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
-            }
+                @Override
+                public void onLeftToRight(float endVelocity) {
+                    ExternalIntents.launchDialer(context);
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
+                }
 
-            @Override
-            public void onTopToBottom(float endVelocity) {
-                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
-                NotificationAreaHelper.expand(context);
-            }
+                @Override
+                public void onTopToBottom(float endVelocity) {
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
+                    NotificationAreaHelper.expand(context);
+                }
 
-            @Override
-            public void onBottomToTop(float endVelocity) {
-                lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
-            }
+                @Override
+                public void onBottomToTop(float endVelocity) {
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+                }
 
-                    @Override
-                    public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
-                        if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
-                            float deltaY = event.getRawY() - downRawY;
-                            setLayoutPropertiesOnVerticalMove(deltaY);
-                        } else {
-                            float deltaX = event.getRawX() - downRawX;
-                            setLayoutPropertiesOnHorizontalMove(deltaX);
-                        }
+                @Override
+                public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                    if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                        float deltaY = event.getRawY() - downRawY;
+                        setLayoutPropertiesOnVerticalMove(deltaY);
+                    } else {
+                        float deltaX = event.getRawX() - downRawX;
+                        setLayoutPropertiesOnHorizontalMove(deltaX);
                     }
+                }
 
-                    @Override
-                    public void onSwipeFail() {
-                        resetLayoutPropertiesWithAnimation();
-                    }
-                });
-                cardView.getBackground().setAlpha(60);
-                notificationCardsLayout.addView(cardView);
-            }
+                @Override
+                public void onSwipeFail() {
+                    resetLayoutPropertiesWithAnimation();
+                }
         });
         cardView.getBackground().setAlpha(60);
         notificationCardsLayout.addView(cardView);
