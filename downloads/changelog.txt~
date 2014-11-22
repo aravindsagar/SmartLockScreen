@@ -1,7 +1,16 @@
+alpha v1.3
+----------
+[*] Added restricted profiles. Now you can add restricted profiles, and set a different passphrase for them. You select the apps which are accessible to the profiles. Profile switching is available from the Lock screen overlay.
+[*] Lock screen overlay has better animations and indicators for phone and camera shortcuts.
+[*] The way in which Notifications are handled, has been reworked upon. Certain notifications not going away should be fixed. Blacklist coming soon.
+[*] More card in notifications show the icons of the hidden notifications
+[*] Coming up in next release: wallpaper support, changing pictures of Users and Environments, Notification blacklist.
+
 alpha v1.2
 ----------
 [*] Fixed crash in opening Camera from lockscreen, on certain devices/firmwares
 [*] Persistent notification by the app showing the current environment, can be disabled now. Go to General Settings page of SmartLockScreen Settings to do so.
+[*] Fixed the mapview while selecting location
 [*] Minor adjustments in Lockscreen animations
 
 alpha v1
