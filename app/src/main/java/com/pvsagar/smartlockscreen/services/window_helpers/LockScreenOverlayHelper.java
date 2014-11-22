@@ -422,9 +422,9 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     public void initNotification(){
-        Log.d(LOG_TAG,"Entered notification changed");
+//        Log.d(LOG_TAG,"Entered notification changed");
         if(notificationCardsLayout != null){
-            Log.d(LOG_TAG, "Linear Layout not null");
+//            Log.d(LOG_TAG, "Linear Layout not null");
             if((notificationCardsLayout).getChildCount() > 0){
                 (notificationCardsLayout).removeAllViews();
             }
@@ -446,14 +446,14 @@ public class LockScreenOverlayHelper extends Overlay{
 
     public void notificationPosted(){
         if(noOfNotificationShown() < MAX_NOTIFICATION_SHOWN){
-            Log.d(LOG_TAG,"No of notification shown: "+noOfNotificationShown());
+//            Log.d(LOG_TAG,"No of notification shown: "+noOfNotificationShown());
             //Show the new notification
             for(int i=0; i< NotificationService.currentNotifications.size(); i++){
                 if(NotificationService.currentNotifications.get(i).isShown()){
                     continue;
                 } else {
                     // Show this notification
-                    Log.d(LOG_TAG, "Notification not shown");
+//                    Log.d(LOG_TAG, "Notification not shown");
                     setNotificationCard(NotificationService.currentNotifications.get(i));
                     break;
                 }
@@ -481,7 +481,7 @@ public class LockScreenOverlayHelper extends Overlay{
                     continue;
                 } else {
                     // Show this notification
-                    Log.d(LOG_TAG, "Notification not shown");
+//                    Log.d(LOG_TAG, "Notification not shown");
                     setNotificationCard(NotificationService.currentNotifications.get(i));
                     break;
                 }
@@ -567,7 +567,7 @@ public class LockScreenOverlayHelper extends Overlay{
         cardView.setOnTouchListener(new CustomFlingListener(context) {
             @Override
             public void onRightToLeft(float endVelocity) {
-                Log.d(LOG_TAG,"Swipe right to left");
+//                Log.d(LOG_TAG,"Swipe right to left");
                 if(!isOngoing){
                     cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
                             .alpha(0f);
@@ -581,7 +581,7 @@ public class LockScreenOverlayHelper extends Overlay{
 
             @Override
             public void onLeftToRight(float endVelocity) {
-                Log.d(LOG_TAG,"Swipe left to right");
+//                Log.d(LOG_TAG,"Swipe left to right");
                 if(!isOngoing){
                     cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
                             alpha(0f);
@@ -608,7 +608,7 @@ public class LockScreenOverlayHelper extends Overlay{
             public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
                 if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
                     // Horizontal motion
-                    Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
+//                    Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
                     cardView.setTranslationX(event.getRawX() - downRawX);
                 } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
                     float deltaY = event.getRawY() - downRawY;

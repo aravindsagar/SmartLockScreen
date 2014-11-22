@@ -15,7 +15,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -169,7 +168,6 @@ public class SmartLockScreenSettings extends ActionBarActivity
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft;
         boolean isValid = true;
-        Log.d(LOG_TAG, "Position: " + position);
         int itemArrayIndex = listAdapter.getItemArrayIndex(position);
         if(mSelectedUserIndex == mDeviceOwnerIndex) {
             switch (itemArrayIndex) {
