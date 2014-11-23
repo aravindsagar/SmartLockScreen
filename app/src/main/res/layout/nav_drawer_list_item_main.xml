@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:minHeight="?listPreferredItemHeight"
+    android:minHeight="@dimen/nav_bar_item_height"
     android:background="@color/nav_bar_main_item_background">
     <ImageView
         android:layout_width="@dimen/nav_bar_icon_dimen"
@@ -21,9 +21,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:textAppearance="?android:textAppearanceMedium"
+        android:textAppearance="?android:textAppearanceSmall"
         android:fontFamily="sans-serif-light"
         android:textSize="@dimen/nav_bar_text_size"
+        android:paddingLeft="@dimen/nav_bar_text_padding"
+        android:paddingStart="@dimen/nav_bar_text_padding"
         android:textColor="@android:color/black"
         android:id="@+id/list_item_text_view"/>
 

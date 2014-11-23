@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +45,8 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
      */
     private int selectedMainItemIndex = -1;
 
-    private Typeface selectedItemTypeface, unSelectedItemTypeface;
+    private Typeface itemTypeface;
+    private int selectedItemBackgroundColor;
 
     /**
      * Constructor which takes in the required data to create list items
@@ -62,8 +64,8 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         mSecondaryItems = secondaryItems;
         mSecondaryItemImageRIds = secondaryItemImageRIds;
 
-        selectedItemTypeface = Typeface.DEFAULT_BOLD;
-        unSelectedItemTypeface = Typeface.create("sans-serif-light", Typeface.NORMAL);
+        itemTypeface = Typeface.DEFAULT_BOLD;
+        selectedItemBackgroundColor = context.getResources().getColor(R.color.text_view_touched);
     }
 
     private Context getContext(){
@@ -111,11 +113,12 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
                 if(mMainItemImageRIds != null && arrayIndex < mMainItemImageRIds.size() && mMainItemImageRIds.get(arrayIndex) != null){
                     viewHolder.iconView.setImageResource(mMainItemImageRIds.get(arrayIndex));
                 }
+                viewHolder.itemName.setTypeface(itemTypeface);
                 viewHolder.itemName.setText(mMainItems.get(arrayIndex));
                 if(arrayIndex == selectedMainItemIndex){
-                    viewHolder.itemName.setTypeface(selectedItemTypeface);
+                    convertView.setBackgroundColor(selectedItemBackgroundColor);
                 } else {
-                    viewHolder.itemName.setTypeface(unSelectedItemTypeface);
+                    convertView.setBackgroundColor(Color.TRANSPARENT);
                 }
                 break;
 
@@ -134,7 +137,8 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
                 if(mSecondaryItemImageRIds != null && arrayIndex < mSecondaryItemImageRIds.size() && mSecondaryItemImageRIds.get(arrayIndex) != null){
                     viewHolder.iconView.setImageResource(mSecondaryItemImageRIds.get(arrayIndex));
                 }
-                viewHolder.itemName = (TextView) convertView.findViewById(R.id.list_item_text_view);
+
+                viewHolder.itemName.setTypeface(itemTypeface);
                 viewHolder.itemName.setText(mSecondaryItems.get(arrayIndex));
                 break;
         }
@@ -149,13 +153,15 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
             return ITEM_TYPE_SEPARATOR;
         } else if(position < mMainItems.size() + mSecondaryItems.size() + 1){
             return ITEM_TYPE_SECONDARY;
+        } else if(position == mMainItems.size() + mSecondaryItems.size() + 1){
+            return ITEM_TYPE_SEPARATOR;
         }
         return -1;
     }
 
     @Override
     public int getCount() {
-        return mMainItems.size() + mSecondaryItems.size() + 1;
+        return mMainItems.size() + mSecondaryItems.size() + 2;
     }
 
     @Override
