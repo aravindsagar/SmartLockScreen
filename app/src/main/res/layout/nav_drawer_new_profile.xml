@@ -25,6 +25,8 @@
         android:layout_gravity="center_vertical"
         android:id="@+id/add_new_profile_text_view"
         android:textColor="@android:color/black"
+        android:paddingLeft="@dimen/nav_bar_text_padding"
+        android:paddingStart="@dimen/nav_bar_text_padding"
         android:text="@string/add_new_profile_text"/>
 
 </LinearLayout>

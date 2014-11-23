@@ -485,5 +485,8 @@ public class BaseService extends Service implements
             ScreenReceiver.turnScreenOff(this);
             ScreenReceiver.turnScreenOn(this);
         }
+        if(mLockScreenOverlayHelper != null){
+            mLockScreenOverlayHelper.setUpEnvironmentOptions();
+        }
     }
 }

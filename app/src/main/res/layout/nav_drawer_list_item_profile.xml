@@ -16,6 +16,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
+        android:paddingLeft="@dimen/nav_bar_text_padding"
+        android:paddingStart="@dimen/nav_bar_text_padding"
         android:orientation="vertical">
         <TextView
             android:layout_width="wrap_content"
@@ -27,7 +29,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/nav_bar_secondary_text_size"
+            android:textSize="@dimen/nav_bar_sub_text_size"
             android:textColor="@android:color/black"
             android:layout_gravity="start"
             android:id="@+id/user_type_text_view"/>

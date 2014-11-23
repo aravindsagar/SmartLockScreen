@@ -96,13 +96,13 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
 
                 if(directionKnown) {
                     if (direction == DIRECTION_UP && velocityY < -MIN_THRESHOLD_VELOCITY) {
-                            onBottomToTop(-velocityY / 500.0f);
+                            onBottomToTop(-velocityY / 300.0f);
                     } else if (direction == DIRECTION_DOWN && velocityY > MIN_THRESHOLD_VELOCITY) {
-                            onTopToBottom(velocityY / 500.0f);
+                            onTopToBottom(velocityY / 300.0f);
                     } else if (direction == DIRECTION_LEFT && velocityX < -MIN_THRESHOLD_VELOCITY) {
-                            onRightToLeft(-velocityX / 500.0f);
+                            onRightToLeft(-velocityX / 300.0f);
                     } else if (direction == DIRECTION_RIGHT && velocityX > MIN_THRESHOLD_VELOCITY) {
-                        onLeftToRight(velocityX / 500.0f);
+                        onLeftToRight(velocityX / 300.0f);
                     } else {
                         onSwipeFail();
                     }

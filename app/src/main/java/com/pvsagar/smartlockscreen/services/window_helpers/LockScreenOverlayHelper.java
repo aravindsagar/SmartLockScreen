@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -24,6 +23,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.DigitalClock;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -34,6 +34,7 @@ import android.widget.TextView;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.adapters.NotificationListAdapter;
 import com.pvsagar.smartlockscreen.adapters.UserListAdapter;
+import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
@@ -41,10 +42,13 @@ import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
+import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomFlingListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.ExternalIntents;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationAreaHelper;
+import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
+import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
@@ -61,8 +65,8 @@ public class LockScreenOverlayHelper extends Overlay{
     private LinearLayout notificationCardsLayout;
     private RelativeLayout rLayout;
     private LinearLayout layout;
-    private ImageView userImageView;
-    private CardView userGridCardView;
+    private ImageView userImageView, environmentImageView;
+    private CardView userGridCardView, environmentOptionsCardView;
     private ImageView backgroundDimmer;
     private DigitalClock digitalClock;
     private ImageView phoneIcon, cameraIcon, phoneIconBackground, cameraIconBackground;
@@ -113,9 +117,11 @@ public class LockScreenOverlayHelper extends Overlay{
 
         //TODO add wallpaper support!
         ImageView wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
-        Drawable wallpaper = context.getResources().getDrawable(R.drawable.background);
-        wallpaper.setColorFilter(Color.argb(100, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
+        Drawable wallpaper = WallpaperHelper.getWallpaperDrawable(context);
         wallpaperView.setImageDrawable(wallpaper);
+
+        /*wallpaperView.setScaleType(ImageView.ScaleType.MATRIX);
+        wallpaperView.setImageMatrix(new Matrix());*/
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Intent intent = new Intent(context,NotificationService.class);
@@ -168,8 +174,65 @@ public class LockScreenOverlayHelper extends Overlay{
 
         setUpAllUsersOverlay();
         setUpShortcuts();
+        setUpEnvironmentOptions();
 
         return rLayout;
+    }
+
+    public void setUpEnvironmentOptions() {
+        if(rLayout == null) return;
+        environmentImageView = (ImageView) rLayout.findViewById(R.id.environment_image_view);
+        String currentEnvironmentName;
+        if(BaseService.getCurrentEnvironments() != null && !BaseService.getCurrentEnvironments().isEmpty()) {
+            environmentImageView.setImageDrawable(BaseService.getCurrentEnvironments().get(0).getEnvironmentPictureDrawable(context));
+            currentEnvironmentName = "Current Environment: " + BaseService.getCurrentEnvironments().get(0).getName();
+        } else {
+            environmentImageView.setImageDrawable(new CharacterDrawable('?', Color.rgb(150, 150, 150)));
+            currentEnvironmentName = context.getString(R.string.unknown_environment);
+        }
+
+        environmentOptionsCardView = (CardView) rLayout.findViewById(R.id.card_view_environment_options);
+        Button masterPassphraseButton = (Button) environmentOptionsCardView.findViewById(R.id.button_master_passphrase_unlock);
+        masterPassphraseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Passphrase.getMasterPassword(context).setAsCurrentPassword(context);
+                new Thread(){
+                    @Override
+                    public void run() {
+                        super.run();
+                        try {
+                            EnvironmentDetector.manageEnvironmentDetectionCriticalSection.acquire();
+                            Thread.sleep(20 * 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } finally {
+                            EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
+                            context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_DETECT_ENVIRONMENT));
+                        }
+                    }
+                }.start();
+                ScreenReceiver.turnScreenOff(context);
+                ScreenReceiver.turnScreenOn(context);
+            }
+        });
+        TextView currentEnvironmentNameTextView = (TextView) environmentOptionsCardView.findViewById(R.id.text_view_current_environment);
+        currentEnvironmentNameTextView.setText(currentEnvironmentName);
+
+        environmentImageView.setOnTouchListener(new Picture.PictureTouchListener());
+        environmentImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(environmentOptionsCardView.getVisibility() == View.GONE) {
+                    showEnvironmentOptions();
+                } else {
+                    hideEnvironmentOptions();
+                }
+            }
+        });
+        environmentOptionsCardView.setTranslationY(-userGridCardView.getHeight());
+        environmentOptionsCardView.setAlpha(0f);
+        environmentOptionsCardView.setVisibility(View.GONE);
     }
 
     private void setUpShortcuts() {
@@ -211,10 +274,28 @@ public class LockScreenOverlayHelper extends Overlay{
         float scaleFactor = deltaY/(float)layout.getHeight();
         notificationCardsLayout.setTranslationY(deltaY);
         notificationCardsLayout.setAlpha((1 - Math.abs(scaleFactor)) * (CARDS_MAX_ALPHA - CARDS_MIN_ALPHA));
-        userImageView.setAlpha(1.0f - Math.abs(scaleFactor));
+
         digitalClock.setAlpha(1.0f - Math.abs(scaleFactor));
         digitalClock.setScaleX(1.0f + scaleFactor);
         digitalClock.setScaleY(1.0f + scaleFactor);
+
+        userImageView.setScaleX(1.0f - Math.abs(scaleFactor));
+        userImageView.setScaleY(1.0f - Math.abs(scaleFactor));
+
+        environmentImageView.setScaleX(1.0f - Math.abs(scaleFactor));
+        environmentImageView.setScaleY(1.0f - Math.abs(scaleFactor));
+
+        phoneIconBackground.setScaleX(1.0f - Math.abs(scaleFactor));
+        phoneIconBackground.setScaleY(1.0f - Math.abs(scaleFactor));
+
+        phoneIcon.setScaleX(1.0f - Math.abs(scaleFactor));
+        phoneIcon.setScaleY(1.0f - Math.abs(scaleFactor));
+
+        cameraIconBackground.setScaleX(1.0f - Math.abs(scaleFactor));
+        cameraIconBackground.setScaleY(1.0f - Math.abs(scaleFactor));
+
+        cameraIcon.setScaleX(1.0f - Math.abs(scaleFactor));
+        cameraIcon.setScaleY(1.0f - Math.abs(scaleFactor));
     }
 
     private void setLayoutPropertiesOnHorizontalMove(float deltaX){
@@ -222,6 +303,7 @@ public class LockScreenOverlayHelper extends Overlay{
         layout.setScaleX(scaleFactor);
         layout.setScaleY(scaleFactor);
         userImageView.setAlpha(scaleFactor);
+        environmentImageView.setAlpha(scaleFactor);
         if(deltaX > 0){
             phoneIconBackground.setScaleX(deltaX/phoneIconBackground.getWidth()/2 + 1);
             phoneIconBackground.setScaleY(deltaX/phoneIconBackground.getWidth()/2 + 1);
@@ -240,15 +322,18 @@ public class LockScreenOverlayHelper extends Overlay{
                 setInterpolator(new AccelerateDecelerateInterpolator()).start();
         notificationCardsLayout.animate().translationY(0).alpha(CARDS_MAX_ALPHA).
                 setInterpolator(new AccelerateDecelerateInterpolator()).start();
-        userImageView.animate().alpha(1).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        userImageView.animate().alpha(1).scaleX(1).scaleY(1).
+                setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        environmentImageView.animate().alpha(1).scaleX(1).scaleY(1).
+                setInterpolator(new AccelerateDecelerateInterpolator()).start();
         digitalClock.animate().scaleY(1).scaleX(1).alpha(1).
                 setInterpolator(new AccelerateDecelerateInterpolator()).start();
         phoneIconBackground.animate().scaleY(1).scaleX(1).alpha(1).
                 setInterpolator(new AccelerateInterpolator()).start();
         cameraIconBackground.animate().scaleY(1).scaleX(1).alpha(1).
                 setInterpolator(new AccelerateInterpolator()).start();
-        phoneIcon.animate().alpha(1).start();
-        cameraIcon.animate().alpha(1).start();
+        phoneIcon.animate().scaleX(1).scaleY(1).alpha(1).start();
+        cameraIcon.animate().scaleX(1).scaleY(1).alpha(1).start();
     }
 
     private void setUpAllUsersOverlay(){
@@ -302,6 +387,7 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 hideUserGrid();
+                hideEnvironmentOptions();
                 return true;
             }
         });
@@ -311,9 +397,7 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void showUserGrid(){
-        backgroundDimmer.setAlpha(0f);
-        backgroundDimmer.setVisibility(View.VISIBLE);
-        backgroundDimmer.animate().alpha(1f).setListener(null).start();
+        showBackgroundDimmer();
         userGridCardView.setVisibility(View.VISIBLE);
         userGridCardView.animate().alpha(1f).translationY(0).setListener(null).
                 setInterpolator(new DecelerateInterpolator()).start();
@@ -321,6 +405,66 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void hideUserGrid(){
+        hideBackgroundDimmer();
+        userGridCardView.animate().translationY(-userGridCardView.getHeight()).alpha(0).
+                setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        userGridCardView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        userGridCardView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {}
+                }).start();
+    }
+
+    private void showEnvironmentOptions(){
+        environmentOptionsCardView.setVisibility(View.VISIBLE);
+        environmentOptionsCardView.animate().alpha(1f).translationY(0).setListener(null).
+                setInterpolator(new DecelerateInterpolator()).start();
+        showBackgroundDimmer();
+    }
+
+    private void hideEnvironmentOptions(){
+        hideBackgroundDimmer();
+        environmentOptionsCardView.animate().translationY(-environmentOptionsCardView.getHeight()).alpha(0).
+                setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        environmentOptionsCardView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        environmentOptionsCardView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+                    }
+                }).start();
+    }
+
+    private void showBackgroundDimmer(){
+        backgroundDimmer.setAlpha(0f);
+        backgroundDimmer.setVisibility(View.VISIBLE);
+        backgroundDimmer.animate().alpha(1f).setListener(null).start();
+    }
+
+    private void hideBackgroundDimmer(){
+
         backgroundDimmer.animate().alpha(0).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {}
@@ -328,22 +472,16 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onAnimationEnd(Animator animation) {
                 backgroundDimmer.setVisibility(View.GONE);
-                userGridCardView.setVisibility(View.GONE);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
                 backgroundDimmer.setVisibility(View.GONE);
-                userGridCardView.setVisibility(View.GONE);
             }
 
             @Override
             public void onAnimationRepeat(Animator animation) {}
         }).start();
-
-        userGridCardView.animate().translationY(-userGridCardView.getHeight()).alpha(0).start();
-
-//        rLayout.invalidate();
     }
 
     private void lockScreenDismiss(float endVelocity){
@@ -356,24 +494,27 @@ public class LockScreenOverlayHelper extends Overlay{
                 notificationCardsLayout.animate().translationY(-layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
                         .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener()).start();
                 digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
-                dismissShortcutIcons();
+                dismissCornerIcons();
             } else if (direction == CustomFlingListener.DIRECTION_DOWN) {
                 notificationCardsLayout.animate().translationY(layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
                         .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener()).start();
                 digitalClock.animate().scaleY(2).scaleX(2).alpha(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
-                dismissShortcutIcons();
+                dismissCornerIcons();
             } else if (direction == CustomFlingListener.DIRECTION_LEFT) {
                 layout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener()).
                         setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 cameraIconBackground.animate().scaleX(shortcutBackgroundMaxScale).scaleY(shortcutBackgroundMaxScale).
-                        setInterpolator(new DecelerateInterpolator(0.5f)).start();
+                        setInterpolator(new DecelerateInterpolator(0.25f)).start();
+                fadeOutUserAndEnvironmentPicture();
+                fadeOutPhoneIcon();
             } else {
                 layout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener()).
                         setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 phoneIconBackground.animate().scaleX(shortcutBackgroundMaxScale).scaleY(shortcutBackgroundMaxScale).
-                        setInterpolator(new DecelerateInterpolator(0.5f)).start();
+                        setInterpolator(new DecelerateInterpolator(0.25f)).start();
+                fadeOutUserAndEnvironmentPicture();
+                fadeOutCameraIcon();
             }
-            userImageView.animate().alpha(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
         } else {
             notificationCardsLayout.animate().translationY(-layout.getHeight()).setListener(new AnimateEndListener())
                     .alpha(CARDS_MIN_ALPHA).setInterpolator(new AccelerateDecelerateInterpolator()).start();
@@ -382,11 +523,28 @@ public class LockScreenOverlayHelper extends Overlay{
         }
     }
 
-    private void dismissShortcutIcons(){
+    private void fadeOutUserAndEnvironmentPicture() {
+        userImageView.animate().alpha(0).start();
+        environmentImageView.animate().alpha(0).start();
+    }
+
+    private void fadeOutCameraIcon(){
+        cameraIconBackground.animate().alpha(0).start();
+        cameraIcon.animate().alpha(0).start();
+    }
+
+    private void fadeOutPhoneIcon(){
+        phoneIconBackground.animate().alpha(0).start();
+        phoneIcon.animate().alpha(0).start();
+    }
+
+    private void dismissCornerIcons(){
         phoneIconBackground.animate().scaleX(0).scaleY(0).setInterpolator(new AccelerateInterpolator()).start();
         cameraIconBackground.animate().scaleX(0).scaleY(0).setInterpolator(new AccelerateInterpolator()).start();
         cameraIcon.animate().scaleX(0).scaleY(0).setInterpolator(new AccelerateInterpolator()).start();
         phoneIcon.animate().scaleX(0).scaleY(0).setInterpolator(new AccelerateInterpolator()).start();
+        userImageView.animate().scaleX(0).scaleY(0).setInterpolator(new AccelerateInterpolator()).start();
+        environmentImageView.animate().scaleX(0).scaleY(0).setInterpolator(new AccelerateInterpolator()).start();
     }
 
     private class AnimateEndListener implements Animator.AnimatorListener{
@@ -445,15 +603,23 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     public void notificationPosted(){
-        if(noOfNotificationShown() < MAX_NOTIFICATION_SHOWN){
+        boolean additionDone = false;
 //            Log.d(LOG_TAG,"No of notification shown: "+noOfNotificationShown());
             //Show the new notification
+        for(int i=0; i< NotificationService.currentNotifications.size(); i++){
+            if(NotificationService.currentNotifications.get(i).isShown()){
+                continue;
+            } else if(NotificationService.currentNotifications.get(i).getCardView() != null) {
+                setNotificationCard(NotificationService.currentNotifications.get(i));
+                additionDone = true;
+                break;
+            }
+        }
+        if(!additionDone){
             for(int i=0; i< NotificationService.currentNotifications.size(); i++){
                 if(NotificationService.currentNotifications.get(i).isShown()){
                     continue;
-                } else {
-                    // Show this notification
-//                    Log.d(LOG_TAG, "Notification not shown");
+                } else if(noOfNotificationShown() < MAX_NOTIFICATION_SHOWN) {
                     setNotificationCard(NotificationService.currentNotifications.get(i));
                     break;
                 }
@@ -496,7 +662,15 @@ public class LockScreenOverlayHelper extends Overlay{
             return;
         }
         final LockScreenNotification lsn = lockScreenNotification;
-        final CardView cardView = (CardView) inflater.inflate(R.layout.list_item_notification, notificationCardsLayout, false);
+        final CardView cardView;
+        boolean shouldAdd;
+        if(lsn.getCardView() != null){
+            cardView = lsn.getCardView();
+            shouldAdd = false;
+        } else {
+            cardView = (CardView) inflater.inflate(R.layout.list_item_notification, notificationCardsLayout, false);
+            shouldAdd = true;
+        }
         TextView titleTextView = (TextView) cardView.findViewById(R.id.notification_card_title);
         TextView subTextTextView = (TextView) cardView.findViewById(R.id.notification_card_subtext);
         ImageView notificationImageView = (ImageView) cardView.findViewById(R.id.image_view_notification);
@@ -565,66 +739,68 @@ public class LockScreenOverlayHelper extends Overlay{
         });
 
         cardView.setOnTouchListener(new CustomFlingListener(context) {
-            @Override
-            public void onRightToLeft(float endVelocity) {
-//                Log.d(LOG_TAG,"Swipe right to left");
-                if(!isOngoing){
-                    cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
-                            .alpha(0f);
-                    lsn.dismiss(context);
-                    notificationCardsLayout.removeView(cardView);
-                } else {
-                    cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
-                            alpha(1f);
+                @Override
+                public void onRightToLeft(float endVelocity) {
+    //                Log.d(LOG_TAG,"Swipe right to left");
+                    if(!isOngoing){
+                        cardView.animate().translationX(-cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity/2))
+                                .alpha(0f);
+                        lsn.dismiss(context);
+                        notificationCardsLayout.removeView(cardView);
+                    } else {
+                        cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity/2)).
+                                alpha(1f);
+                    }
                 }
-            }
 
-            @Override
-            public void onLeftToRight(float endVelocity) {
-//                Log.d(LOG_TAG,"Swipe left to right");
-                if(!isOngoing){
-                    cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
-                            alpha(0f);
-                    lsn.dismiss(context);
-                    notificationCardsLayout.removeView(cardView);
-                } else {
-                    cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
-                            alpha(1f);
+                @Override
+                public void onLeftToRight(float endVelocity) {
+    //                Log.d(LOG_TAG,"Swipe left to right");
+                    if(!isOngoing){
+                        cardView.animate().translationX(cardView.getWidth()).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
+                                alpha(0f);
+                        lsn.dismiss(context);
+                        notificationCardsLayout.removeView(cardView);
+                    } else {
+                        cardView.animate().translationX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).
+                                alpha(1f);
+                    }
                 }
-            }
 
-            @Override
-            public void onTopToBottom(float endVelocity) {
-                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
-                NotificationAreaHelper.expand(context);
-            }
-
-            @Override
-            public void onBottomToTop(float endVelocity) {
-                lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
-            }
-
-            @Override
-            public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
-                if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
-                    // Horizontal motion
-//                    Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
-                    cardView.setTranslationX(event.getRawX() - downRawX);
-                } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
-                    float deltaY = event.getRawY() - downRawY;
-                    setLayoutPropertiesOnVerticalMove(deltaY);
+                @Override
+                public void onTopToBottom(float endVelocity) {
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
+                    NotificationAreaHelper.expand(context);
                 }
-            }
 
-            @Override
-            public void onSwipeFail() {
-                cardView.animate().translationX(0).start();
-                resetLayoutPropertiesWithAnimation();
-            }
+                @Override
+                public void onBottomToTop(float endVelocity) {
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+                }
+
+                @Override
+                public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                    if(direction == CustomFlingListener.DIRECTION_LEFT || direction == CustomFlingListener.DIRECTION_RIGHT){
+                        // Horizontal motion
+    //                    Log.d(LOG_TAG,"Down x: "+downRawX+"  eventx: "+event.getRawX());
+                        cardView.setTranslationX(event.getRawX() - downRawX);
+                    } else if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                        float deltaY = event.getRawY() - downRawY;
+                        setLayoutPropertiesOnVerticalMove(deltaY);
+                    }
+                }
+
+                @Override
+                public void onSwipeFail() {
+                    cardView.animate().translationX(0).start();
+                    resetLayoutPropertiesWithAnimation();
+                }
         });
-    lsn.setCardView(cardView);
-    lsn.setShown(true);
-    notificationCardsLayout.addView(cardView);
+        lsn.setCardView(cardView);
+        lsn.setShown(true);
+        if(shouldAdd) {
+            notificationCardsLayout.addView(cardView);
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -722,7 +898,7 @@ public class LockScreenOverlayHelper extends Overlay{
                     resetLayoutPropertiesWithAnimation();
                 }
         });
-        cardView.getBackground().setAlpha(60);
+        cardView.getBackground().setAlpha(150);
         notificationCardsLayout.addView(cardView);
     }
 

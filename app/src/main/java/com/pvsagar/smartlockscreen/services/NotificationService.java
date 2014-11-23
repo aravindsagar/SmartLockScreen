@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.support.v7.widget.CardView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
 
@@ -119,14 +120,19 @@ public class NotificationService extends NotificationListenerService{
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         LockScreenNotification lsn = new LockScreenNotification(sbn);
+        CardView currentCardView = null;
         for(int i = 0; i < currentNotifications.size(); i++){
             if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
                     currentNotifications.get(i).getId() == sbn.getId() ){
                 //Log.d(LOG_TAG,"Removing for adding: \n"+NotificationListAdapter.currentNotifications.get(i).getNotification().toString());
+                currentCardView = currentNotifications.get(i).getCardView();
                 currentNotifications.remove(i);
                 currentSBN.remove(i);
                 break;
             }
+        }
+        if(currentCardView != null){
+            lsn.setCardView(currentCardView);
         }
         currentNotifications.add(lsn);
         currentSBN.add(sbn);

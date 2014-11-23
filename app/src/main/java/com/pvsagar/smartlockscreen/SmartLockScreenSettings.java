@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -23,7 +24,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -345,6 +345,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
         navDrawerLayout.invalidate();
         currentUserPicture = (ImageView) currentUserLinearLayout.findViewById(R.id.user_image_view);
         currentUserName = (TextView) currentUserLinearLayout.findViewById(R.id.user_name_text_view);
+        currentUserName.setTypeface(Typeface.DEFAULT_BOLD);
         currentUserDescription = (TextView) currentUserLinearLayout.findViewById(R.id.user_type_text_view);
         userListDropDown = (ImageView) currentUserLinearLayout.findViewById(R.id.user_selected_tick_image_view);
         currentUserLinearLayout.setOnClickListener(new View.OnClickListener() {
@@ -411,7 +412,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
         usersList.clearAnimation();
         usersList.setVisibility(View.VISIBLE);
 
-        usersList.animate().alpha(1f).translationY(0f).setInterpolator(new DecelerateInterpolator())
+        usersList.animate().alpha(1f).translationY(0f).setInterpolator(new AccelerateDecelerateInterpolator())
                 .setListener(null).start();
         navDrawerListView.animate().translationY(usersList.getHeight()).alpha(0).setListener(new Animator.AnimatorListener() {
             @Override
@@ -435,7 +436,7 @@ public class SmartLockScreenSettings extends ActionBarActivity
             public void onAnimationRepeat(Animator animation) {
 
             }
-        }).setInterpolator(new DecelerateInterpolator()).start();
+        }).setInterpolator(new AccelerateDecelerateInterpolator()).start();
 
         userListDropDown.animate().rotation(180).setInterpolator(new AccelerateDecelerateInterpolator()).start();
     }
