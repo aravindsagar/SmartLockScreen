@@ -1,0 +1,8 @@
+float targetDeltaY = notificationCard.getTranslationY() + lastDeltaY;
+            if(cardFactor > Math.abs(scaleFactor)){
+                targetDeltaY += (deltaY - lastDeltaY)/3;
+            } else {
+                targetDeltaY += (deltaY - lastDeltaY);
+            }
+            targetDeltaY -= deltaY;
+            notificationCard.setTranslationY(targetDeltaY);

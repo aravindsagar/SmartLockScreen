@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +38,7 @@ public abstract class Overlay {
             remove();
         }
         layout = getLayout();
-        layout.setLayerType(View.LAYER_TYPE_HARDWARE,null);
+        layout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         if(params == null){
             params = getLayoutParams();
         }
@@ -75,5 +76,15 @@ public abstract class Overlay {
         DisplayMetrics displaymetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displaymetrics);
         return displaymetrics.heightPixels;
+    }
+
+
+    protected int getFullScreenSystemUiVisibility(){
+        int systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            systemUiVisibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        }
+        return systemUiVisibility;
     }
 }

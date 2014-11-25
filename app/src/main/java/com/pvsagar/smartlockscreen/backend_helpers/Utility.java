@@ -102,8 +102,8 @@ public class Utility {
     }
 
     public static int getLighterShade(int color) {
-        return Color.rgb((int)(Color.red(color) / SHADE_FACTOR),
-                (int)(Color.green(color) / SHADE_FACTOR),
-                (int)(Color.blue(color) / SHADE_FACTOR));
+        return Color.rgb((int)Math.min(0xff, (Color.red(color) / SHADE_FACTOR)),
+                (int)Math.min(0xff, (Color.green(color) / SHADE_FACTOR)),
+                (int)Math.min(0xff, (Color.blue(color) / SHADE_FACTOR)));
     }
 }

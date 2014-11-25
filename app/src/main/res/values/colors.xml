@@ -20,22 +20,24 @@
     <color name="action_bar_location_search">#ff3a3a3c</color>
     <color name="action_mode">#ff0d4661</color>
 
-    <color name="user_profiles_background">#ff896a39</color>
+    <color name="user_profiles_background">#72000000</color>
     <color name="nav_bar_add_new_profile_background">#ffffffff</color>
     <color name="nav_bar_add_new_profile_background_old">#ff242421</color>
     <color name="nav_bar_list_background">#ffffffff</color>
     <color name="nav_bar_list_background_old">#fff5f5f5</color>
     <color name="nav_bar_main_item_background">#8cffffff</color>
+    <color name="nav_bar_main_selected_item_color">#ff827717</color>
     <color name="switch_color">#ff8da961</color>
 
-    <color name="user_pic_background1">#ffab6f8d</color>
-    <color name="user_pic_background2">#ff94a742</color>
-    <color name="user_pic_background3">#ff825115</color>
-    <color name="user_pic_background4">#ffa34018</color>
-    <color name="user_pic_background5">#ff2f3790</color>
-    <color name="user_pic_background6">#ff537890</color>
-    <color name="user_pic_background7">#ffb7b66b</color>
-    <color name="user_pic_background8">#ff6ca758</color>
+    <color name="user_pic_background1">#ff9C27B0</color>
+    <color name="user_pic_background2">#ff558B2F</color>
+    <color name="user_pic_background3">#ff795548</color>
+    <color name="user_pic_background4">#ffAD1457</color>
+    <color name="user_pic_background5">#ff3F51B5</color>
+    <color name="user_pic_background6">#ff00ACC1</color>
+    <color name="user_pic_background7">#ffF4511E</color>
+    <color name="user_pic_background8">#ff827717</color>
 
     <color name="card_background_with_alpha">#c8ffffff</color>
+    <color name="notification_subtext">#ff5f5f5f</color>
 </resources>

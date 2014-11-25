@@ -13,11 +13,36 @@
         android:layout_gravity="start"
         android:id="@+id/linear_layout_nav_drawer"
         android:background="@color/nav_bar_list_background">
-        <LinearLayout
-            android:id="@+id/linear_layout_current_user"
-            android:orientation="horizontal" android:layout_width="match_parent"
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:id="@+id/drawer_list_view"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:choiceMode="singleChoice"
+            android:background="@color/nav_bar_list_background"
+            android:layout_below="@+id/linear_layout_current_user"/>
+        <ListView
+            android:layout_below="@id/linear_layout_current_user"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/user_profiles_background">
+            android:id="@+id/list_view_user_profiles"/>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/bg_default_profile_art"
+            android:layout_alignTop="@id/linear_layout_current_user"
+            android:layout_alignBottom="@id/linear_layout_current_user"
+            android:layout_alignLeft="@id/linear_layout_current_user"
+            android:layout_alignRight="@id/linear_layout_current_user"
+            android:id="@+id/bg_user_profiles"
+            android:scaleType="centerCrop"/>
+        <LinearLayout
+            android:id="@id/linear_layout_current_user"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
             <ImageView
                 android:layout_width="@dimen/user_picture_dimen"
                 android:layout_height="@dimen/user_picture_dimen"
@@ -67,21 +92,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/linear_layout_current_user"/>
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:id="@+id/drawer_list_view"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp"
-            android:choiceMode="singleChoice"
-            android:background="@color/nav_bar_list_background"
-            android:layout_below="@id/linear_layout_current_user"/>
-        <ListView
-            android:layout_below="@id/linear_layout_current_user"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/list_view_user_profiles"/>
-
     </RelativeLayout>
 </android.support.v4.widget.DrawerLayout>

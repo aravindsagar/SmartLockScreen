@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -334,9 +335,10 @@ public class SmartLockScreenSettings extends ActionBarActivity
 
         RelativeLayout navDrawerLayout = (RelativeLayout) findViewById(R.id.linear_layout_nav_drawer);
         final LinearLayout currentUserLinearLayout = (LinearLayout) navDrawerLayout.findViewById(R.id.linear_layout_current_user);
-        currentUserLinearLayout.bringToFront();
         navDrawerLayout.requestLayout();
         navDrawerLayout.invalidate();
+        ImageView currentUserBackgroundPicture = (ImageView) navDrawerLayout.findViewById(R.id.bg_user_profiles);
+        currentUserBackgroundPicture.setColorFilter(Color.argb(100, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
         currentUserPicture = (ImageView) currentUserLinearLayout.findViewById(R.id.user_image_view);
         currentUserName = (TextView) currentUserLinearLayout.findViewById(R.id.user_name_text_view);
         currentUserName.setTypeface(Typeface.DEFAULT_BOLD);
@@ -379,6 +381,10 @@ public class SmartLockScreenSettings extends ActionBarActivity
                 footerView.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
                 footerView.setBackgroundColor(Color.TRANSPARENT);
                 navDrawerListView.addFooterView(footerView, null, false);
+                View footerView2 = new View(this);
+                footerView2.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
+                footerView2.setBackgroundColor(Color.TRANSPARENT);
+                usersList.addFooterView(footerView2, null, false);
                 break;
         }
         navDrawerLayout.setPadding(navDrawerLayout.getPaddingLeft(), navDrawerLayout.getPaddingTop() + mPaddingTop,

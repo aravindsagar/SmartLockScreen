@@ -13,8 +13,8 @@
         android:scaleType="fitCenter"
         android:layout_marginLeft="@dimen/nav_bar_icon_padding"
         android:layout_marginRight="@dimen/nav_bar_icon_padding"
-        android:layout_marginTop="@dimen/nav_bar_picture_padding"
-        android:layout_marginBottom="@dimen/nav_bar_picture_padding"
+        android:layout_marginTop="@dimen/nav_bar_icon_padding_top_bottom"
+        android:layout_marginBottom="@dimen/nav_bar_icon_padding_top_bottom"
         android:id="@+id/list_item_icon"/>
 
     <TextView

@@ -3,20 +3,19 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="card_spacing">8dp</dimen>
+
     <dimen name="drawer_width">300dp</dimen>
     <dimen name="user_picture_dimen">48dp</dimen>
     <dimen name="nav_bar_picture_padding">8dp</dimen>
     <dimen name="nav_bar_add_button">24dp</dimen>
     <dimen name="nav_bar_add_button_padding">20dp</dimen>
-    <dimen name="nav_bar_icon_dimen">32dp</dimen>
+    <dimen name="nav_bar_icon_dimen">24dp</dimen>
     <dimen name="nav_bar_icon_padding">16dp</dimen>
-    <dimen name="nav_bar_text_padding">12dp</dimen>
-    <dimen name="nav_bar_text_size">14.5sp</dimen> <!--17-->
-    <dimen name="nav_bar_secondary_icon_dimen">20dp</dimen> <!--20dp-->
-    <dimen name="nav_bar_secondary_icon_padding">22dp</dimen> <!--22dp-->
-    <dimen name="nav_bar_secondary_text_size">14.5sp</dimen> <!--13-->
+    <dimen name="nav_bar_icon_padding_top_bottom">12dp</dimen>
+    <dimen name="nav_bar_text_padding">16dp</dimen>
+    <dimen name="nav_bar_text_size">14sp</dimen> <!--17-->
     <dimen name="nav_bar_sub_text_size">13sp</dimen> <!--13-->
-    <dimen name="nav_bar_item_height">56sp</dimen> <!--13-->
+    <dimen name="nav_bar_item_height">52sp</dimen> <!--13-->
 
     <dimen name="lock_screen_user_picture_size">36dp</dimen>
     <dimen name="user_grid_column_width">94dp</dimen>

@@ -3,7 +3,6 @@ package com.pvsagar.smartlockscreen.services.window_helpers;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -39,12 +38,16 @@ public class PatternLockOverlay extends Overlay {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
                         WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                        WindowManager.LayoutParams.FLAG_DIM_BEHIND | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                        WindowManager.LayoutParams.FLAG_DIM_BEHIND | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                        | WindowManager.LayoutParams.FLAG_FULLSCREEN
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
         params.dimAmount = 0.5f;
         params.x = 0;
         params.y = 0;
-        params.systemUiVisibility = getSystemUiVisibility();
+        params.systemUiVisibility = getFullScreenSystemUiVisibility();
         return params;
     }
 
@@ -100,7 +103,7 @@ public class PatternLockOverlay extends Overlay {
     }
 
     private void setSystemUiVisibility(final View layout) {
-        layout.setSystemUiVisibility(getSystemUiVisibility());
+        layout.setSystemUiVisibility(getFullScreenSystemUiVisibility());
         layout.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
             @Override
             public void onSystemUiVisibilityChange(int visibility) {
@@ -109,15 +112,6 @@ public class PatternLockOverlay extends Overlay {
         });
     }
 
-    private int getSystemUiVisibility(){
-        int systemUiVisibility;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            systemUiVisibility = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        } else {
-            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-        }
-        return systemUiVisibility;
-    }
 
     @Override
     public void execute() {

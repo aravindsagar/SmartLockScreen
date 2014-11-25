@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +47,7 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
     private int selectedMainItemIndex = -1;
 
     private Typeface itemTypeface;
-    private int selectedItemBackgroundColor;
+    private int selectedItemBackgroundColor, selectedItemTextColor;
 
     /**
      * Constructor which takes in the required data to create list items
@@ -64,8 +65,10 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         mSecondaryItems = secondaryItems;
         mSecondaryItemImageRIds = secondaryItemImageRIds;
 
-        itemTypeface = Typeface.DEFAULT_BOLD;
-        selectedItemBackgroundColor = context.getResources().getColor(R.color.text_view_touched);
+        itemTypeface = Typeface.createFromAsset(context.getAssets(),
+                "fonts/roboto-medium.ttf");
+        selectedItemBackgroundColor = context.getResources().getColor(R.color.text_view_touched_darker);
+        selectedItemTextColor = context.getResources().getColor(R.color.nav_bar_main_selected_item_color);
     }
 
     private Context getContext(){
@@ -117,8 +120,13 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
                 viewHolder.itemName.setText(mMainItems.get(arrayIndex));
                 if(arrayIndex == selectedMainItemIndex){
                     convertView.setBackgroundColor(selectedItemBackgroundColor);
+                    viewHolder.itemName.setTextColor(selectedItemTextColor);
+                    //TODO find a better mode if available
+                    viewHolder.iconView.setColorFilter(selectedItemTextColor, PorterDuff.Mode.SRC_ATOP);
                 } else {
                     convertView.setBackgroundColor(Color.TRANSPARENT);
+                    viewHolder.itemName.setTextColor(Color.BLACK);
+                    viewHolder.iconView.clearColorFilter();
                 }
                 break;
 
