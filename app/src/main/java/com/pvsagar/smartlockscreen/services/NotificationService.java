@@ -87,9 +87,16 @@ public class NotificationService extends NotificationListenerService{
                     }
                 } else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS)) {
                     StatusBarNotification[] sbns = getActiveNotifications();
-                    if(sbns != null){
+                    if (currentNotifications != null){
                         currentNotifications.clear();
+                    }
+                    if(currentSBN != null){
                         currentSBN.clear();
+                    }
+                    if(removedNotifications != null){
+                        removedNotifications.clear();
+                    }
+                    if(sbns != null){
                         for (StatusBarNotification sbn : sbns) {
                             LockScreenNotification lsn = new LockScreenNotification(sbn);
                             currentNotifications.add(lsn);

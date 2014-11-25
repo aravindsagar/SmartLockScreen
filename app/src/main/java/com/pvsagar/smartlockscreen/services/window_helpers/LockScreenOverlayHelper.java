@@ -46,6 +46,7 @@ import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomFlingListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.ExternalIntents;
+import com.pvsagar.smartlockscreen.frontend_helpers.FontCache;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationAreaHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
@@ -65,7 +66,7 @@ public class LockScreenOverlayHelper extends Overlay{
     private NotificationListAdapter notificationListAdapter;
     private LinearLayout notificationCardsLayout;
     private RelativeLayout rLayout;
-    private LinearLayout layout;
+    private LinearLayout lLayout;
     private ImageView userImageView, environmentImageView;
     private CardView userGridCardView, environmentOptionsCardView;
     private ImageView backgroundDimmer;
@@ -73,12 +74,14 @@ public class LockScreenOverlayHelper extends Overlay{
     private ImageView phoneIcon, cameraIcon, phoneIconBackground, cameraIconBackground;
     private ArrayList<CardView> notificationCards;
     private CardView moreCard;
+    private ImageView wallpaperView;
+    private GridView userGridView;
 
     public static int clickedCard = -1;
     public static final int MAX_NOTIFICATION_SHOWN = 4;
-    public static String KEY_NOTIFICATION_TITLE = "android.title";
-    public static String KEY_NOTIFICATION_TEXT = "android.text";
-    public static String KEY_NOTIFICATION_TEXTLINES = "android.textLines";
+    public static final String KEY_NOTIFICATION_TITLE = "android.title";
+    public static final String KEY_NOTIFICATION_TEXT = "android.text";
+    public static final String KEY_NOTIFICATION_TEXTLINES = "android.textLines";
     public static final float CARD_NORMAL_ELEVATION = 8.5f;
     public static final float CARD_TOUCHED_ELEVATION = 0f;
     public static final int CARD_VIEW_NORMAL_ALPHA = 200;
@@ -109,86 +112,120 @@ public class LockScreenOverlayHelper extends Overlay{
 
     @Override
     protected View getLayout(){
-        rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
-        layout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
-        digitalClock = (DigitalClock) layout.findViewById(R.id.digital_clock_lock_screen);
-        digitalClock.setPadding(digitalClock.getPaddingLeft() + verticalPadding,
-                digitalClock.getPaddingTop() + horizontalPadding,
-                digitalClock.getPaddingRight() + verticalPadding, digitalClock.getPaddingBottom());
-        notificationCardsLayout = (LinearLayout) layout.findViewById(R.id.linear_layout_notification_cards);
-        notificationCardsLayout.removeAllViews();
-        notificationCardsLayout.bringToFront();
-        notificationCardsLayout.setAlpha(CARDS_MAX_ALPHA);
+        if(rLayout == null) {
+            rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
+            lLayout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
+            digitalClock = (DigitalClock) lLayout.findViewById(R.id.digital_clock_lock_screen);
 
-        setSystemUiVisibility();
+            notificationCardsLayout = (LinearLayout) lLayout.findViewById(R.id.linear_layout_notification_cards);
+            wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
+            environmentImageView = (ImageView) rLayout.findViewById(R.id.environment_image_view);
+
+            digitalClock.setPadding(digitalClock.getPaddingLeft() + verticalPadding,
+                    digitalClock.getPaddingTop() + horizontalPadding,
+                    digitalClock.getPaddingRight() + verticalPadding, digitalClock.getPaddingBottom());
+            notificationCardsLayout.bringToFront();
+            notificationCardsLayout.setAlpha(CARDS_MAX_ALPHA);
+
+            environmentOptionsCardView = (CardView) rLayout.findViewById(R.id.card_view_environment_options);
+            Button masterPassphraseButton = (Button) environmentOptionsCardView.findViewById(R.id.button_master_passphrase_unlock);
+            masterPassphraseButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Passphrase.getMasterPassword(context).setAsCurrentPassword(context);
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
+                            try {
+                                EnvironmentDetector.manageEnvironmentDetectionCriticalSection.acquire();
+                                Thread.sleep(10 * 1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            } finally {
+                                EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
+                                context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_DETECT_ENVIRONMENT));
+                            }
+                        }
+                    }.start();
+                    ScreenReceiver.turnScreenOff(context);
+                    ScreenReceiver.turnScreenOn(context);
+                }
+            });
+
+            userGridCardView = (CardView) rLayout.findViewById(R.id.card_view_user_grid);
+            userGridView = (GridView) userGridCardView.findViewById(R.id.grid_view_all_users);
+
+            rLayout.setOnTouchListener(new CustomFlingListener(context) {
+                @Override
+                public void onRightToLeft(float endVelocity) {
+                    ExternalIntents.launchCamera(context);
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
+                }
+
+                @Override
+                public void onLeftToRight(float endVelocity) {
+                    ExternalIntents.launchDialer(context);
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
+                }
+
+                @Override
+                public void onTopToBottom(float endVelocity) {
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
+                    NotificationAreaHelper.expand(context);
+                }
+
+                @Override
+                public void onBottomToTop(float endVelocity) {
+                    lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
+                }
+
+                @Override
+                public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
+                    if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
+                        float deltaY = event.getRawY() - downRawY;
+                        setLayoutPropertiesOnVerticalMove(deltaY);
+                    } else {
+                        float deltaX = event.getRawX() - downRawX;
+                        setLayoutPropertiesOnHorizontalMove(deltaX);
+                    }
+                }
+
+                @Override
+                public void onSwipeFail() {
+                    resetLayoutPropertiesWithAnimation();
+                }
+            });
+
+            setSystemUiVisibility();
+            setUpShortcuts();
+        }
+
+        notificationCardsLayout.removeAllViews();
 
         //TODO add wallpaper support!
-        ImageView wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
         Drawable wallpaper = WallpaperHelper.getWallpaperDrawable(context);
         wallpaperView.setImageDrawable(wallpaper);
-
-        /*wallpaperView.setScaleType(ImageView.ScaleType.MATRIX);
-        wallpaperView.setImageMatrix(new Matrix());*/
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Intent intent = new Intent(context,NotificationService.class);
             intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS);
             context.startService(intent);
-            //initNotification();
-            //notificationChanged();
         }
 
-        rLayout.setOnTouchListener(new CustomFlingListener(context) {
-            @Override
-            public void onRightToLeft(float endVelocity) {
-                ExternalIntents.launchCamera(context);
-                lockScreenDismiss(CustomFlingListener.DIRECTION_LEFT, endVelocity);
-            }
-
-            @Override
-            public void onLeftToRight(float endVelocity) {
-                ExternalIntents.launchDialer(context);
-                lockScreenDismiss(CustomFlingListener.DIRECTION_RIGHT, endVelocity);
-            }
-
-            @Override
-            public void onTopToBottom(float endVelocity) {
-                lockScreenDismiss(CustomFlingListener.DIRECTION_DOWN, endVelocity);
-                NotificationAreaHelper.expand(context);
-            }
-
-            @Override
-            public void onBottomToTop(float endVelocity) {
-                lockScreenDismiss(CustomFlingListener.DIRECTION_UP, endVelocity);
-            }
-
-            @Override
-            public void onMove(MotionEvent event, int direction, float downRawX, float downRawY) {
-                if(direction == CustomFlingListener.DIRECTION_UP || direction == CustomFlingListener.DIRECTION_DOWN){
-                    float deltaY = event.getRawY() - downRawY;
-                    setLayoutPropertiesOnVerticalMove(deltaY);
-                } else {
-                    float deltaX = event.getRawX() - downRawX;
-                    setLayoutPropertiesOnHorizontalMove(deltaX);
-                }
-            }
-
-            @Override
-            public void onSwipeFail() {
-                resetLayoutPropertiesWithAnimation();
-            }
-        });
-
         setUpAllUsersOverlay();
-        setUpShortcuts();
+
         setUpEnvironmentOptions();
+
+        //TODO reset properties without animation
+        resetLayoutPropertiesWithAnimation();
 
         return rLayout;
     }
 
     public void setUpEnvironmentOptions() {
         if(rLayout == null) return;
-        environmentImageView = (ImageView) rLayout.findViewById(R.id.environment_image_view);
+
         String currentEnvironmentName;
         if(BaseService.getCurrentEnvironments() != null && !BaseService.getCurrentEnvironments().isEmpty()) {
             environmentImageView.setImageDrawable(BaseService.getCurrentEnvironments().get(0).getEnvironmentPictureDrawable(context));
@@ -198,31 +235,6 @@ public class LockScreenOverlayHelper extends Overlay{
             currentEnvironmentName = context.getString(R.string.unknown_environment);
         }
 
-        environmentOptionsCardView = (CardView) rLayout.findViewById(R.id.card_view_environment_options);
-        Button masterPassphraseButton = (Button) environmentOptionsCardView.findViewById(R.id.button_master_passphrase_unlock);
-        masterPassphraseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Passphrase.getMasterPassword(context).setAsCurrentPassword(context);
-                new Thread(){
-                    @Override
-                    public void run() {
-                        super.run();
-                        try {
-                            EnvironmentDetector.manageEnvironmentDetectionCriticalSection.acquire();
-                            Thread.sleep(20 * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } finally {
-                            EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
-                            context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_DETECT_ENVIRONMENT));
-                        }
-                    }
-                }.start();
-                ScreenReceiver.turnScreenOff(context);
-                ScreenReceiver.turnScreenOn(context);
-            }
-        });
         TextView currentEnvironmentNameTextView = (TextView) environmentOptionsCardView.findViewById(R.id.text_view_current_environment);
         currentEnvironmentNameTextView.setText(currentEnvironmentName);
 
@@ -243,11 +255,11 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void setUpShortcuts() {
-
         phoneIcon = (ImageView) rLayout.findViewById(R.id.image_view_phone_icon);
         cameraIcon = (ImageView) rLayout.findViewById(R.id.image_view_camera_icon);
         phoneIconBackground = (ImageView) rLayout.findViewById(R.id.image_view_background_circle_phone);
         cameraIconBackground = (ImageView) rLayout.findViewById(R.id.image_view_background_circle_camera);
+
         int shortcutBackgroundOriginalSize = convertDipToPx((int) context.getResources().getDimension(R.dimen.user_picture_dimen));
         shortcutBackgroundMaxScale = (float) Math.sqrt(sqr(getDisplayHeight()) + sqr(getDisplayWidth())) * 2.0f/
                 shortcutBackgroundOriginalSize;
@@ -269,7 +281,7 @@ public class LockScreenOverlayHelper extends Overlay{
 
     private void setLayoutPropertiesOnVerticalMove(float deltaY){
         lastDeltaY = deltaY;
-        float scaleFactor = deltaY/(float)(layout.getHeight());
+        float scaleFactor = deltaY/(float)(lLayout.getHeight());
         /*notificationCardsLayout.setTranslationY(deltaY);*/
         int numNotifications = notificationCardsLayout.getChildCount();
         float cardHeight = notificationCardsLayout.getChildAt(numNotifications-1).getBottom();
@@ -318,9 +330,9 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private void setLayoutPropertiesOnHorizontalMove(float deltaX){
-        float scaleFactor = 1.0f - Math.abs(deltaX)/(float)layout.getWidth();
-        layout.setScaleX(scaleFactor);
-        layout.setScaleY(scaleFactor);
+        float scaleFactor = 1.0f - Math.abs(deltaX)/(float) lLayout.getWidth();
+        lLayout.setScaleX(scaleFactor);
+        lLayout.setScaleY(scaleFactor);
         userImageView.setAlpha(scaleFactor);
         environmentImageView.setAlpha(scaleFactor);
         if(deltaX > 0){
@@ -341,7 +353,7 @@ public class LockScreenOverlayHelper extends Overlay{
         for(int i=0; i<numNotifications; i++){
             notificationCardsLayout.getChildAt(i).animate().translationY(0).start();
         }
-        layout.animate().translationY(0).scaleX(1).scaleY(1).
+        lLayout.animate().translationY(0).scaleX(1).scaleY(1).
                 setInterpolator(accelerateDecelerateInterpolator).start();
         notificationCardsLayout.animate().translationY(0).alpha(CARDS_MAX_ALPHA).
                 setInterpolator(accelerateDecelerateInterpolator).start();
@@ -357,6 +369,8 @@ public class LockScreenOverlayHelper extends Overlay{
                 setInterpolator(accelerateDecelerateInterpolator).start();
         phoneIcon.animate().scaleX(1).scaleY(1).alpha(1).start();
         cameraIcon.animate().scaleX(1).scaleY(1).alpha(1).start();
+        backgroundDimmer.animate().alpha(0).start();
+        backgroundDimmer.setVisibility(View.GONE);
     }
 
     private void setUpAllUsersOverlay(){
@@ -370,8 +384,6 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         }
 
-        userGridCardView = (CardView) rLayout.findViewById(R.id.card_view_user_grid);
-        GridView userGridView = (GridView) userGridCardView.findViewById(R.id.grid_view_all_users);
         userGridView.setAdapter(new UserListAdapter(context, R.layout.grid_item_user,
                 R.layout.grid_item_settings, allUsers, mDeviceOwnerIndex, new UserListAdapter.OnUsersModifiedListener() {
             @Override
@@ -437,11 +449,12 @@ public class LockScreenOverlayHelper extends Overlay{
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         userGridCardView.setVisibility(View.GONE);
+                        userGridCardView.animate().setListener(null).start();
                     }
 
                     @Override
                     public void onAnimationCancel(Animator animation) {
-                        userGridCardView.setVisibility(View.GONE);
+                        onAnimationEnd(animation);
                     }
 
                     @Override
@@ -467,11 +480,12 @@ public class LockScreenOverlayHelper extends Overlay{
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         environmentOptionsCardView.setVisibility(View.GONE);
+                        environmentOptionsCardView.animate().setListener(null).start();
                     }
 
                     @Override
                     public void onAnimationCancel(Animator animation) {
-                        environmentOptionsCardView.setVisibility(View.GONE);
+                        onAnimationEnd(animation);
                     }
 
                     @Override
@@ -495,11 +509,12 @@ public class LockScreenOverlayHelper extends Overlay{
             @Override
             public void onAnimationEnd(Animator animation) {
                 backgroundDimmer.setVisibility(View.GONE);
+                backgroundDimmer.animate().setListener(null).start();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                backgroundDimmer.setVisibility(View.GONE);
+                onAnimationEnd(animation);
             }
 
             @Override
@@ -514,24 +529,24 @@ public class LockScreenOverlayHelper extends Overlay{
     private void lockScreenDismiss(int direction, float endVelocity){
         if(endVelocity > 0) {
             if (direction == CustomFlingListener.DIRECTION_UP) {
-                notificationCardsLayout.animate().translationY(-layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
-                        .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener()).start();
+                notificationCardsLayout.animate().translationY(-lLayout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                        .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener(notificationCardsLayout)).start();
                 digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 dismissCornerIcons();
             } else if (direction == CustomFlingListener.DIRECTION_DOWN) {
-                notificationCardsLayout.animate().translationY(layout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
-                        .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener()).start();
+                notificationCardsLayout.animate().translationY(lLayout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
+                        .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener(notificationCardsLayout)).start();
                 digitalClock.animate().scaleY(2).scaleX(2).alpha(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 dismissCornerIcons();
             } else if (direction == CustomFlingListener.DIRECTION_LEFT) {
-                layout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener()).
+                lLayout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener(lLayout)).
                         setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 cameraIconBackground.animate().scaleX(shortcutBackgroundMaxScale).scaleY(shortcutBackgroundMaxScale).
                         setInterpolator(new DecelerateInterpolator(0.25f)).start();
                 fadeOutUserAndEnvironmentPicture();
                 fadeOutPhoneIcon();
             } else {
-                layout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener()).
+                lLayout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener(lLayout)).
                         setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 phoneIconBackground.animate().scaleX(shortcutBackgroundMaxScale).scaleY(shortcutBackgroundMaxScale).
                         setInterpolator(new DecelerateInterpolator(0.25f)).start();
@@ -539,8 +554,9 @@ public class LockScreenOverlayHelper extends Overlay{
                 fadeOutCameraIcon();
             }
         } else {
-            notificationCardsLayout.animate().translationY(-layout.getHeight()).setListener(new AnimateEndListener())
-                    .alpha(CARDS_MIN_ALPHA).setInterpolator(accelerateDecelerateInterpolator).start();
+            notificationCardsLayout.animate().translationY(-lLayout.getHeight()).
+                    setListener(new AnimateEndListener(notificationCardsLayout)).
+                    alpha(CARDS_MIN_ALPHA).setInterpolator(accelerateDecelerateInterpolator).start();
             digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(accelerateDecelerateInterpolator).start();
             userImageView.animate().alpha(0).setInterpolator(accelerateDecelerateInterpolator).start();
         }
@@ -571,6 +587,10 @@ public class LockScreenOverlayHelper extends Overlay{
     }
 
     private class AnimateEndListener implements Animator.AnimatorListener{
+        View mView;
+        public AnimateEndListener(View v){
+            mView = v;
+        }
         @Override
         public void onAnimationStart(Animator animation) {
 
@@ -589,6 +609,7 @@ public class LockScreenOverlayHelper extends Overlay{
             } else {
                 remove();
             }
+            mView.animate().setListener(null).start();
         }
 
         @Override
@@ -656,15 +677,16 @@ public class LockScreenOverlayHelper extends Overlay{
         if(notificationCardsLayout == null){
             return;
         }
-        for(int i=0; i< NotificationService.removedNotifications.size(); i++){
+        for(int i = NotificationService.removedNotifications.size() - 1; i >= 0; i--){
             LockScreenNotification lsn = NotificationService.removedNotifications.get(i);
             notificationCardsLayout.removeView(lsn.getCardView());
+            NotificationService.removedNotifications.remove(i);
         }
 
         while(noOfNotificationShown() <
                 ((MAX_NOTIFICATION_SHOWN < NotificationService.currentNotifications.size())?
                         MAX_NOTIFICATION_SHOWN : NotificationService.currentNotifications.size())){
-            //Add a notification to the layout
+            //Add a notification to the lLayout
             for(int i=0; i< NotificationService.currentNotifications.size(); i++){
                 if(NotificationService.currentNotifications.get(i).isShown()){
                     continue;
@@ -695,8 +717,7 @@ public class LockScreenOverlayHelper extends Overlay{
             shouldAdd = true;
         }
         TextView titleTextView = (TextView) cardView.findViewById(R.id.notification_card_title);
-        Typeface typeface = Typeface.createFromAsset(context.getAssets(),
-                "fonts/roboto-medium.ttf");
+        Typeface typeface = FontCache.get("fonts/roboto-medium.ttf", context);
         titleTextView.setTypeface(typeface);
         TextView subTextTextView = (TextView) cardView.findViewById(R.id.notification_card_subtext);
         ImageView notificationImageView = (ImageView) cardView.findViewById(R.id.image_view_notification);

@@ -37,8 +37,8 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                downRawX = last1MoveX = event.getRawX();
-                downRawY = last1MoveY = event.getRawY();
+                downRawX = last1MoveX = last2MoveX = event.getRawX();
+                downRawY = last1MoveY = last2MoveY = event.getRawY();
                 downTime = new Date().getTime();
                 directionKnown = false;
                 break;

@@ -25,6 +25,12 @@ import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
  */
 public class AppLockScreenOverlay extends Overlay {
 
+    private RelativeLayout rLayout;
+    private ImageView wallpaperView;
+    private TextView messageView;
+    private EditText masterPasswordEditText;
+    private Button continueButton;
+
     public AppLockScreenOverlay(Context context, WindowManager windowManager) {
         super(context, windowManager);
     }
@@ -46,16 +52,37 @@ public class AppLockScreenOverlay extends Overlay {
 
     @Override
     protected View getLayout() {
-        RelativeLayout layout = (RelativeLayout) inflater.inflate(R.layout.app_lockscreen_overlay, null);
+        if(rLayout == null) {
+            rLayout = (RelativeLayout) inflater.inflate(R.layout.app_lockscreen_overlay, null);
+            wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
+            messageView = (TextView) rLayout.findViewById(R.id.text_view_app_lockscreen);
+            masterPasswordEditText = (EditText) rLayout.findViewById(R.id.edit_text_enter_master_password);
 
-        ImageView wallpaperView = (ImageView) layout.findViewById(R.id.wallpaper_image_view);
+            Button cancelButton = (Button) rLayout.findViewById(R.id.button_cancel);
+            cancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent
+                            .setAction(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_HOME)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                    remove();
+                }
+            });
+
+            continueButton = (Button) rLayout.findViewById(R.id.button_confirm);
+        }
+
+        messageView.setText(context.getString(R.string.app_locked_message));
+
         Drawable wallpaper = context.getResources().getDrawable(R.drawable.background);
         wallpaper.setColorFilter(Color.argb(100, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
         wallpaperView.setImageDrawable(wallpaper);
 
-        final TextView messageView = (TextView) layout.findViewById(R.id.text_view_app_lockscreen);
 
-        final EditText masterPasswordEditText = (EditText) layout.findViewById(R.id.edit_text_enter_master_password);
         final Passphrase masterPassphrase = Passphrase.getMasterPassword(context);
         masterPasswordEditText.setText("");
         masterPasswordEditText.setTransformationMethod(new PasswordTransformationMethod());
@@ -65,7 +92,6 @@ public class AppLockScreenOverlay extends Overlay {
             masterPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         }
 
-        Button continueButton = (Button) layout.findViewById(R.id.button_confirm);
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,22 +103,7 @@ public class AppLockScreenOverlay extends Overlay {
                 }
             }
         });
-
-        Button cancelButton = (Button) layout.findViewById(R.id.button_cancel);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent
-                        .setAction(Intent.ACTION_MAIN)
-                        .addCategory(Intent.CATEGORY_HOME)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-                remove();
-            }
-        });
-        return layout;
+        return rLayout;
     }
 
 

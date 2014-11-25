@@ -208,7 +208,8 @@ public class BaseService extends Service implements
                 } else if(action.equals(ACTION_START_PATTERN_OVERLAY)){
                     mPatternLockOverlay.execute();
                 } else if(action.equals(ACTION_UNLOCK)){
-                    EnvironmentDetector.manageEnvironmentDetectionCriticalSection.acquireUninterruptibly();
+                    //TODO some bugs cropping up in multi profile switching. Should fix them before enabling this again.
+//                    EnvironmentDetector.manageEnvironmentDetectionCriticalSection.acquireUninterruptibly();
                     AdminActions.changePassword("", Passphrase.TYPE_NONE, null);
                     Intent dismissIntent = new Intent(this, DismissKeyguardActivity.class);
                     dismissIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -221,6 +222,7 @@ public class BaseService extends Service implements
                     }
                 } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY_ONLY)) {
                     mPatternLockOverlay.remove();
+                    mLockScreenOverlayHelper.execute();
                 } else if (action.equals(ACTION_NOTIFICATION_CHANGED)) {
                     // Add to the list view
                     //Bundle extras = intent.getExtras();

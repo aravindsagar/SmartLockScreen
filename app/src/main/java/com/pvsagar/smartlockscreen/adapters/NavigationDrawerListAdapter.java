@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
+import com.pvsagar.smartlockscreen.frontend_helpers.FontCache;
 
 import java.util.List;
 
@@ -65,8 +66,7 @@ public class NavigationDrawerListAdapter extends BaseAdapter{
         mSecondaryItems = secondaryItems;
         mSecondaryItemImageRIds = secondaryItemImageRIds;
 
-        itemTypeface = Typeface.createFromAsset(context.getAssets(),
-                "fonts/roboto-medium.ttf");
+        itemTypeface = FontCache.get("fonts/roboto-medium.ttf", context);
         selectedItemBackgroundColor = context.getResources().getColor(R.color.text_view_touched_darker);
         selectedItemTextColor = context.getResources().getColor(R.color.nav_bar_main_selected_item_color);
     }

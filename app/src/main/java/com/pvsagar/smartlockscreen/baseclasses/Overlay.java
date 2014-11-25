@@ -17,7 +17,7 @@ public abstract class Overlay {
     protected LayoutInflater inflater;
     protected WindowManager windowManager;
     protected Context context;
-    private View layout;
+    protected View layout;
     protected WindowManager.LayoutParams params;
 
     public Overlay(Context context, WindowManager windowManager){
@@ -28,15 +28,20 @@ public abstract class Overlay {
 
     protected abstract WindowManager.LayoutParams getLayoutParams();
 
+    /**
+     * Gets the layout to be shown by the window manager.
+     * Recycling of already inflated view must be taken care of by the implementation. Else memory leaks can occur!
+     * @return layout to be shown by the window manager.
+     */
     protected abstract View getLayout();
 
     /**
      * Adds the view specified by getLayout() to the windowManager passed during initialization
      */
     public void execute(){
-        if(layout != null) {
+        /*if(layout != null) {
             remove();
-        }
+        }*/
         layout = getLayout();
         layout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         if(params == null){
@@ -59,8 +64,8 @@ public abstract class Overlay {
         }
         try {
             windowManager.removeView(layout);
-            layout = null;
-            params = null;
+            /*layout = null;
+            params = null;*/
         } catch (Exception e){
             //Do nothing
         }

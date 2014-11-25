@@ -29,6 +29,10 @@ public class PatternLockOverlay extends Overlay {
     private static final int COLOR_INVALID_PATTERN = Color.rgb(255, 80, 50);
     private static final int COLOR_VALID_PATTERN = Color.rgb(80, 200, 70);
 
+    RelativeLayout enterPatternLayout;
+    TextView statusView;
+    PatternGridView patternGridView;
+
     public PatternLockOverlay(Context context, WindowManager windowManager) {
         super(context, windowManager);
     }
@@ -55,50 +59,57 @@ public class PatternLockOverlay extends Overlay {
     protected View getLayout() {
         final String currentPassword = AdminActions.getCurrentPassphraseString();
 
-        final RelativeLayout enterPatternLayout = (RelativeLayout) inflater.inflate(R.layout.enter_pattern, null);
-        final TextView statusView = (TextView) enterPatternLayout.findViewById(R.id.enter_pattern_status_textview);
-        final PatternGridView patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
+        if(enterPatternLayout == null) {
+            enterPatternLayout = (RelativeLayout) inflater.inflate(R.layout.enter_pattern, null);
+            statusView = (TextView) enterPatternLayout.findViewById(R.id.enter_pattern_status_textview);
+            patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
+            setSystemUiVisibility(enterPatternLayout);
 
-        setSystemUiVisibility(enterPatternLayout);
-        enterPatternLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!(v instanceof PatternGridView)){
-                    context.startService(BaseService.getServiceIntent(context, null,
-                            BaseService.ACTION_DISMISS_PATTERN_OVERLAY_ONLY));
+            enterPatternLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!(v instanceof PatternGridView)){
+                        context.startService(BaseService.getServiceIntent(context, null,
+                                BaseService.ACTION_DISMISS_PATTERN_OVERLAY_ONLY));
+                    }
                 }
-            }
-        });
-        patternGridView.setPatternListener(new PatternInterface.PatternListener() {
-            Timer mClearTimer;
-            @Override
-            public void onPatternStarted() {
+            });
 
-            }
+            patternGridView.setPatternListener(new PatternInterface.PatternListener() {
+                Timer mClearTimer;
+                @Override
+                public void onPatternStarted() {
 
-            @Override
-            public void onPatternEntered(List<Integer> pattern) {
-                Pattern enteredPattern = new Pattern(pattern);
-                if(enteredPattern.compareString(currentPassword)){
-                    context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
-                    patternGridView.setRingColor(COLOR_VALID_PATTERN);
-                    patternGridView.setInputEnabled(false);
-                } else {
-                    patternGridView.setRingColor(COLOR_INVALID_PATTERN);
-                    statusView.setText("Wrong pattern");
-                    //TODO Set timer
                 }
-            }
 
-            @Override
-            public void onPatternCleared() {
-                if(mClearTimer != null){
-                    mClearTimer.cancel();
-                    mClearTimer = null;
+                @Override
+                public void onPatternEntered(List<Integer> pattern) {
+                    Pattern enteredPattern = new Pattern(pattern);
+                    if(enteredPattern.compareString(currentPassword)){
+                        context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
+                        patternGridView.setRingColor(COLOR_VALID_PATTERN);
+                        patternGridView.setInputEnabled(false);
+                    } else {
+                        patternGridView.setRingColor(COLOR_INVALID_PATTERN);
+                        statusView.setText("Wrong pattern");
+                        //TODO Set timer
+                    }
                 }
-                statusView.setText("");
-            }
-        });
+
+                @Override
+                public void onPatternCleared() {
+                    if(mClearTimer != null){
+                        mClearTimer.cancel();
+                        mClearTimer = null;
+                    }
+                    statusView.setText("");
+                }
+            });
+        }
+
+        patternGridView.clearPattern();
+        patternGridView.setInputEnabled(true);
+
         return enterPatternLayout;
     }
 

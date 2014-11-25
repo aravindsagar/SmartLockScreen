@@ -5,7 +5,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.view.WindowManager;
 
@@ -31,6 +30,8 @@ public class AppLockService extends Service {
 
     private AppLockScreenOverlay mAppLockScreenOverlay;
 
+    ActivityManager mActivityManager;
+
     public AppLockService() {
     }
 
@@ -48,6 +49,7 @@ public class AppLockService extends Service {
         mOnForegroundAppChangedListener = new AppLocker(this);
         WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mAppLockScreenOverlay = new AppLockScreenOverlay(this, windowManager);
+        mActivityManager = (ActivityManager) getBaseContext().getSystemService(Context.ACTIVITY_SERVICE);
         super.onCreate();
     }
 
@@ -101,7 +103,7 @@ public class AppLockService extends Service {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                ActivityManager mActivityManager = (ActivityManager) getBaseContext().getSystemService(Context.ACTIVITY_SERVICE);
+
                 RunningTaskInfo foregroundTaskInfo = mActivityManager.getRunningTasks(1).get(0);
 
                 String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
