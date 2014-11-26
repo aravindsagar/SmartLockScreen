@@ -65,6 +65,7 @@ public class AppLockService extends Service {
             if (action != null && !action.isEmpty()) {
                 if (action.equals(ACTION_CLEAR_PREVIOUS_PACKAGE)) {
                     previousPackageName = "";
+                    mAppLockScreenOverlay.remove();
                 } else if (action.equals(ACTION_START_SERVICE)) {
                     startThread();
                 } else if (action.equals(ACTION_STOP_SERVICE)) {

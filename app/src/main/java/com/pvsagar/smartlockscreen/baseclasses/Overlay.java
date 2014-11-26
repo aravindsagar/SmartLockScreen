@@ -20,6 +20,8 @@ public abstract class Overlay {
     protected View layout;
     protected WindowManager.LayoutParams params;
 
+    private boolean isAdded = false;
+
     public Overlay(Context context, WindowManager windowManager){
         this.context = context;
         inflater = LayoutInflater.from(context);
@@ -39,19 +41,18 @@ public abstract class Overlay {
      * Adds the view specified by getLayout() to the windowManager passed during initialization
      */
     public void execute(){
-        /*if(layout != null) {
-            remove();
-        }*/
         layout = getLayout();
+        if(isAdded) return;
         layout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         if(params == null){
             params = getLayoutParams();
         }
         try {
             windowManager.addView(layout, params);
+            isAdded = true;
             layout.invalidate();
         } catch (IllegalStateException e){
-            //Dont do anything
+            isAdded = false;
         }
     }
 
@@ -59,13 +60,10 @@ public abstract class Overlay {
      * Removes the view specified by getLayout() from the windowManager passed during initialization
      */
     public void remove(){
-        if(layout == null){
-            layout = getLayout();
-        }
+        if(!isAdded) return;
         try {
             windowManager.removeView(layout);
-            /*layout = null;
-            params = null;*/
+            isAdded = false;
         } catch (Exception e){
             //Do nothing
         }

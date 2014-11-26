@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
 /**
@@ -39,7 +40,7 @@ public class DismissKeyguardActivity extends Activity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-//        EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
+        EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
         startService(BaseService.getServiceIntent(this, null, BaseService.ACTION_DETECT_ENVIRONMENT));
         finish();
         overridePendingTransition(0, 0);
