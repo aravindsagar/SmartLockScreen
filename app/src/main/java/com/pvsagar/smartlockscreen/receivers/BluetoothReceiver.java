@@ -30,13 +30,13 @@ public class BluetoothReceiver extends BroadcastReceiver {
         BluetoothDevice device;
         if(mAction.equals(BluetoothDevice.ACTION_ACL_CONNECTED)){
             device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            addBluetoothDeviceToConnectedDevices(BluetoothEnvironmentVariable.
-                    getBluetoothEnvironmentVariableFromDatabase(context, device.getName(),
+            addBluetoothDeviceToConnectedDevices(/*BluetoothEnvironmentVariable.
+                    getBluetoothEnvironmentVariableFromDatabase(context,*/ new BluetoothEnvironmentVariable(device.getName(),
                             device.getAddress()));
         } else if(mAction.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)){
             device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            removeBluetoothDeviceFromConnectedDevices(BluetoothEnvironmentVariable.
-                    getBluetoothEnvironmentVariableFromDatabase(context, device.getName(),
+            removeBluetoothDeviceFromConnectedDevices(/*BluetoothEnvironmentVariable.
+                    getBluetoothEnvironmentVariableFromDatabase(context,*/ new BluetoothEnvironmentVariable(device.getName(),
                             device.getAddress()));
         } else return;
         Toast.makeText(context, device.getName() + " connected.", Toast.LENGTH_SHORT).show();
