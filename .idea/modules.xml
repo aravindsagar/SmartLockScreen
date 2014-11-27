@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/Lock Pattern Grid View Library/Lock Pattern Grid View Library.iml" filepath="$PROJECT_DIR$/Lock Pattern Grid View Library/Lock Pattern Grid View Library.iml" />
       <module fileurl="file://$PROJECT_DIR$/SmartLockScreen.iml" filepath="$PROJECT_DIR$/SmartLockScreen.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/camera/camera.iml" filepath="$PROJECT_DIR$/camera/camera.iml" />
     </modules>
   </component>
 </project>

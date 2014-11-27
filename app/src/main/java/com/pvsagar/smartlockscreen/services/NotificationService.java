@@ -11,6 +11,7 @@ import android.support.v7.widget.CardView;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
 
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created by PV on 10/7/2014.
@@ -26,11 +27,12 @@ public class NotificationService extends NotificationListenerService{
     public static String EXTRAS_LOCK_SCREEN_NOTIFICATION_ID = ".LockScreenNotification.id";
     public static ArrayList<StatusBarNotification> currentSBN = new ArrayList<StatusBarNotification>();
     public static ArrayList<LockScreenNotification> currentNotifications;
+    public static Semaphore currentNotificationsAccessSemaphore = new Semaphore(1);
     public static ArrayList<LockScreenNotification> removedNotifications = new ArrayList<LockScreenNotification>();
 
     //Actions
     public static String ACTION_CANCEL_NOTIFICATION = PACKAGE_NAME + ".cancel_notification";
-    public static String ACTION_GET_CURRENT_NOTIFICATION = PACKAGE_NAME + ".get_current_notification";
+//    public static String ACTION_GET_CURRENT_NOTIFICATION = PACKAGE_NAME + ".get_current_notification";
     public static String ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS = PACKAGE_NAME + ".get_current_notification_clear_previous";
 
     //Extras
@@ -61,7 +63,7 @@ public class NotificationService extends NotificationListenerService{
                         String key = (String) intent.getCharSequenceExtra(EXTRAS_CANCEL_NOTIFICATION_KEY);
 //                        Log.d(LOG_TAG, key);
                     }
-                } else if (action.equals(ACTION_GET_CURRENT_NOTIFICATION)) {
+                } /*else if (action.equals(ACTION_GET_CURRENT_NOTIFICATION)) {
 //                    Log.d(LOG_TAG,"Get current notifications");
                     StatusBarNotification[] sbns = getActiveNotifications();
                     if(sbns != null){
@@ -85,8 +87,9 @@ public class NotificationService extends NotificationListenerService{
                         baseIntent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
                         startService(baseIntent);
                     }
-                } else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS)) {
+                }*/ else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS)) {
                     StatusBarNotification[] sbns = getActiveNotifications();
+                    currentNotificationsAccessSemaphore.acquireUninterruptibly();
                     if (currentNotifications != null){
                         currentNotifications.clear();
                     }
@@ -106,6 +109,7 @@ public class NotificationService extends NotificationListenerService{
                         baseIntent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
                         startService(baseIntent);
                     }
+                    currentNotificationsAccessSemaphore.release();
                 }
             }
         }
@@ -128,6 +132,7 @@ public class NotificationService extends NotificationListenerService{
     public void onNotificationPosted(StatusBarNotification sbn) {
         LockScreenNotification lsn = new LockScreenNotification(sbn);
         CardView currentCardView = null;
+        currentNotificationsAccessSemaphore.acquireUninterruptibly();
         for(int i = 0; i < currentNotifications.size(); i++){
             if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
                     currentNotifications.get(i).getId() == sbn.getId() ){
@@ -142,11 +147,11 @@ public class NotificationService extends NotificationListenerService{
             lsn.setCardView(currentCardView);
         }
         currentNotifications.add(lsn);
+        currentNotificationsAccessSemaphore.release();
         currentSBN.add(sbn);
         Intent intent = new Intent(this,BaseService.class);
         intent.setAction(BaseService.ACTION_NOTIFICATION_POSTED);
         startService(intent);
-
     }
 
     @Override
@@ -155,6 +160,7 @@ public class NotificationService extends NotificationListenerService{
         //Log.d(LOG_TAG,"Extras: \n"+sbn.getNotification().extras.get("android.title"));
 
         int id = sbn.getId();
+        currentNotificationsAccessSemaphore.acquireUninterruptibly();
         for(int i = 0; i < currentNotifications.size(); i++){
             if(currentNotifications.get(i).getPackageName().equals(sbn.getPackageName()) &&
                     currentNotifications.get(i).getId() == id ){
@@ -165,6 +171,7 @@ public class NotificationService extends NotificationListenerService{
                 break;
             }
         }
+        currentNotificationsAccessSemaphore.release();
         Intent intent = new Intent(this,BaseService.class);
         intent.setAction(BaseService.ACTION_NOTIFICATION_REMOVED);
         startService(intent);

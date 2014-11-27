@@ -24,4 +24,5 @@
     <!-- Notifications -->
     <dimen name="notification_card_header_title_size">18sp</dimen>
     <dimen name="lockscreen_clock_padding">25sp</dimen>
+    <dimen name="lockscreen_date_size">15sp</dimen>
 </resources>

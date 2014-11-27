@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="@string/pref_key_hide_persistent_notifications"
+        android:title="@string/pref_title_hide_persistent_notifications"
+        android:defaultValue="false" />
+
+    <CheckBoxPreference
+        android:key="@string/pref_key_hide_low_priority_notifications"
+        android:title="@string/pref_title_hide_low_priority_notifications"
+        android:defaultValue="false" />
+
+    <ListPreference
+        android:key="@string/pref_key_lockscreen_wallpaper"
+        android:title="@string/pref_title_lockscreen_wallpaper"
+        android:entryValues="@array/pref_values_lockscreen_wallpaper"
+        android:entries="@array/pref_entries_lockscreen_wallpaper"
+        android:defaultValue="system"/>
+</PreferenceScreen>

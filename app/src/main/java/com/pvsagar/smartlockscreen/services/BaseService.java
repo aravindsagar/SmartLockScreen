@@ -39,6 +39,7 @@ import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
+import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 import com.pvsagar.smartlockscreen.receivers.PhoneStateReceiver;
@@ -146,6 +147,8 @@ public class BaseService extends Service implements
             Intent intent = new Intent(this,NotificationService.class);
             startService(intent);
         }
+
+        WallpaperHelper.onWallpaperChanged(this);
 
         super.onCreate();
     }

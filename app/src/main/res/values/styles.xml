@@ -3,6 +3,7 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Wallpaper.NoTitleBar">
         <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/action_bar_settings</item>
     </style>
 
     <style name="TranslucentActionBar" parent="@style/Theme.AppCompat.Light.DarkActionBar">

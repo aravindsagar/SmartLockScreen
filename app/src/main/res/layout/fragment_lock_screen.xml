@@ -4,12 +4,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:id="@+id/wallpaper_image_view"
         android:scaleType="centerCrop"/>
     <ImageView
@@ -35,32 +31,37 @@
         android:layout_alignParentTop="true"/>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".LockScreenActivity$PlaceholderFragment"
         android:orientation="vertical"
         android:id="@+id/lockscreen_linear_layout">
-        <DigitalClock
-            android:id="@+id/digital_clock_lock_screen"
+        <LinearLayout
+            android:id="@+id/linear_layout_time_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textSize="80sp"
-            android:paddingTop="@dimen/lockscreen_clock_padding"
-            android:textStyle="normal"
-            android:fontFamily="sans-serif-thin"
-            android:gravity="center"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/button_unlock"
-            android:id="@+id/unlock_button"
-            android:visibility="gone"/>
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal">
+            <DigitalClock
+                android:id="@+id/digital_clock_lock_screen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textSize="80sp"
+                android:paddingTop="@dimen/lockscreen_clock_padding"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-thin"
+                android:gravity="center"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:id="@+id/text_view_date"
+                android:paddingBottom="@dimen/activity_horizontal_margin"
+                android:textColor="@color/nav_bar_main_item_background"
+                android:textSize="@dimen/lockscreen_date_size"
+                android:textStyle="bold"/>
+        </LinearLayout>
         <LinearLayout
             android:id="@+id/linear_layout_notification_cards"
             android:orientation="vertical"

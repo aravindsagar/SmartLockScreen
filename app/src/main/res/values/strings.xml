@@ -110,5 +110,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="use_master_password_to_unlock">Use master passphrase to unlock</string>
     <string name="unknown_environment">Unknown environment</string>
+    <string name="toast_wallpaper_set">Wallpaper set</string>
 
 </resources>

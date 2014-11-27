@@ -33,7 +33,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
-import com.pvsagar.smartlockscreen.adapters.NotificationListAdapter;
 import com.pvsagar.smartlockscreen.adapters.UserListAdapter;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
@@ -55,6 +54,7 @@ import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -63,19 +63,19 @@ import java.util.List;
  */
 public class LockScreenOverlayHelper extends Overlay{
     private static final String LOG_TAG = LockScreenOverlayHelper.class.getSimpleName();
-    private NotificationListAdapter notificationListAdapter;
     private LinearLayout notificationCardsLayout;
     private RelativeLayout rLayout;
     private LinearLayout lLayout;
     private ImageView userImageView, environmentImageView;
     private CardView userGridCardView, environmentOptionsCardView;
     private ImageView backgroundDimmer;
-    private DigitalClock digitalClock;
+    private LinearLayout timeDateLayout;
     private ImageView phoneIcon, cameraIcon, phoneIconBackground, cameraIconBackground;
     private ArrayList<CardView> notificationCards;
     private CardView moreCard;
     private ImageView wallpaperView;
     private GridView userGridView;
+    private TextView dateView;
 
     public static int clickedCard = -1;
     public static final int MAX_NOTIFICATION_SHOWN = 4;
@@ -115,7 +115,9 @@ public class LockScreenOverlayHelper extends Overlay{
         if(rLayout == null) {
             rLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_lock_screen, null);
             lLayout = (LinearLayout) rLayout.findViewById(R.id.lockscreen_linear_layout);
-            digitalClock = (DigitalClock) lLayout.findViewById(R.id.digital_clock_lock_screen);
+            timeDateLayout = (LinearLayout) lLayout.findViewById(R.id.linear_layout_time_date);
+            DigitalClock digitalClock = (DigitalClock) timeDateLayout.findViewById(R.id.digital_clock_lock_screen);
+            dateView = (TextView) timeDateLayout.findViewById(R.id.text_view_date);
 
             notificationCardsLayout = (LinearLayout) lLayout.findViewById(R.id.linear_layout_notification_cards);
             wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
@@ -123,7 +125,7 @@ public class LockScreenOverlayHelper extends Overlay{
 
             digitalClock.setPadding(digitalClock.getPaddingLeft() + verticalPadding,
                     digitalClock.getPaddingTop() + horizontalPadding,
-                    digitalClock.getPaddingRight() + verticalPadding, digitalClock.getPaddingBottom());
+                    digitalClock.getPaddingRight() + verticalPadding, 0);
             notificationCardsLayout.bringToFront();
             notificationCardsLayout.setAlpha(CARDS_MAX_ALPHA);
 
@@ -203,7 +205,6 @@ public class LockScreenOverlayHelper extends Overlay{
 
         notificationCardsLayout.removeAllViews();
 
-        //TODO add wallpaper support!
         Drawable wallpaper = WallpaperHelper.getWallpaperDrawable(context);
         wallpaperView.setImageDrawable(wallpaper);
 
@@ -212,6 +213,9 @@ public class LockScreenOverlayHelper extends Overlay{
             intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS);
             context.startService(intent);
         }
+
+        String date = new Date().toString().substring(0, 10);
+        dateView.setText(date);
 
         setUpAllUsersOverlay();
 
@@ -306,9 +310,9 @@ public class LockScreenOverlayHelper extends Overlay{
         }
         notificationCardsLayout.setAlpha((1 - Math.abs(scaleFactor)) * (CARDS_MAX_ALPHA - CARDS_MIN_ALPHA));
 
-        digitalClock.setAlpha(1.0f - Math.abs(scaleFactor));
-        digitalClock.setScaleX(1.0f + scaleFactor);
-        digitalClock.setScaleY(1.0f + scaleFactor);
+        timeDateLayout.setAlpha(1.0f - Math.abs(scaleFactor));
+        timeDateLayout.setScaleX(1.0f + scaleFactor);
+        timeDateLayout.setScaleY(1.0f + scaleFactor);
 
         userImageView.setScaleX(1.0f - Math.abs(scaleFactor));
         userImageView.setScaleY(1.0f - Math.abs(scaleFactor));
@@ -361,7 +365,7 @@ public class LockScreenOverlayHelper extends Overlay{
                 setInterpolator(accelerateDecelerateInterpolator).start();
         environmentImageView.animate().alpha(1).scaleX(1).scaleY(1).
                 setInterpolator(accelerateDecelerateInterpolator).start();
-        digitalClock.animate().scaleY(1).scaleX(1).alpha(1).
+        timeDateLayout.animate().scaleY(1).scaleX(1).alpha(1).
                 setInterpolator(accelerateDecelerateInterpolator).start();
         phoneIconBackground.animate().scaleY(1).scaleX(1).alpha(1).
                 setInterpolator(accelerateDecelerateInterpolator).start();
@@ -531,12 +535,12 @@ public class LockScreenOverlayHelper extends Overlay{
             if (direction == CustomFlingListener.DIRECTION_UP) {
                 notificationCardsLayout.animate().translationY(-lLayout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
                         .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener(notificationCardsLayout)).start();
-                digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
+                timeDateLayout.animate().scaleY(0).scaleX(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 dismissCornerIcons();
             } else if (direction == CustomFlingListener.DIRECTION_DOWN) {
                 notificationCardsLayout.animate().translationY(lLayout.getHeight()).setInterpolator(new DecelerateInterpolator(endVelocity / 2))
                         .alpha(CARDS_MIN_ALPHA).setListener(new AnimateEndListener(notificationCardsLayout)).start();
-                digitalClock.animate().scaleY(2).scaleX(2).alpha(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
+                timeDateLayout.animate().scaleY(2).scaleX(2).alpha(0).setInterpolator(new DecelerateInterpolator(endVelocity / 2)).start();
                 dismissCornerIcons();
             } else if (direction == CustomFlingListener.DIRECTION_LEFT) {
                 lLayout.animate().scaleX(0).scaleY(0).setListener(new AnimateEndListener(lLayout)).
@@ -557,7 +561,7 @@ public class LockScreenOverlayHelper extends Overlay{
             notificationCardsLayout.animate().translationY(-lLayout.getHeight()).
                     setListener(new AnimateEndListener(notificationCardsLayout)).
                     alpha(CARDS_MIN_ALPHA).setInterpolator(accelerateDecelerateInterpolator).start();
-            digitalClock.animate().scaleY(0).scaleX(0).setInterpolator(accelerateDecelerateInterpolator).start();
+            timeDateLayout.animate().scaleY(0).scaleX(0).setInterpolator(accelerateDecelerateInterpolator).start();
             userImageView.animate().alpha(0).setInterpolator(accelerateDecelerateInterpolator).start();
         }
     }
@@ -632,6 +636,7 @@ public class LockScreenOverlayHelper extends Overlay{
             }
 
             //Update the notifications
+            NotificationService.currentNotificationsAccessSemaphore.acquireUninterruptibly();
             for(int i = 0; i < NotificationService.currentNotifications.size(); i++){
                 if(i >= MAX_NOTIFICATION_SHOWN){
                     NotificationService.currentNotifications.get(i).setShown(false);
@@ -643,6 +648,7 @@ public class LockScreenOverlayHelper extends Overlay{
             if(NotificationService.currentNotifications.size() > MAX_NOTIFICATION_SHOWN){
                 setMoreCard();
             }
+            NotificationService.currentNotificationsAccessSemaphore.release();
         }
     }
 
@@ -650,6 +656,7 @@ public class LockScreenOverlayHelper extends Overlay{
         boolean additionDone = false;
 //            Log.d(LOG_TAG,"No of notification shown: "+noOfNotificationShown());
             //Show the new notification
+        NotificationService.currentNotificationsAccessSemaphore.acquireUninterruptibly();
         for(int i=0; i< NotificationService.currentNotifications.size(); i++){
             if(NotificationService.currentNotifications.get(i).isShown()){
                 continue;
@@ -671,6 +678,7 @@ public class LockScreenOverlayHelper extends Overlay{
         }
             // Just change the last card
         setMoreCard();
+        NotificationService.currentNotificationsAccessSemaphore.release();
     }
 
     public void notificationRemoved(){
@@ -683,6 +691,7 @@ public class LockScreenOverlayHelper extends Overlay{
             NotificationService.removedNotifications.remove(i);
         }
 
+        NotificationService.currentNotificationsAccessSemaphore.acquireUninterruptibly();
         while(noOfNotificationShown() <
                 ((MAX_NOTIFICATION_SHOWN < NotificationService.currentNotifications.size())?
                         MAX_NOTIFICATION_SHOWN : NotificationService.currentNotifications.size())){
@@ -699,6 +708,7 @@ public class LockScreenOverlayHelper extends Overlay{
             }
         }
         setMoreCard();
+        NotificationService.currentNotificationsAccessSemaphore.release();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

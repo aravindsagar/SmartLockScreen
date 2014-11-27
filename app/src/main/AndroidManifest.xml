@@ -135,6 +135,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
         </activity>
+        <activity android:name="com.android.camera.CropImage"/>
 
         <provider
             android:name="com.pvsagar.smartlockscreen.environmentdb.EnvironmentProvider"

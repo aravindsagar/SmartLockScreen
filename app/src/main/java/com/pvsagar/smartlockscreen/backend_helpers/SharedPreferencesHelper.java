@@ -166,4 +166,17 @@ public class SharedPreferencesHelper {
         initPreferences(context);
         return preferences.getBoolean(KEY_ENABLE_NOTIFICATION, true);
     }
+
+    public static void setWallpaperPreference(Context context, String value){
+        initPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(context.getString(R.string.pref_key_lockscreen_wallpaper), value);
+        editor.apply();
+        preferences = null;
+    }
+
+    public static String getWallpaperPreference(Context context){
+        initPreferences(context);
+        return preferences.getString(context.getString(R.string.pref_key_lockscreen_wallpaper), "system");
+    }
 }
