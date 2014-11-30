@@ -25,6 +25,7 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
     float velocityX,velocityY,distX,distY;
     static final int MIN_SWIPE_DIST = 60;
     static final int MIN_THRESHOLD_VELOCITY = 100;
+    static final int MIN_THRESHOLD_AVERAGE_VELOCITY = 250;
     boolean directionKnown;
     int direction;
     Context mContext;
@@ -87,11 +88,13 @@ public abstract class CustomFlingListener implements View.OnTouchListener {
                     velocityY = distY / ((upTime - last2MoveTime)/1000.0f);
                 }
 
-                if(velocityX == 0 && velocityY == 0){
+                if(Math.abs(velocityX) < MIN_THRESHOLD_VELOCITY && Math.abs(velocityY) < MIN_THRESHOLD_VELOCITY){
                     distX = convertPxToDip((int)(upRawX-downRawX));
                     distY = convertPxToDip((int)(upRawY-downRawY));
                     velocityX = distX / ((upTime - downTime)/1000.0f);
                     velocityY = distY / ((upTime - downTime)/1000.0f);
+                    velocityY/=(MIN_THRESHOLD_AVERAGE_VELOCITY/MIN_THRESHOLD_VELOCITY);
+                    velocityX/=(MIN_THRESHOLD_AVERAGE_VELOCITY/MIN_THRESHOLD_VELOCITY);
                 }
 
                 if(directionKnown) {
