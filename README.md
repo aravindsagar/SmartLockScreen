@@ -1,5 +1,4 @@
 #SmartLockScreen
-===============
 
 An android app, for balancing security and convinience, with **Environment sensitive passwords, Notifications in lockscreen, and Restricted User profiles**
 
@@ -24,7 +23,7 @@ Signed apk, screenshots and more can be found there.
 Copyright 2014 Aravind Sagar, and Priyan Vaithilingam
 
    Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
+   you may not use the files in this repository except in compliance with the License.
    You may obtain a copy of the License at
 
   http://www.apache.org/licenses/LICENSE-2.0
