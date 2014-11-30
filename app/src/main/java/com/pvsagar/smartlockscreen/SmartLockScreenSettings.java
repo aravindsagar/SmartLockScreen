@@ -576,6 +576,8 @@ public class SmartLockScreenSettings extends ActionBarActivity
         if(requestCode == MASTER_PASSWORD_REQUEST){
             if(!(resultCode == RESULT_OK && AdminActions.isAdminEnabled())){
                 finish();
+            } else {
+                refreshUserList();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
