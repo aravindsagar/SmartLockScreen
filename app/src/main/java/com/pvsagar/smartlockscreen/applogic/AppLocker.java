@@ -38,9 +38,8 @@ public class AppLocker implements OnForegroundAppChangedListener {
 
     private boolean isBlockedApp(final String packageName, final String activityName){
         //TODO add additional program logic
-        if(packageName.equals(APP_PACKAGE_NAME) &&
-                !activityName.equals("." + DismissKeyguardActivity.class.getSimpleName())){
-            return true;
+        if(packageName.equals(APP_PACKAGE_NAME)){
+            return !activityName.equals("." + DismissKeyguardActivity.class.getSimpleName());
         }
 
         List<App> apps = User.getCurrentUser(mContext).getAllowedApps(mContext);

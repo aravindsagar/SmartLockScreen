@@ -10,7 +10,9 @@ import android.util.Log;
 
 import com.pvsagar.smartlockscreen.R;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -80,6 +82,10 @@ public class Utility {
         return context.getResources().getColor(colors[index]);
     }
 
+    public static int[] getPictureColors(){
+        return colors;
+    }
+
     public static Bitmap drawableToBitmap (Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable)drawable).getBitmap();
@@ -105,5 +111,24 @@ public class Utility {
         return Color.rgb((int)Math.min(0xff, (Color.red(color) / SHADE_FACTOR)),
                 (int)Math.min(0xff, (Color.green(color) / SHADE_FACTOR)),
                 (int)Math.min(0xff, (Color.blue(color) / SHADE_FACTOR)));
+    }
+
+    private static int[] builtInDrawables = {
+            R.drawable.env_building_1,
+            R.drawable.env_building_2,
+            R.drawable.env_ground,
+            R.drawable.env_home,
+            R.drawable.env_location,
+            R.drawable.env_school,
+            R.drawable.env_wifi_ap
+    };
+
+    public static List<Drawable> getBuiltInPictureDrawables(Context context){
+        List<Drawable> drawables = new ArrayList<Drawable>(builtInDrawables.length);
+        for(int r:builtInDrawables){
+            Drawable drawable = context.getResources().getDrawable(r);
+            drawables.add(new BitmapDrawable(context.getResources(),Picture.getCroppedBitmap(drawableToBitmap(drawable), Color.DKGRAY, Picture.CROP_MODE_CENTER)));
+        }
+        return drawables;
     }
 }

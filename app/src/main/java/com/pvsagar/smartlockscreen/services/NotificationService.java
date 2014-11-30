@@ -33,7 +33,7 @@ public class NotificationService extends NotificationListenerService{
     //Actions
     public static String ACTION_CANCEL_NOTIFICATION = PACKAGE_NAME + ".cancel_notification";
 //    public static String ACTION_GET_CURRENT_NOTIFICATION = PACKAGE_NAME + ".get_current_notification";
-    public static String ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS = PACKAGE_NAME + ".get_current_notification_clear_previous";
+    public static String ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOUS = PACKAGE_NAME + ".get_current_notification_clear_previous";
 
     //Extras
     public static String EXTRAS_CANCEL_NOTIFICATION_KEY = PACKAGE_NAME + ".cancel_notification_key";
@@ -87,7 +87,7 @@ public class NotificationService extends NotificationListenerService{
                         baseIntent.setAction(BaseService.ACTION_NOTIFICATION_CHANGED);
                         startService(baseIntent);
                     }
-                }*/ else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS)) {
+                }*/ else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOUS)) {
                     StatusBarNotification[] sbns = getActiveNotifications();
                     currentNotificationsAccessSemaphore.acquireUninterruptibly();
                     if (currentNotifications != null){

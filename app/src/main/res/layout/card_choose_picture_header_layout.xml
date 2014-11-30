@@ -21,8 +21,17 @@
             android:layout_height="wrap_content"
             android:id="@+id/card_header_title"
             android:layout_weight="1"
-            android:textSize="@dimen/card_header_simple_title_text_size"
+            android:textSize="@dimen/nav_bar_text_size"
             android:layout_gravity="center_vertical"/>
-
+        <Spinner
+            android:id="@+id/card_header_spinner1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
+        <Spinner
+            android:id="@+id/card_header_spinner2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
     </LinearLayout>
 </FrameLayout>

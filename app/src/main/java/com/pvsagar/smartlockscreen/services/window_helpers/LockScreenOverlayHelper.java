@@ -53,6 +53,7 @@ import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.pvsagar.smartlockscreen.services.NotificationService;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -210,12 +211,13 @@ public class LockScreenOverlayHelper extends Overlay{
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Intent intent = new Intent(context,NotificationService.class);
-            intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOOUS);
+            intent.setAction(NotificationService.ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOUS);
             context.startService(intent);
         }
 
-        String date = new Date().toString().substring(0, 10);
-        dateView.setText(date);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd yyyy");
+        String dateString = sdf.format(new Date());
+        dateView.setText(dateString);
 
         setUpAllUsersOverlay();
 
@@ -288,25 +290,27 @@ public class LockScreenOverlayHelper extends Overlay{
         float scaleFactor = deltaY/(float)(lLayout.getHeight());
         /*notificationCardsLayout.setTranslationY(deltaY);*/
         int numNotifications = notificationCardsLayout.getChildCount();
-        float cardHeight = notificationCardsLayout.getChildAt(numNotifications-1).getBottom();
-        for(int i=0; i<numNotifications; i++){
-            CardView notificationCard = (CardView) notificationCardsLayout.getChildAt(i);
-            float cardFactor = (numNotifications-i-1.0f)/numNotifications;
-            float targetDeltaY = Math.abs(deltaY) - cardFactor * cardHeight;
+        if(numNotifications > 0) {
+            float cardHeight = notificationCardsLayout.getChildAt(numNotifications - 1).getBottom();
+            for (int i = 0; i < numNotifications; i++) {
+                CardView notificationCard = (CardView) notificationCardsLayout.getChildAt(i);
+                float cardFactor = (numNotifications - i - 1.0f) / numNotifications;
+                float targetDeltaY = Math.abs(deltaY) - cardFactor * cardHeight;
 
-            cardFactor *= 1.5;
-            if(cardFactor > Math.abs(scaleFactor)){
-                targetDeltaY = (Math.abs(deltaY/2) + (targetDeltaY - Math.abs(deltaY/2))*(Math.abs(scaleFactor)/cardFactor));
-            }
-            if(deltaY < 0){
-                targetDeltaY -= Math.abs(deltaY);
-                targetDeltaY *= -1;
-            }
-            notificationCard.setTranslationY(targetDeltaY);
+                cardFactor *= 1.5;
+                if (cardFactor > Math.abs(scaleFactor)) {
+                    targetDeltaY = (Math.abs(deltaY / 2) + (targetDeltaY - Math.abs(deltaY / 2)) * (Math.abs(scaleFactor) / cardFactor));
+                }
+                if (deltaY < 0) {
+                    targetDeltaY -= Math.abs(deltaY);
+                    targetDeltaY *= -1;
+                }
+                notificationCard.setTranslationY(targetDeltaY);
 
-        }
-        if(deltaY < 0) {
-            notificationCardsLayout.setTranslationY(deltaY);
+            }
+            if (deltaY < 0) {
+                notificationCardsLayout.setTranslationY(deltaY);
+            }
         }
         notificationCardsLayout.setAlpha((1 - Math.abs(scaleFactor)) * (CARDS_MAX_ALPHA - CARDS_MIN_ALPHA));
 

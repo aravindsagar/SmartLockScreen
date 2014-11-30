@@ -74,38 +74,38 @@ public class PatternLockOverlay extends Overlay {
                     }
                 }
             });
-
-            patternGridView.setPatternListener(new PatternInterface.PatternListener() {
-                Timer mClearTimer;
-                @Override
-                public void onPatternStarted() {
-
-                }
-
-                @Override
-                public void onPatternEntered(List<Integer> pattern) {
-                    Pattern enteredPattern = new Pattern(pattern);
-                    if(enteredPattern.compareString(currentPassword)){
-                        context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
-                        patternGridView.setRingColor(COLOR_VALID_PATTERN);
-                        patternGridView.setInputEnabled(false);
-                    } else {
-                        patternGridView.setRingColor(COLOR_INVALID_PATTERN);
-                        statusView.setText("Wrong pattern");
-                        //TODO Set timer
-                    }
-                }
-
-                @Override
-                public void onPatternCleared() {
-                    if(mClearTimer != null){
-                        mClearTimer.cancel();
-                        mClearTimer = null;
-                    }
-                    statusView.setText("");
-                }
-            });
         }
+
+        patternGridView.setPatternListener(new PatternInterface.PatternListener() {
+            Timer mClearTimer;
+            @Override
+            public void onPatternStarted() {
+
+            }
+
+            @Override
+            public void onPatternEntered(List<Integer> pattern) {
+                Pattern enteredPattern = new Pattern(pattern);
+                if(enteredPattern.compareString(currentPassword)){
+                    context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
+                    patternGridView.setRingColor(COLOR_VALID_PATTERN);
+                    patternGridView.setInputEnabled(false);
+                } else {
+                    patternGridView.setRingColor(COLOR_INVALID_PATTERN);
+                    statusView.setText("Wrong pattern");
+                    //TODO Set timer
+                }
+            }
+
+            @Override
+            public void onPatternCleared() {
+                if(mClearTimer != null){
+                    mClearTimer.cancel();
+                    mClearTimer = null;
+                }
+                statusView.setText("");
+            }
+        });
 
         patternGridView.clearPattern();
         patternGridView.setInputEnabled(true);

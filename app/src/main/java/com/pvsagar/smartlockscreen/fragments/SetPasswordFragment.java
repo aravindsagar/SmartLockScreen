@@ -317,7 +317,7 @@ public class SetPasswordFragment extends Fragment {
                         pattern != null) {
                     Passphrase passphrase = PassphraseFactory.getPassphraseInstance(
                             selectedPassphrasetype, passphraseEditText.getText().toString(),
-                            passphraseEditText.getText().toString(), null);
+                            passphraseEditText.getText().toString(), pattern);
 
                     getActivity().startService(BaseService.getServiceIntent(getActivity(),
                             null, BaseService.ACTION_DETECT_ENVIRONMENT));
@@ -390,6 +390,17 @@ public class SetPasswordFragment extends Fragment {
             }
             return false;
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_CREATE_PATTERN){
+            if (resultCode == Activity.RESULT_OK) {
+                pattern = data.getIntegerArrayListExtra(StorePattern.EXTRA_PATTERN);
+                passphraseEnterPatternTextView.setText(getString(R.string.text_view_enter_pattern_after_entry));
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public static interface SetPassphraseInterface {

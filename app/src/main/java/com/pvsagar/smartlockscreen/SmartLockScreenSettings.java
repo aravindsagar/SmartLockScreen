@@ -474,6 +474,9 @@ public class SmartLockScreenSettings extends ActionBarActivity
     }
 
     private void setCurrentUserView(){
+        if(allUsers.size() <= 0){
+            return;
+        }
         User currentUser = allUsers.get(mSelectedUserIndex);
         currentUserPicture.setImageDrawable(currentUser.getUserPictureDrawable(this));
         currentUserName.setText(currentUser.getUserName());

@@ -1,20 +1,19 @@
 package com.pvsagar.smartlockscreen.adapters;
 
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -22,12 +21,9 @@ import com.pvsagar.smartlockscreen.ChoosePicture;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.backend_helpers.Picture;
-import com.pvsagar.smartlockscreen.cards.CardAnimatorListener;
-import com.pvsagar.smartlockscreen.cards.CardTouchListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.CustomSwitchHelper;
 
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Created by PV on 9/2/2014.
@@ -35,10 +31,12 @@ import java.util.Vector;
  */
 public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
 
+    public static final float CARD_NORMAL_ELEVATION = 0f;
+
     /**
      * Duration of the animation of "raising" the card when an environment is selected in multi-select mode.
      */
-    private static final int ANIMATOR_DURATION = 150;
+    /*private static final int ANIMATOR_DURATION = 150;*/
 
     private Context context;
 
@@ -53,12 +51,14 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
      * This is used while animating cards. Current elevations of all the items are stored, so that if an animation
      * is cancelled, it can resume a new animation without jumoing to a different elevation
      */
-    private Vector<Float> elevations;
+    /*private Vector<Float> elevations;*/
 
     /**
      * Colors for custom on-off switch
      */
     private Drawable switchOn, switchOff;
+
+    private int selectedItemColor;
 
     /**
      * Constructor. Takes in all the details required to construct list items.
@@ -70,14 +70,15 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
         this.environments = environments;
         this.context = context;
         this.mSelectedItemsIds = new SparseBooleanArray();
-        this.elevations = new Vector<Float>();
+        /*this.elevations = new Vector<Float>();*/
+        selectedItemColor = context.getResources().getColor(R.color.text_view_touched_darker);
 
         switchOn = CustomSwitchHelper.getSwitchOnDrawable(getContext());
         switchOff = CustomSwitchHelper.getSwitchOffDrawable();
 
-        for (int i = 0; i < environments.size(); i++) {
+        /*for (int i = 0; i < environments.size(); i++) {
             elevations.add(CardTouchListener.CARD_NORMAL_ELEVATION);
-        }
+        }*/
     }
 
 
@@ -92,17 +93,20 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
             rootView = convertView;
         }
         CardView cardView = (CardView) rootView.findViewById(R.id.manage_environment_card_view);
-        final Switch mSwitch = (Switch) rootView.findViewById(R.id.switch_environment_list);
-        TextView textView = (TextView)rootView.findViewById(R.id.text_view_environment_list);
+        LinearLayout listItem = (LinearLayout) cardView.findViewById(R.id.linear_layout_list_items);
+        final Switch mSwitch = (Switch) listItem.findViewById(R.id.switch_environment_list);
+        TextView textView = (TextView)listItem.findViewById(R.id.text_view_environment_list);
         final String environmentName = environment.getName();
         textView.setText(environmentName);
         TextView hintTextView = (TextView)rootView.findViewById(R.id.text_view_environment_hint);
         hintTextView.setText(environment.getHint());
         cardView.setPreventCornerOverlap(false);
-        cardView.setMaxCardElevation(elevations.get(position));
-        cardView.setCardElevation(elevations.get(position));
+        /*cardView.setMaxCardElevation(elevations.get(position));
+        cardView.setCardElevation(elevations.get(position));*/
+        cardView.setMaxCardElevation(CARD_NORMAL_ELEVATION);
+        cardView.setCardElevation(CARD_NORMAL_ELEVATION);
         if(mSelectedItemsIds.get(position)){
-            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxCardElevation", CardTouchListener.CARD_SELECTED_ELEVATION);
+            /*ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxCardElevation", CardTouchListener.CARD_SELECTED_ELEVATION);
             maxAnimator.setDuration(ANIMATOR_DURATION);
             maxAnimator.setInterpolator(new AccelerateInterpolator());
             maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
@@ -112,9 +116,10 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
             animator.setDuration(ANIMATOR_DURATION);
             animator.setInterpolator(new AccelerateInterpolator());
             animator.addListener(new CardAnimatorListener(position, elevations, cardView));
-            animator.start();
+            animator.start();*/
+            listItem.setBackgroundColor(selectedItemColor);
         } else {
-            ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxCardElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
+            /*ObjectAnimator maxAnimator = ObjectAnimator.ofFloat(cardView, "maxCardElevation", CardTouchListener.CARD_NORMAL_ELEVATION);
             maxAnimator.setDuration(ANIMATOR_DURATION);
             maxAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
             maxAnimator.addListener(new CardAnimatorListener(position, elevations, cardView));
@@ -124,7 +129,8 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
             animator.setDuration(ANIMATOR_DURATION);
             animator.setInterpolator(new AccelerateDecelerateInterpolator());
             animator.addListener(new CardAnimatorListener(position, elevations, cardView));
-            animator.start();
+            animator.start();*/
+            listItem.setBackgroundColor(Color.TRANSPARENT);
         }
 
         mSwitch.setChecked(environment.isEnabled());
@@ -151,7 +157,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
                 int[] location = new int[2];
                 environmentPicture.getLocationInWindow(location);
                 intent.putExtra(ChoosePicture.EXTRA_IMAGE_VIEW_START_LOCATION, location);
-                intent.putExtra(ChoosePicture.EXTRA_OBJECT_TYPE, ChoosePicture.ObjectType.USER);
+                intent.putExtra(ChoosePicture.EXTRA_OBJECT_TYPE, ChoosePicture.ObjectType.ENVIRONMENT);
                 intent.putExtra(ChoosePicture.EXTRA_OBJECT_ID, environment.getId());
                 getContext().startActivity(intent);
                 ((Activity)getContext()).overridePendingTransition(0, 0);

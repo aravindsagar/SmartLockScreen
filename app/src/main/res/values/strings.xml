@@ -111,5 +111,7 @@
     <string name="use_master_password_to_unlock">Use master passphrase to unlock</string>
     <string name="unknown_environment">Unknown environment</string>
     <string name="toast_wallpaper_set">Wallpaper set</string>
+    <string name="defined_environments">Defined environments</string>
+    <string name="no_environments_added">No environments added.</string>
 
 </resources>

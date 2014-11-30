@@ -33,15 +33,12 @@ public class DismissKeyguardActivity extends Activity {
             systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
         getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
-
         new WaitBeforeDismiss().execute();
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
-        startService(BaseService.getServiceIntent(this, null, BaseService.ACTION_DETECT_ENVIRONMENT));
         finish();
         overridePendingTransition(0, 0);
     }
@@ -78,5 +75,12 @@ public class DismissKeyguardActivity extends Activity {
         protected void onCancelled(Void aVoid) {
             startService(BaseService.getServiceIntent(getBaseContext(), null, BaseService.ACTION_DISMISS_PATTERN_OVERLAY));
         }
+    }
+
+    @Override
+    protected void onPause() {
+        EnvironmentDetector.manageEnvironmentDetectionCriticalSection.release();
+        startService(BaseService.getServiceIntent(this, null, BaseService.ACTION_DETECT_ENVIRONMENT));
+        super.onPause();
     }
 }

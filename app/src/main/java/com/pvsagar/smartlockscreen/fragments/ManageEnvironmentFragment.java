@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -18,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -34,7 +32,6 @@ import com.pvsagar.smartlockscreen.cards.CardTouchListener;
 import com.pvsagar.smartlockscreen.frontend_helpers.CharacterDrawable;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,11 +41,7 @@ import java.util.List;
 public class ManageEnvironmentFragment extends Fragment {
     private static final String LOG_TAG = ManageEnvironmentFragment.class.getSimpleName();
 
-    List<String> environmentNames = new ArrayList<String>();
     List<Environment> environments;
-    List<Boolean> enabledValues = new ArrayList<Boolean>();
-    List<String> environmentHints = new ArrayList<String>();
-    List<Drawable> environmentPictures = new ArrayList<Drawable>();
     ListView environmentsListView;
 
     private int mPaddingTop, mPaddingBottom;
@@ -58,6 +51,7 @@ public class ManageEnvironmentFragment extends Fragment {
     private ActionModeListener actionModeListener;
 
     private View unknownEnvironmentView;
+    private TextView noEnvironmentsTextView;
 
     public ManageEnvironmentFragment() {
     }
@@ -70,7 +64,9 @@ public class ManageEnvironmentFragment extends Fragment {
         textViewTouchedColor = getResources().getColor(R.color.text_view_touched_darker);
 
         View rootView = inflater.inflate(R.layout.fragment_manage_environment, container, false);
-        environmentsListView = (ListView)rootView.findViewById(R.id.list_view_environments);
+        CardView environmentsCardView = (CardView) rootView.findViewById(R.id.card_view_environments);
+        environmentsCardView.setPreventCornerOverlap(true);
+        environmentsListView = (ListView)environmentsCardView.findViewById(R.id.list_view_environments);
         SystemBarTintManager tintManager = new SystemBarTintManager(getActivity());
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             mPaddingBottom = tintManager.getConfig().getNavigationBarHeight();
@@ -79,18 +75,13 @@ public class ManageEnvironmentFragment extends Fragment {
                 mPaddingTop += 24;
             }
         }
-        unknownEnvironmentView = getUnknownEnvironmentLayout(inflater);
-        environmentsListView.addFooterView(unknownEnvironmentView);
+        setUnknownEnvironmentLayout(rootView);
+
         switch (getActivity().getResources().getConfiguration().orientation){
             case Configuration.ORIENTATION_UNDEFINED:
             case Configuration.ORIENTATION_PORTRAIT:
                 rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
-                        rootView.getPaddingRight(), rootView.getPaddingBottom());
-                View bottomPaddingView = new View(getActivity());
-                bottomPaddingView.setBackgroundColor(Color.TRANSPARENT);
-                bottomPaddingView.setLayoutParams(new AbsListView.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, mPaddingBottom));
-                environmentsListView.addFooterView(bottomPaddingView, null, false);
+                        rootView.getPaddingRight(), rootView.getPaddingBottom() + mPaddingBottom);
                 break;
             case Configuration.ORIENTATION_LANDSCAPE:
                 rootView.setPadding(rootView.getPaddingLeft(), rootView.getPaddingTop() + mPaddingTop,
@@ -98,13 +89,15 @@ public class ManageEnvironmentFragment extends Fragment {
                 break;
         }
 
+        noEnvironmentsTextView = (TextView) rootView.findViewById(R.id.text_view_no_environment);
+        noEnvironmentsTextView.setVisibility(View.GONE);
+
         //Init
         init();
         return rootView;
     }
 
     private void init(){
-
         environments = Environment.getAllEnvironmentBarebones(getActivity());
 
             /* Creating the adapter */
@@ -162,6 +155,9 @@ public class ManageEnvironmentFragment extends Fragment {
                         }
                         // Close CAB
                         mode.finish();
+                        if(listAdapter.getCount() == 0){
+                            noEnvironmentsTextView.setVisibility(View.VISIBLE);
+                        }
                         return true;
                     default:
                         return false;
@@ -176,12 +172,18 @@ public class ManageEnvironmentFragment extends Fragment {
                 unknownEnvironmentView.animate().alpha(1).setDuration(200).setInterpolator(new AccelerateInterpolator()).start();
             }
         });
+
+        if(environments.isEmpty()){
+            noEnvironmentsTextView.setVisibility(View.VISIBLE);
+        } else {
+            noEnvironmentsTextView.setVisibility(View.GONE);
+        }
+
             /* End of adapter code */
     }
 
-    private View getUnknownEnvironmentLayout(LayoutInflater inflater){
-        CardView unknownLayout = (CardView) inflater.inflate(R.layout.list_item_unknown_environment,
-                environmentsListView, false);
+    private void setUnknownEnvironmentLayout(View rootView){
+        CardView unknownLayout = (CardView) rootView.findViewById(R.id.card_view_unknown_environment);
 
 //        LinearLayout listItemLayout = (LinearLayout) unknownLayout.findViewById(R.id.linear_layout_list_items);
 //        listItemLayout.setOnTouchListener(new TextViewTouchListener());
@@ -192,16 +194,15 @@ public class ManageEnvironmentFragment extends Fragment {
         TextView textView = (TextView) unknownLayout.findViewById(R.id.text_view_environment_list);
         textView.setText("Unknown Environment");
 
-        unknownLayout.setOnTouchListener(new CardTouchListener());
+        unknownLayout.setOnTouchListener(new CardTouchListener(getResources().getColor(R.color.text_view_touched)));
         unknownLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getActivity(), SetUnknownEnvironmentPassword.class));
             }
         });
-        unknownLayout.setMaxCardElevation(CardTouchListener.CARD_NORMAL_ELEVATION);
-        unknownLayout.setCardElevation(CardTouchListener.CARD_NORMAL_ELEVATION);
-        return unknownLayout;
+
+        unknownEnvironmentView = unknownLayout;
     }
 
     @Override
