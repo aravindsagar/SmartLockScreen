@@ -18,7 +18,7 @@ These are just indicative. Possibilities are endless!
 Visit XDA thread http://forum.xda-developers.com/android/apps-games/app-smartlockscreen-android-enjoy-t2919989
 Signed apk, screenshots and more can be found there.
 
-##Licence
+##License
 
 Copyright 2014 Aravind Sagar, and Priyan Vaithilingam
 
