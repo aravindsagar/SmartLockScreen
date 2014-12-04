@@ -1,0 +1,4 @@
+versionName=1.4
+versionCode=1
+downloadLink=http://goo.gl/OIf0Dp
+changelogLink=http://goo.gl/rwroFI
