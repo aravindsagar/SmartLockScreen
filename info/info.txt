@@ -1,3 +1,4 @@
+#Always add newline at the end of lastline. No spaces before or after '='
 versionName=1.4
 versionCode=1
 downloadLink=http://goo.gl/OIf0Dp
