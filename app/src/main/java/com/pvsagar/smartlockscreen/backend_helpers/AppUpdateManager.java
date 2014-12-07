@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,7 +65,6 @@ public class AppUpdateManager {
                 // Starts the query
                 conn.connect();
                 int response = conn.getResponseCode();
-                Log.d(LOG_TAG, "The response is: " + response);
                 is = conn.getInputStream();
 
                 // Convert the InputStream into AppInfo
@@ -85,7 +83,6 @@ public class AppUpdateManager {
             char[] buffer = new char[len];
             reader.read(buffer);
             String appData = new String(buffer);
-            Log.d(LOG_TAG, appData);
             String[] dataParts = appData.split("\n");
             AppInfo info = new AppInfo();
             boolean hasCode, hasName, hasDownloadLink, hasChangeLogLink;
