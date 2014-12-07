@@ -1,0 +1,85 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.pvsagar.smartlockscreen.AboutActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_about_activity"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationContentDescription="@string/abc_action_bar_up_description"
+        android:background="@color/action_bar_setup"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+    <ProgressBar
+        android:id="@+id/progress_bar_update_check"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_below="@id/toolbar_about_activity"/>
+
+    <ImageView
+        android:id="@+id/image_view_app_icon_big"
+        android:layout_width="@dimen/about_icon_size"
+        android:layout_height="@dimen/about_icon_size"
+        android:src="@drawable/ic_launcher_web"
+        android:scaleType="centerInside"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/toolbar_about_activity"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"/>
+    <TextView
+        android:id="@+id/text_view_app_name_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textStyle="bold"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:layout_below="@id/image_view_app_icon_big"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/text_view_authors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/text_view_app_name_version"
+        android:text="@string/authors"
+        android:textColor="@android:color/black"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"/>
+
+    <Button
+        android:id="@+id/button_check_update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_authors"
+        android:text="@string/check_update"
+        android:gravity="center"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"/>
+
+    <Button
+        android:id="@+id/button_join_discussion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/join_discussion"
+        android:layout_below="@id/button_check_update"
+        android:gravity="center"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"/>
+
+</RelativeLayout>

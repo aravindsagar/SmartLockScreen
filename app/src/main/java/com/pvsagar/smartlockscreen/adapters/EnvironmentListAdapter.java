@@ -87,11 +87,11 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rootView;
         final Environment environment = environments.get(position);
-        if(convertView == null) {
+        /*if(convertView == null) {*/
             rootView = inflater.inflate(R.layout.list_view_environments, parent, false);
-        } else {
+        /*} else {
             rootView = convertView;
-        }
+        }*/
         CardView cardView = (CardView) rootView.findViewById(R.id.manage_environment_card_view);
         LinearLayout listItem = (LinearLayout) cardView.findViewById(R.id.linear_layout_list_items);
         final Switch mSwitch = (Switch) listItem.findViewById(R.id.switch_environment_list);
@@ -139,7 +139,6 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
         } else {
             mSwitch.setThumbDrawable(switchOn);
         }
-
         mSwitch.setOnCheckedChangeListener(new CustomSwitchHelper.CustomSwitchCheckedChangeListener(getContext()) {
             @Override
             public void onCustomCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -147,6 +146,7 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
                         isChecked);
             }
         });
+
         final ImageView environmentPicture = (ImageView) rootView.findViewById(R.id.image_view_environment_picture);
         environmentPicture.setImageDrawable(environment.getEnvironmentPictureDrawable(getContext()));
         environmentPicture.setOnTouchListener(new Picture.PictureTouchListener());

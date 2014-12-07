@@ -113,5 +113,15 @@
     <string name="toast_wallpaper_set">Wallpaper set</string>
     <string name="defined_environments">Defined environments</string>
     <string name="no_environments_added">No environments added.</string>
+    <string name="join_discussion">Join the discussion at XDA</string>
+    <string name="check_update">Check for updates</string>
+    <string name="authors">©Aravind Sagar and V Priyan</string>
+    <string name="checking_update">Checking for updates</string>
+    <string name="update_check_failed">Couldn\'t check for updates.</string>
+    <string name="no_update_available">No update available</string>
+    <string name="update_available">"Update available, version "</string>
+    <string name="download">Download</string>
+    <string name="view_change_log">View change log</string>
+    <string name="update_available_dialog">"A new version of SmartLockScreen is available, version "</string>
 
 </resources>

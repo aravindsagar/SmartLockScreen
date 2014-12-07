@@ -30,8 +30,7 @@ public class WifiReceiver extends BroadcastReceiver {
             for(WifiConfiguration configuration: wifiConfigurations){
                 if(configuration.SSID.equals(wifiInfo.getSSID())) {
                     wifiEncryptionType = WiFiEnvironmentVariable.getSecurity(configuration);
-                    currentWifiNetwork = WiFiEnvironmentVariable.getWifiEnvironmentVariableFromDatabase(
-                            context, wifiInfo.getSSID(), wifiEncryptionType);
+                    currentWifiNetwork = new WiFiEnvironmentVariable(wifiInfo.getSSID(), wifiEncryptionType);
                     break;
                 }
             }

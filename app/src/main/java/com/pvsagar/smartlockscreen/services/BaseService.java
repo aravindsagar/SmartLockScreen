@@ -362,8 +362,10 @@ public class BaseService extends Service implements
             for(WifiConfiguration configuration: wifiConfigurations){
                 if(configuration.SSID.equals(wifiInfo.getSSID())) {
                     String wifiEncryptionType = WiFiEnvironmentVariable.getSecurity(configuration);
-                    return WiFiEnvironmentVariable.getWifiEnvironmentVariableFromDatabase(
-                            this, wifiInfo.getSSID(), wifiEncryptionType);
+                    return new WiFiEnvironmentVariable(wifiInfo.getSSID(), wifiEncryptionType);
+                    /*WiFiEnvironmentVariable.getWifiEnvironmentVariableFromDatabase(
+                            this, wifiInfo.getSSID(), wifiEncryptionType);*/
+
                 }
             }
         }
@@ -389,9 +391,9 @@ public class BaseService extends Service implements
                         socket.close();
                         connectedDevices.add(new BluetoothEnvironmentVariable(device.getName(),
                                 device.getAddress()));
-//                        Log.d(LOG_TAG, device.getName() + " added.");
+                        Log.d(LOG_TAG, device.getName() + " added.");
                     } catch (Exception e) {
-//                        Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
+                        Log.d("BluetoothPlugin", device.getName() + "Device is not in range");
                     }
                 }
                 return connectedDevices;
@@ -401,6 +403,7 @@ public class BaseService extends Service implements
 
         @Override
         protected void onPostExecute(List<BluetoothEnvironmentVariable> variables) {
+            Log.d(LOG_TAG, "bluetooth device search over.");
             if(!Utility.checkForNullAndWarn(variables, LOG_TAG)) {
                 for (BluetoothEnvironmentVariable device : variables) {
                     BluetoothReceiver.addBluetoothDeviceToConnectedDevices(device);

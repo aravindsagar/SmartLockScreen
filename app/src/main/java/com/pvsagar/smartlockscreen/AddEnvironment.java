@@ -980,14 +980,13 @@ public class AddEnvironment extends ActionBarActivity {
             User.getDefaultUser(getActivity()).setPassphraseForEnvironment(getActivity(),
                     passphrase, environment);
             /* done with setting passphrase */
-            getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
+           getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_ADD_GEOFENCES));
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_DETECT_WIFI));
             getActivity().startService(BaseService.getServiceIntent(getActivity(), null,
                     BaseService.ACTION_DETECT_ENVIRONMENT));
             getActivity().finish();
-
         }
 
         /**

@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.pvsagar.smartlockscreen.GeneralSettingsActivity;
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
 import com.pvsagar.smartlockscreen.applogic_objects.OverlappingEnvironmentIdsWithResolved;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +28,10 @@ public class SharedPreferencesHelper {
     private static final String KEY_MASTER_PASSWORD_TYPE = PACKAGE_NAME + ".MASTER_PASSWORD_TYPE";
     private static final String KEY_DEVICE_OWNER_USER_ID = PACKAGE_NAME + ".DEVICE_OWNER_USER_ID";
     private static final String KEY_PREFIX_OVERLAP_CHOICE = PACKAGE_NAME + ".OVERLAP_CHOICE_AMONG";
+    private static final String KEY_VERSION_NAME = PACKAGE_NAME + ".VERSION_NAME";
+    private static final String KEY_VERSION_CODE = PACKAGE_NAME + ".VERSION_CODE";
+    private static final String KEY_DOWNLOAD_LINK = PACKAGE_NAME + ".DOWNLOAD_LINK";
+    private static final String KEY_CHANGE_LOG_LINK = PACKAGE_NAME + ".CHANGE_LOG_LINK";
     private static String KEY_ENABLE_NOTIFICATION;
 
     private static SharedPreferences preferences;
@@ -178,5 +185,41 @@ public class SharedPreferencesHelper {
     public static String getWallpaperPreference(Context context){
         initPreferences(context);
         return preferences.getString(context.getString(R.string.pref_key_lockscreen_wallpaper), "system");
+    }
+
+    public static void setLatestVersionInfo(AppUpdateManager.AppInfo appInfo, Context context){
+        initPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(KEY_VERSION_CODE, appInfo.versionCode);
+        editor.putString(KEY_VERSION_NAME, appInfo.versionName);
+        editor.putString(KEY_CHANGE_LOG_LINK, appInfo.changeLogUrl.toString());
+        editor.putString(KEY_DOWNLOAD_LINK, appInfo.downloadUrl.toString());
+        editor.apply();
+        preferences = null;
+    }
+
+    public static AppUpdateManager.AppInfo getLatestVersionInfo(Context context){
+        initPreferences(context);
+        try {
+            return new AppUpdateManager.AppInfo(
+                    preferences.getInt(KEY_VERSION_CODE, 0),
+                    preferences.getString(KEY_VERSION_NAME, null),
+                    new URL(preferences.getString(KEY_VERSION_NAME, null)),
+                    new URL(preferences.getString(KEY_VERSION_NAME, null))
+            );
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static boolean shouldHidePersistentNotifications(Context context){
+        initPreferences(context);
+        return preferences.getBoolean(GeneralSettingsActivity.PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS, false);
+    }
+
+    public static boolean shouldHideLowPriorityNotifications(Context context){
+        initPreferences(context);
+        return preferences.getBoolean(GeneralSettingsActivity.PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS, false);
     }
 }

@@ -1,6 +1,7 @@
 package com.pvsagar.smartlockscreen.services;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.v7.widget.CardView;
 
 import com.pvsagar.smartlockscreen.applogic_objects.LockScreenNotification;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
@@ -42,7 +44,7 @@ public class NotificationService extends NotificationListenerService{
     public static String EXTRAS_CANCEL_NOTIFICATION_ID = PACKAGE_NAME + ".cancel_notification_id";
     public static String EXTRAS_CANCEL_NOTIFICATION_BUNDLE = PACKAGE_NAME + ".cancel_notification_bundle";
 
-
+    private boolean hidePersistent = false, hideLowPriority = false;
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action;
@@ -88,6 +90,8 @@ public class NotificationService extends NotificationListenerService{
                         startService(baseIntent);
                     }
                 }*/ else if(action.equals(ACTION_GET_CURRENT_NOTIFICATION_CLEAR_PREVIOUS)) {
+                    hideLowPriority = SharedPreferencesHelper.shouldHideLowPriorityNotifications(NotificationService.this);
+                    hidePersistent = SharedPreferencesHelper.shouldHidePersistentNotifications(NotificationService.this);
                     StatusBarNotification[] sbns = getActiveNotifications();
                     currentNotificationsAccessSemaphore.acquireUninterruptibly();
                     if (currentNotifications != null){
@@ -101,6 +105,9 @@ public class NotificationService extends NotificationListenerService{
                     }
                     if(sbns != null){
                         for (StatusBarNotification sbn : sbns) {
+                            if(shouldHideNotification(sbn)){
+                                continue;
+                            }
                             LockScreenNotification lsn = new LockScreenNotification(sbn);
                             currentNotifications.add(lsn);
                             currentSBN.add(sbn);
@@ -117,6 +124,12 @@ public class NotificationService extends NotificationListenerService{
         return START_STICKY;
     }
 
+    private boolean shouldHideNotification(StatusBarNotification sbn){
+        return (hideLowPriority &&
+                (/*sbn.getNotification().priority == Notification.PRIORITY_LOW || */sbn.getNotification().priority == Notification.PRIORITY_MIN))
+                || (hidePersistent && sbn.isOngoing());
+    }
+
     public static boolean isInstanceCreated(){
         return notificationService != null;
     }
@@ -130,6 +143,9 @@ public class NotificationService extends NotificationListenerService{
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
+        if(shouldHideNotification(sbn)){
+            return;
+        }
         LockScreenNotification lsn = new LockScreenNotification(sbn);
         CardView currentCardView = null;
         currentNotificationsAccessSemaphore.acquireUninterruptibly();

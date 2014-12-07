@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <!-- The following three permissions are used by Maps, on which location selection and searching is possible -->
+    <!-- Internet permission is also used for checking for updates -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -91,9 +92,9 @@
             android:name="com.pvsagar.smartlockscreen.DismissKeyguardActivity"
             android:excludeFromRecents="true"
             android:label="@string/title_activity_dismiss_keyguard"
+            android:screenOrientation="nosensor"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen"
-            android:screenOrientation="nosensor">
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
             android:name="com.pvsagar.smartlockscreen.SetMasterPassword"
@@ -135,7 +136,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
         </activity>
-        <activity android:name="com.android.camera.CropImage"/>
+        <activity
+            android:name="com.pvsagar.smartlockscreen.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName="com.pvsagar.smartlockscreen.SmartLockScreenSettings"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pvsagar.smartlockscreen.SmartLockScreenSettings" />
+        </activity>
+        <activity android:name="com.android.camera.CropImage" />
 
         <provider
             android:name="com.pvsagar.smartlockscreen.environmentdb.EnvironmentProvider"
@@ -207,7 +217,6 @@
             android:enabled="true"
             android:exported="false" >
         </service>
-
     </application>
 
 </manifest>

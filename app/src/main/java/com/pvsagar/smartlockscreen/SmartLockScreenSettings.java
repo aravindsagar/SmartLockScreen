@@ -237,6 +237,9 @@ public class SmartLockScreenSettings extends ActionBarActivity
             case INDEX_SETTINGS:
                 startActivity(new Intent(SmartLockScreenSettings.this, GeneralSettingsActivity.class));
                 break;
+            case INDEX_ABOUT:
+                startActivity(new Intent(this, AboutActivity.class));
+                break;
             default:
                 Toast.makeText(SmartLockScreenSettings.this, "Not yet implemented", Toast.LENGTH_SHORT).show();
         }

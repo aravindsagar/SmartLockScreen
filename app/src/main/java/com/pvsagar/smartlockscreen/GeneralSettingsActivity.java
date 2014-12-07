@@ -53,10 +53,10 @@ public class GeneralSettingsActivity extends PreferenceActivity {
      * shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
-    private static String PREF_KEY_ENABLE_NOTIFICATION;
-    private static String PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS;
-    private static String PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS;
-    private static String PREF_KEY_SET_WALLPAPER;
+    public static String PREF_KEY_ENABLE_NOTIFICATION;
+    public static String PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS;
+    public static String PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS;
+    public static String PREF_KEY_SET_WALLPAPER;
 
     private static int REQUEST_PICTURE = 1;
     private static int REQUEST_CROP_PICTURE = 2;

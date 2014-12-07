@@ -126,8 +126,10 @@ public class WiFiEnvironmentVariable extends EnvironmentVariable {
             wifiManager.setWifiEnabled(true);
         }
         ArrayList<WifiConfiguration> wifiConfigurations = new ArrayList<WifiConfiguration>();
-        for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
-            wifiConfigurations.add(wifiConfiguration);
+        if(wifiManager.getConfiguredNetworks() != null) {
+            for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
+                wifiConfigurations.add(wifiConfiguration);
+            }
         }
         return wifiConfigurations;
     }
