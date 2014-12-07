@@ -1,3 +1,12 @@
+alpha v1.4
+----------
+[*] This is primarily a bug fix update, I would have added more functionality before updating if the notification bug was not present in previous version.
+[*] Bug fix in notification duplication when its modified
+[*] Option to unlock using master passphrase anytime. Click on the top left icon in lockscreen overlay to get the option. (once that option is selected, it'll revert after 20 sec)
+[*] Nav drawer updated to latest material design guidelines
+[*] Preliminary wallpaper support. Using system wallpaper for now. Ability to customize will be added soon.
+[*] Coming up in next release: support for changing lockscreen wallpaper, changing pictures of Users and Environments, Notification blacklist.
+
 alpha v1.3
 ----------
 [*] Added restricted profiles. Now you can add restricted profiles, and set a different passphrase for them. You select the apps which are accessible to the profiles. Profile switching is available from the Lock screen overlay.
@@ -5,7 +14,6 @@ alpha v1.3
 [*] The way in which Notifications are handled, has been reworked upon. Bugs related to that should be gone now. Blacklist coming soon.
 [*] More card in notifications show the icons of the hidden notifications.
 [*] Miscellaneous bug fixes
-[*] Coming up in next release: wallpaper support, changing pictures of Users and Environments, Notification blacklist.
 
 alpha v1.2
 ----------

@@ -1,5 +1,5 @@
 #Always add newline at the end of lastline. No spaces before or after '='
-versionName=1.4
+versionName=1.5
 versionCode=2
-downloadLink=http://goo.gl/OIf0Dp
+downloadLink=http://goo.gl/17NhP7
 changelogLink=http://goo.gl/rwroFI
