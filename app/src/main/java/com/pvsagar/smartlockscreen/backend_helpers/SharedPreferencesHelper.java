@@ -33,7 +33,8 @@ public class SharedPreferencesHelper {
     private static final String KEY_DOWNLOAD_LINK = PACKAGE_NAME + ".DOWNLOAD_LINK";
     private static final String KEY_CHANGE_LOG_LINK = PACKAGE_NAME + ".CHANGE_LOG_LINK";
     private static String KEY_ENABLE_NOTIFICATION;
-
+    private static String KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS;
+    private static String KEY_HIDE_PERSISTENT_NOTIFICATIONS;
     private static SharedPreferences preferences;
 
     private static void initPreferences(Context context){
@@ -42,6 +43,12 @@ public class SharedPreferencesHelper {
         }
         if(KEY_ENABLE_NOTIFICATION == null || KEY_ENABLE_NOTIFICATION.isEmpty()){
             KEY_ENABLE_NOTIFICATION = context.getResources().getString(R.string.pref_key_enable_notification);
+        }
+        if(KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS== null || KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS.isEmpty()){
+            KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS = context.getResources().getString(R.string.pref_key_hide_low_priority_notifications);
+        }
+        if(KEY_HIDE_PERSISTENT_NOTIFICATIONS == null || KEY_HIDE_PERSISTENT_NOTIFICATIONS.isEmpty()){
+            KEY_HIDE_PERSISTENT_NOTIFICATIONS = context.getResources().getString(R.string.pref_key_hide_persistent_notifications);
         }
     }
 
