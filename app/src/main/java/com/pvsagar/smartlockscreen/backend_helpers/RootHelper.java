@@ -78,11 +78,9 @@ public class RootHelper {
     }
 
     public static boolean getPattern(Context context, String environmentName) {
-        Log.d(LOG_TAG, "Pattern capture started");
         hasCapturedPattern = false;
         mEnvironmentName = environmentName;
         if(!hasRootAccess()) return false;
-        Log.d(LOG_TAG, "Has root");
         context.startService(AppLockService.getServiceIntent(context, AppLockService.ACTION_REGISTER_LISTENER_ROOT_HELPER));
         Shell.SU.run(new String[]{
                 getCopyCurrentPatternCommand(context, GESTURE_KEY_TEMP_NAME),
@@ -116,16 +114,13 @@ public class RootHelper {
         public void onForegroundAppChanged(String packageName, String activityName, int timeSinceRegistered) {
             if(packageName.equals(SETTINGS_PACKAGE_NAME)){
                 hasEnteredSettings = true;
-                Log.d(LOG_TAG, "Entered settings");
                 if(!activityName.equals("." + PATTERN_ACTIVITY_NAME)){
                     mContext.startService(AppLockService.getServiceIntent(mContext, AppLockService.ACTION_UNREGISTER_LISTENER_ROOT_HELPER));
-                    Log.d(LOG_TAG, "But not in Pattern screen. Unregistering. activity: " + activityName);
                 }
                 return;
             }
             if(timeSinceRegistered > TIME_FOR_CHOOSE_PATTERN_START && !hasEnteredSettings) {
                 mContext.startService(AppLockService.getServiceIntent(mContext, AppLockService.ACTION_UNREGISTER_LISTENER_ROOT_HELPER));
-                Log.d(LOG_TAG, "Pattern screen time out. Unregistering. time: " + timeSinceRegistered);
                 return;
             }
             if(hasEnteredSettings){

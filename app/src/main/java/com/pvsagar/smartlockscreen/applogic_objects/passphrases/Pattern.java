@@ -1,7 +1,6 @@
 package com.pvsagar.smartlockscreen.applogic_objects.passphrases;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
@@ -62,7 +61,6 @@ public class Pattern extends Passphrase<List<Integer>> {
 
     @Override
     public boolean setAsCurrentPassword(Context context) {
-        Log.d(LOG_TAG, "Setting current password");
         if(isRootPattern){
             Passphrase.getMasterPassword(context).setAsCurrentPassword(context);
             return RootHelper.setCurrentPattern(context);
