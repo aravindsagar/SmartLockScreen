@@ -1,3 +1,9 @@
+alpha v2.0
+----------
+[*] Native pattern lock support (only if device has root access)
+[*] Option to hide notifications from lock screen 
+[*] A non-intrusive icon will be displayed in lock screen if notifications are hidden. Touch on the icon to see environment/user options. Touch outside anywhere to dismiss the icon.
+
 alpha v1.5
 ----------
 [*] Added support for custom wallpapers in lock screen
