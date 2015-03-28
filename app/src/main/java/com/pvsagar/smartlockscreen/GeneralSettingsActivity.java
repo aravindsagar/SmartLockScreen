@@ -66,6 +66,7 @@ public class GeneralSettingsActivity extends PreferenceActivity {
     private static int REQUEST_CROP_PICTURE = 2;
 
     private static Preference wallpaperPreference;
+    private boolean hasRootAccess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +79,7 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         PREF_KEY_PATTERN_TYPE = getResources().getString(R.string.pref_key_pattern_type);
         PREF_KEY_VISIBLE_PATTERN = getResources().getString(R.string.pref_key_is_visible_pattern);
         setupActionBar();
-        RootHelper.hasRootAccess();
+        hasRootAccess = RootHelper.hasRootAccess();
     }
 
     /**
@@ -149,10 +150,12 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         getPreferenceScreen().addPreference(lockscreenHeader);
         addPreferencesFromResource(R.xml.pref_lockscreen);
 
-        PreferenceCategory patternHeader = new PreferenceCategory(this);
-        patternHeader.setTitle(R.string.pref_header_pattern);
-        getPreferenceScreen().addPreference(patternHeader);
-        addPreferencesFromResource(R.xml.pref_pattern);
+        if(hasRootAccess) {
+            PreferenceCategory patternHeader = new PreferenceCategory(this);
+            patternHeader.setTitle(R.string.pref_header_pattern);
+            getPreferenceScreen().addPreference(patternHeader);
+            addPreferencesFromResource(R.xml.pref_pattern);
+        }
 
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated

@@ -771,7 +771,11 @@ public class EditEnvironment extends ActionBarActivity {
             passphraseEnterPatternTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (currentPatternType.equals(patternTypes[0])) {
+                    boolean rootPatterned = false;
+                    if (currentPatternType.equals(patternTypes[1])) {
+                        rootPatterned = RootHelper.getPattern(getActivity(), TMP_ENVIRONMENT_GESTURE_FILE_NAME);
+                    }
+                    if (currentPatternType.equals(patternTypes[0]) || !rootPatterned) {
                         if(!SharedPreferencesHelper.isLockscreenNotificationsShown(getActivity())){
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                             builder.setTitle(R.string.alert_title_error).setMessage(R.string.alert_incompat_pattern);
@@ -781,8 +785,6 @@ public class EditEnvironment extends ActionBarActivity {
                         }
                         Intent patternIntent = new Intent(getActivity(), StorePattern.class);
                         startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
-                    } else if (currentPatternType.equals(patternTypes[1])) {
-                        RootHelper.getPattern(getActivity(), TMP_ENVIRONMENT_GESTURE_FILE_NAME);
                     }
                 }
             });

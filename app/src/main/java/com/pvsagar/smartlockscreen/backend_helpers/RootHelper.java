@@ -82,6 +82,7 @@ public class RootHelper {
         hasCapturedPattern = false;
         mEnvironmentName = environmentName;
         if(!hasRootAccess()) return false;
+        Log.d(LOG_TAG, "Has root");
         context.startService(AppLockService.getServiceIntent(context, AppLockService.ACTION_REGISTER_LISTENER_ROOT_HELPER));
         Shell.SU.run(new String[]{
                 getCopyCurrentPatternCommand(context, GESTURE_KEY_TEMP_NAME),
