@@ -6,8 +6,8 @@ alpha v1.5
 [*] Fixed a major memory leak
 [*] Fixes in bluetooth device detection
 [*] Lock screen overlay is now completely fullscreen (Only in KitKat)
-[*] Slight design tweaks, more material!
 [*] More tweaks in lock screen notification animations
+[*] Slight design tweaks, more material!
 
 alpha v1.4
 ----------

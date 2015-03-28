@@ -1,3 +1,14 @@
+alpha v1.5
+----------
+[*] Added support for custom wallpapers in lock screen
+[*] Now you have the option to hide persistent and/or low priority notifications in lock screen. Go to general settings to enable it. I recommend hiding low priority only. More fine grained control with a blacklist will be added in the next update.
+[*] Updates can be checked from within the app now. Go to 'About' screen to check for updates. Automatic update checking and notification will be added soon.
+[*] Fixed a major memory leak
+[*] Fixes in bluetooth device detection
+[*] Lock screen overlay is now completely fullscreen (Only in KitKat)
+[*] Slight design tweaks, more material!
+[*] More tweaks in lock screen notification animations
+
 alpha v1.4
 ----------
 [*] This is primarily a bug fix update, I would have added more functionality before updating if the notification bug was not present in previous version.
