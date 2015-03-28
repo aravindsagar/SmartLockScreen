@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- From: file:/home/aravind/Android/workspace/SmartLockScreen/camera/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string-array name="pref_gallery_size_choices">
+        <!-- size choice of "large" -->
+        <item>Large</item>
+        <!-- size choice of "small" -->
+        <item>Small</item>
+    </string-array>
+    <string-array name="pref_gallery_size_values" translatable="false">
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+    <string-array name="pref_gallery_slideshow_interval_choices">
+        <!-- slide show interval "N seconds" where N is 2 -->
+        <item>2 seconds</item>
+        <!-- slide show interval "N seconds" where N is 3 -->
+        <item>3 seconds</item>
+        <!-- slide show interval "N seconds" where N is 4 -->
+        <item>4 seconds</item>
+    </string-array>
+    <string-array name="pref_gallery_slideshow_interval_values" translatable="false">
+        <item>"2"</item>
+        <item>"3"</item>
+        <item>"4"</item>
+    </string-array>
+    <string-array name="pref_gallery_slideshow_transition_choices">
+        <!-- Slide show transition to fade in and fade out -->
+        <item>Fade in &amp; out</item>
+        <!-- Slide show transition to slide in and out from the left and right -->
+        <item>Slide left - right</item>
+        <!-- Slide show transition to slide in and out from the top and bottom -->
+        <item>Slide up - down</item>
+        <!-- Slide show transition to be chosen randomly -->
+        <item>Random selection</item>
+    </string-array>
+    <string-array name="pref_gallery_slideshow_transition_values" translatable="false">
+        <item>"0"</item>
+        <item>"1"</item>
+        <item>"2"</item>
+        <item>"-1"</item>
+    </string-array>
+    <string-array name="pref_gallery_sort_choices">
+        <!-- Preference choice to show "newest first" -->
+        <item>Newest first</item>
+        <!-- Preference choice to show "newest last" -->
+        <item>Newest last</item>
+    </string-array>
+    <string-array name="pref_gallery_sort_values" translatable="false">
+        <item>descending</item>
+        <item>ascending</item>
+    </string-array>
+    <string name="all_images">All pictures</string>
+    <string name="all_videos">All videos</string>
+    <string name="camera_attach">Attach</string>
+    <string name="camera_cancel">Cancel</string>
+    <string name="camera_crop">Crop</string>
+    <string name="camera_label">Camera</string>
+    <string name="camera_pick_wallpaper">Pictures</string>
+    <string name="camera_play">Play</string>
+    <string name="camera_set">Set as</string>
+    <string name="camera_setas_wallpaper">Wallpaper</string>
+    <string name="camera_share">Share</string>
+    <string name="camera_toss">Delete</string>
+    <string name="camerasettings">Settings</string>
+    <string name="capture_picture">Capture picture</string>
+    <string name="capture_video">Capture video</string>
+    <string name="confirm_delete_message">Delete this picture?</string>
+    <string name="confirm_delete_multiple_message">Delete these media files?</string>
+    <string name="confirm_delete_title">Delete</string>
+    <string name="confirm_delete_video_message">Delete this video?</string>
+    <string name="context_menu_header">Picture options</string>
+    <string name="crop_discard_text">Discard</string>
+    <string name="crop_label">Crop picture</string>
+    <string name="crop_save_text">Save</string>
+    <string name="default_value_pref_gallery_size" translatable="false">1</string>
+    <string name="default_value_pref_gallery_slideshow_interval" translatable="false">"2"</string>
+    <string name="default_value_pref_gallery_slideshow_transition" translatable="false">"0"</string>
+    <string name="default_value_pref_gallery_sort" translatable="false">descending</string>
+    <string name="delete_images_message">Deleting images\u2026</string>
+    <string name="details">Details</string>
+    <string name="details_bit_rate">Bit rate:</string>
+    <string name="details_codec">Codec:</string>
+    <string name="details_date_taken">Date taken:</string>
+    <string name="details_dimension_x"><ns1:g example="640" id="width">%1$d</ns1:g> x <ns1:g example="480" id="height">%2$d</ns1:g></string>
+    <string name="details_duration">Duration:</string>
+    <string name="details_file_size">File size:</string>
+    <string name="details_format">Format:</string>
+    <string name="details_fps"><ns1:g example="30" id="frames">%1$d</ns1:g> fps</string>
+    <string name="details_frame_rate">Frame rate:</string>
+    <string name="details_hms"><ns1:g id="hours">%1$d</ns1:g>:<ns1:g id="minutes">%2$02d</ns1:g>:<ns1:g id="seconds">%3$02d</ns1:g></string>
+    <string name="details_image_latitude">GPS latitude:</string>
+    <string name="details_image_location">Location:</string>
+    <string name="details_image_longitude">GPS longitude:</string>
+    <string name="details_image_make">Manufacturer:</string>
+    <string name="details_image_model">Model:</string>
+    <string name="details_image_resolution">Resolution:</string>
+    <string name="details_image_whitebalance">WhiteBalance:</string>
+    <string name="details_kbps"><ns1:g example="192" id="speed">%1$d</ns1:g> Kbps</string>
+    <string name="details_mbps"><ns1:g example="2.3" id="speed">%1$g</ns1:g> Mbps</string>
+    <string name="details_ms"><ns1:g id="minutes">%1$02d</ns1:g>:<ns1:g id="seconds">%2$02d</ns1:g></string>
+    <string name="details_ok">OK</string>
+    <string name="details_panel_title">Details</string>
+    <string name="file_info_title">File info:</string>
+    <string name="gadget_title">Picture frame</string>
+    <string name="gallery_camera_bucket_name">Camera pictures</string>
+    <string name="gallery_camera_media_bucket_name">Camera media</string>
+    <string name="gallery_camera_videos_bucket_name">Camera videos</string>
+    <string name="gallery_label">Gallery</string>
+    <string name="gallery_picker_label">Gallery</string>
+    <string name="image_gallery_NoImageView_text">No media found.</string>
+    <string name="loading_video">Loading video\u2026</string>
+    <string name="movieviewlabel">Movies</string>
+    <string name="multiface_crop_help">Touch a face to begin.</string>
+    <string name="multiselect">Multiselect</string>
+    <string name="multiselect_cancel">Cancel</string>
+    <string name="multiselect_delete">Delete</string>
+    <string name="multiselect_share">Share</string>
+    <string name="no_location_image">There\'s no location information stored in this image.</string>
+    <string name="no_storage" product="default">You need to insert an SD card before using the camera.</string>
+    <string name="no_way_to_share">There\'s no app available to share the media file(s).</string>
+    <string name="no_way_to_share_image">There\'s no app available to share the picture.</string>
+    <string name="no_way_to_share_video">There\'s no app available to share the video.</string>
+    <string name="not_enough_space" product="default">Your SD card is full.</string>
+    <string name="photos_gallery_title">Gallery</string>
+    <string name="pick_photos_gallery_title">Choose picture</string>
+    <string name="pick_videos_gallery_title">Choose video</string>
+    <string name="pref_gallery_category">General settings</string>
+    <string name="pref_gallery_confirm_delete_summary">Show confirmation before deleting a picture or video</string>
+    <string name="pref_gallery_confirm_delete_title">Confirm deletions</string>
+    <string name="pref_gallery_size_dialogtitle">Picture size</string>
+    <string name="pref_gallery_size_summary">Choose the display size of pictures and videos</string>
+    <string name="pref_gallery_size_title">Display size</string>
+    <string name="pref_gallery_slideshow_interval_dialogtitle">Slideshow interval</string>
+    <string name="pref_gallery_slideshow_interval_summary">Choose how long each slide displays in the show</string>
+    <string name="pref_gallery_slideshow_interval_title">Slideshow interval</string>
+    <string name="pref_gallery_slideshow_repeat_summary">Play slideshow more than once</string>
+    <string name="pref_gallery_slideshow_repeat_title">Repeat slideshow</string>
+    <string name="pref_gallery_slideshow_shuffle_summary">Show pictures in random order</string>
+    <string name="pref_gallery_slideshow_shuffle_title">Shuffle slides</string>
+    <string name="pref_gallery_slideshow_transition_dialogtitle">Slideshow transition</string>
+    <string name="pref_gallery_slideshow_transition_summary">Choose the effect used when moving from one slide to the next</string>
+    <string name="pref_gallery_slideshow_transition_title">Slideshow transition</string>
+    <string name="pref_gallery_sort_dialogtitle">Picture sort</string>
+    <string name="pref_gallery_sort_summary">Choose the sort order of pictures and videos</string>
+    <string name="pref_gallery_sort_title">Sort order</string>
+    <string name="pref_slideshow_category">Slideshow settings</string>
+    <string name="preferences_label">Camera settings</string>
+    <string name="preparing_sd" product="default">Preparing SD card\u2026</string>
+    <string name="resume_playing_message">Resume playing video from <ns1:g example="5:30" id="duration">%s</ns1:g>?</string>
+    <string name="resume_playing_restart">Start over</string>
+    <string name="resume_playing_resume">Resume playing</string>
+    <string name="resume_playing_title">Resume video</string>
+    <string name="rotate">Rotate</string>
+    <string name="rotate_left">Rotate left</string>
+    <string name="rotate_right">Rotate right</string>
+    <string name="runningFaceDetection">Please wait\u2026</string>
+    <string name="savingImage">Saving picture\u2026</string>
+    <string name="sendImage">Share picture via</string>
+    <string name="sendVideo">Share video via</string>
+    <string name="send_media_files">Share media files via</string>
+    <string name="setImage">Set picture as</string>
+    <string name="show_on_map">Show on Maps</string>
+    <string name="slide_show">Slideshow</string>
+    <string name="video_context_menu_header">Video options</string>
+    <string name="video_exceed_mms_limit">The video you recorded is too large to send via MMS. Try recording a shorter length clip.</string>
+    <string name="video_play">Play</string>
+    <string name="videos_gallery_title">Gallery</string>
+    <string name="view">View</string>
+    <string name="view_label">View picture</string>
+    <string name="wait">Please wait\u2026</string>
+    <string name="wallpaper">Setting wallpaper\u2026</string>
+</resources>

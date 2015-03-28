@@ -38,7 +38,7 @@ public class PatternLockOverlay extends Overlay {
     }
 
     @Override
-    protected WindowManager.LayoutParams getLayoutParams() {
+    protected WindowManager.LayoutParams buildLayoutParams() {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
                         WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
@@ -56,11 +56,11 @@ public class PatternLockOverlay extends Overlay {
     }
 
     @Override
-    protected View getLayout() {
+    protected View buildLayout() {
         final String currentPassword = AdminActions.getCurrentPassphraseString();
 
         if(enterPatternLayout == null) {
-            enterPatternLayout = (RelativeLayout) inflater.inflate(R.layout.enter_pattern, null);
+            enterPatternLayout = (RelativeLayout) getInflater().inflate(R.layout.enter_pattern, null);
             statusView = (TextView) enterPatternLayout.findViewById(R.id.enter_pattern_status_textview);
             patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
             setSystemUiVisibility(enterPatternLayout);
@@ -69,7 +69,7 @@ public class PatternLockOverlay extends Overlay {
                 @Override
                 public void onClick(View v) {
                     if(!(v instanceof PatternGridView)){
-                        context.startService(BaseService.getServiceIntent(context, null,
+                        getContext().startService(BaseService.getServiceIntent(getContext(), null,
                                 BaseService.ACTION_DISMISS_PATTERN_OVERLAY_ONLY));
                     }
                 }
@@ -87,7 +87,7 @@ public class PatternLockOverlay extends Overlay {
             public void onPatternEntered(List<Integer> pattern) {
                 Pattern enteredPattern = new Pattern(pattern);
                 if(enteredPattern.compareString(currentPassword)){
-                    context.startService(BaseService.getServiceIntent(context, null, BaseService.ACTION_UNLOCK));
+                    getContext().startService(BaseService.getServiceIntent(getContext(), null, BaseService.ACTION_UNLOCK));
                     patternGridView.setRingColor(COLOR_VALID_PATTERN);
                     patternGridView.setInputEnabled(false);
                 } else {

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:columnWidth="@dimen/user_grid_column_width"
+    android:numColumns="auto_fit"
+    android:horizontalSpacing="@dimen/user_grid_spacing"
+    android:verticalSpacing="@dimen/user_grid_spacing"
+    android:id="@+id/grid_view_all_users"
+    android:stretchMode="columnWidth"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@android:color/white"/>

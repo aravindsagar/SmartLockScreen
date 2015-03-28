@@ -25,7 +25,7 @@ public class AppLocker implements OnForegroundAppChangedListener {
     }
 
     @Override
-    public void onForegroundAppChanged(final String packageName, final String activityName) {
+    public void onForegroundAppChanged(final String packageName, final String activityName, int notRequired) {
         if(User.getCurrentUser(mContext).getId() == User.getDefaultUser(mContext).getId()){
             return;
         }

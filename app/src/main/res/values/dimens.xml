@@ -28,4 +28,5 @@
     <dimen name="lockscreen_date_size">15sp</dimen>
 
     <dimen name="about_icon_size">150dp</dimen>
+    <dimen name="pager_tab_padding">4dp</dimen>
 </resources>

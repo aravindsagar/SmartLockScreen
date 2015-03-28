@@ -1,1 +1,1 @@
-include ':app', ':Lock Pattern Grid View Library'
+include ':app', ':Lock Pattern Grid View Library', ':libsuperuser'

@@ -29,14 +29,15 @@ import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultLis
 import com.google.android.gms.location.LocationStatusCodes;
 import com.pvsagar.smartlockscreen.DismissKeyguardActivity;
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
-import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.Environment;
-import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.User;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
+import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
+import com.pvsagar.smartlockscreen.baseclasses.LockScreenOverlay;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
@@ -45,7 +46,8 @@ import com.pvsagar.smartlockscreen.receivers.BluetoothReceiver;
 import com.pvsagar.smartlockscreen.receivers.PhoneStateReceiver;
 import com.pvsagar.smartlockscreen.receivers.ScreenReceiver;
 import com.pvsagar.smartlockscreen.receivers.WifiReceiver;
-import com.pvsagar.smartlockscreen.services.window_helpers.LockScreenOverlayHelper;
+import com.pvsagar.smartlockscreen.services.window_helpers.MinimalLockScreenOverlay;
+import com.pvsagar.smartlockscreen.services.window_helpers.NotificationsLockScreenOverlay;
 import com.pvsagar.smartlockscreen.services.window_helpers.PatternLockOverlay;
 
 import java.lang.reflect.Method;
@@ -85,8 +87,13 @@ public class BaseService extends Service implements
     public static final String ACTION_NOTIFICATION_POSTED = PACKAGE_NAME + ".NOTIFICATION_POSTED";
     public static final String ACTION_NOTIFICATION_REMOVED = PACKAGE_NAME + ".NOTIFICATION_REMOVED";
     public static final String ACTION_REMOVE_PERSISTENT_NOTIFICATION = PACKAGE_NAME + ".REMOVE_PERSISTENT_NOTIFICATION";
+    public static final String ACTION_SET_LOCKSCREEN_TYPE = PACKAGE_NAME + ".SET_LOCKSCREEN_TYPE";
 
     public static final String EXTRA_GEOFENCE_IDS_TO_REMOVE = PACKAGE_NAME + ".EXTRA_GEOFENCE_IDS_TO_REMOVE";
+    public static final String EXTRA_LOCKSCREEN_TYPE = PACKAGE_NAME + ".EXTRA_LOCKSCREEN_TYPE";
+
+    public static final int LOCKSCREEN_TYPE_NOTIFICATIONS = 0;
+    public static final int LOCKSCREEN_TYPE_MINIMAL = 1;
 
     private static List<Environment> currentEnvironments;
 
@@ -104,7 +111,9 @@ public class BaseService extends Service implements
     //List of geofence ids to delete when calling removeGeofences
     private List<String> mGeofencesToRemove;
 
-    private LockScreenOverlayHelper mLockScreenOverlayHelper;
+    private LockScreenOverlay mCurrentLockScreenOverlay;
+    private NotificationsLockScreenOverlay mNotificationsLockScreenOverlay;
+    private MinimalLockScreenOverlay mMinimalLockScreenOverlay;
 
     private PatternLockOverlay mPatternLockOverlay;
 
@@ -138,10 +147,18 @@ public class BaseService extends Service implements
         requestAddGeofences();
         new DetermineConnectedWifiNetwork().execute();
         new BluetoothDeviceSearch().execute();
+        new RootAccessTest().execute();
         ScreenReceiver.registerScreenReceiver(this);
         WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        mLockScreenOverlayHelper = new LockScreenOverlayHelper(this, windowManager);
+        mNotificationsLockScreenOverlay = new NotificationsLockScreenOverlay(this, windowManager);
         mPatternLockOverlay = new PatternLockOverlay(this, windowManager);
+        mMinimalLockScreenOverlay = new MinimalLockScreenOverlay(this, windowManager);
+
+        if(SharedPreferencesHelper.isLockscreenNotificationsShown(this)){
+            mCurrentLockScreenOverlay = mNotificationsLockScreenOverlay;
+        } else {
+            mCurrentLockScreenOverlay = mMinimalLockScreenOverlay;
+        }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
             Intent intent = new Intent(this,NotificationService.class);
@@ -196,17 +213,17 @@ public class BaseService extends Service implements
                 } else if(action.equals(ACTION_DETECT_BLUETOOTH)){
                     new BluetoothDeviceSearch().execute();
                 } else if(action.equals(ACTION_START_LOCKSCREEN_OVERLAY)){
-                    mLockScreenOverlayHelper.remove();
+                    mCurrentLockScreenOverlay.remove();
                     mPatternLockOverlay.remove();
                     if(!intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, true)){
                         mIsInCall = false;
                     }
                     if(!mIsInCall){
-                        mLockScreenOverlayHelper.execute();
+                        mCurrentLockScreenOverlay.execute();
                     }
                     WakeLockHelper.releaseWakeLock(ScreenReceiver.WAKE_LOCK_TAG);
                 } else if(action.equals(ACTION_DISMISS_LOCKSCREEN_OVERLAY)){
-                    mLockScreenOverlayHelper.remove();
+                    mCurrentLockScreenOverlay.remove();
                     if(intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, false)){
                         mIsInCall = true;
                     }
@@ -220,25 +237,38 @@ public class BaseService extends Service implements
                     this.getApplicationContext().startActivity(dismissIntent);
                 } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY)){
                     mPatternLockOverlay.remove();
-                    mLockScreenOverlayHelper.remove();
+                    mCurrentLockScreenOverlay.remove();
                     if(intent.getBooleanExtra(PhoneStateReceiver.EXTRA_IS_IN_CALL, false)){
                         mIsInCall = true;
                     }
                 } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY_ONLY)) {
                     mPatternLockOverlay.remove();
-                    mLockScreenOverlayHelper.execute();
+                    mCurrentLockScreenOverlay.execute();
                 } else if (action.equals(ACTION_NOTIFICATION_CHANGED)) {
                     // Add to the list view
                     //Bundle extras = intent.getExtras();
                     //LockScreenNotification lsn = (LockScreenNotification)
                     //        extras.getParcelable(NotificationService.EXTRAS_LOCK_SCREEN_NOTIFICATION);
-                    mLockScreenOverlayHelper.initNotification();
+                    if(mCurrentLockScreenOverlay instanceof NotificationsLockScreenOverlay) {
+                        ((NotificationsLockScreenOverlay) mCurrentLockScreenOverlay).initNotification();
+                    }
                 } else if(action.equals(ACTION_NOTIFICATION_POSTED)){
-                    mLockScreenOverlayHelper.notificationPosted();
+                    if(mCurrentLockScreenOverlay instanceof NotificationsLockScreenOverlay) {
+                        ((NotificationsLockScreenOverlay) mCurrentLockScreenOverlay).notificationPosted();
+                    }
                 } else if(action.equals(ACTION_NOTIFICATION_REMOVED)) {
-                    mLockScreenOverlayHelper.notificationRemoved();
+                    if(mCurrentLockScreenOverlay instanceof NotificationsLockScreenOverlay) {
+                        ((NotificationsLockScreenOverlay) mCurrentLockScreenOverlay).notificationRemoved();
+                    }
                 } else if(action.equals(ACTION_REMOVE_PERSISTENT_NOTIFICATION)){
                     stopForeground(true);
+                } else if(action.equals(ACTION_SET_LOCKSCREEN_TYPE)){
+                    int lockScreenType = intent.getIntExtra(EXTRA_LOCKSCREEN_TYPE, LOCKSCREEN_TYPE_NOTIFICATIONS);
+                    if (lockScreenType == LOCKSCREEN_TYPE_NOTIFICATIONS){
+                        mCurrentLockScreenOverlay = mNotificationsLockScreenOverlay;
+                    } else if(lockScreenType == LOCKSCREEN_TYPE_MINIMAL){
+                        mCurrentLockScreenOverlay = mMinimalLockScreenOverlay;
+                    }
                 }
                 //Additional action handling to be done here when more actions are added
             }
@@ -494,8 +524,28 @@ public class BaseService extends Service implements
             ScreenReceiver.turnScreenOff(this);
             ScreenReceiver.turnScreenOn(this);
         }
-        if(mLockScreenOverlayHelper != null){
-            mLockScreenOverlayHelper.setUpEnvironmentOptions();
+        if(mCurrentLockScreenOverlay != null){
+            mCurrentLockScreenOverlay.setUpEnvironmentOptions();
         }
+    }
+
+    private class RootAccessTest extends AsyncTask<Void, Void, Boolean>{
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            //return RootHelper.testRootAccess(BaseService.this);
+            return null;
+        }
+
+        /*@Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            String toastText;
+            if(aBoolean){
+                toastText = "Copied apk to sdcard";
+            } else {
+                toastText = "No root access";
+            }
+            Toast.makeText(BaseService.this, toastText, Toast.LENGTH_SHORT).show();
+        }*/
     }
 }

@@ -25,11 +25,14 @@ import android.widget.Toast;
 
 import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
+import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.InnerViewElementsSetUpListener;
 import com.pvsagar.smartlockscreen.cards.PassphraseCardHeader;
 import com.pvsagar.smartlockscreen.services.BaseService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -41,11 +44,15 @@ import it.gmariotti.cardslib.library.view.CardView;
 public class SetUnknownEnvironmentPassword extends Activity {
     private static final int REQUEST_CREATE_PATTERN = 32;
 
+    private static final String ENVIRONMENT_GESTURE_FILE_NAME = "unknown_environment";
+
     private static ArrayAdapter<String> passphraseAdapter;
     private static int selectedPassphrasetype;
 
     private CardView passphraseCardView;
     private static List<Integer> pattern;
+    private static String[] patternTypes;
+    private static String currentPatternType;
     private Spinner passphraseTypeSpinner;
     private EditText passphraseEditText;
     private EditText passphraseConfirmationEditText;
@@ -83,6 +90,8 @@ public class SetUnknownEnvironmentPassword extends Activity {
         setUpButtons();
 
         getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, convertDipToPx(expandedHeight));
+        patternTypes = this.getResources().getStringArray(R.array.pref_values_pattern_type);
+        currentPatternType = SharedPreferencesHelper.getPatternType(this);
     }
 
     protected Activity getActivity(){
@@ -109,8 +118,19 @@ public class SetUnknownEnvironmentPassword extends Activity {
         passphraseEnterPatternTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent patternIntent = new Intent(getActivity(), StorePattern.class);
-                startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
+                if (currentPatternType.equals(patternTypes[0])) {
+                    if(!SharedPreferencesHelper.isLockscreenNotificationsShown(getActivity())){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle(R.string.alert_title_error).setMessage(R.string.alert_incompat_pattern);
+                        builder.setPositiveButton(R.string.ok,null);
+                        builder.create().show();
+                        return;
+                    }
+                    Intent patternIntent = new Intent(getActivity(), StorePattern.class);
+                    startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
+                } else if (currentPatternType.equals(patternTypes[1])) {
+                    RootHelper.getPattern(getActivity(), ENVIRONMENT_GESTURE_FILE_NAME);
+                }
             }
         });
 
@@ -280,6 +300,11 @@ public class SetUnknownEnvironmentPassword extends Activity {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
+                        currentPatternType.equals(patternTypes[1]) && RootHelper.isHasCapturedPattern()) {
+                    pattern = new ArrayList<>();
+                    pattern.add(0);
+                }
                 if((selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_NONE &&
                         selectedPassphrasetype != Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
                         passphraseEditText.getText().toString().equals("")) ||

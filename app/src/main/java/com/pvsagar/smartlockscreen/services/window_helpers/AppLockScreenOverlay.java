@@ -36,7 +36,7 @@ public class AppLockScreenOverlay extends Overlay {
     }
 
     @Override
-    protected WindowManager.LayoutParams getLayoutParams() {
+    protected WindowManager.LayoutParams buildLayoutParams() {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
@@ -51,9 +51,9 @@ public class AppLockScreenOverlay extends Overlay {
     }
 
     @Override
-    protected View getLayout() {
+    protected View buildLayout() {
         if(rLayout == null) {
-            rLayout = (RelativeLayout) inflater.inflate(R.layout.app_lockscreen_overlay, null);
+            rLayout = (RelativeLayout) getInflater().inflate(R.layout.app_lockscreen_overlay, null);
             wallpaperView = (ImageView) rLayout.findViewById(R.id.wallpaper_image_view);
             messageView = (TextView) rLayout.findViewById(R.id.text_view_app_lockscreen);
             masterPasswordEditText = (EditText) rLayout.findViewById(R.id.edit_text_enter_master_password);
@@ -68,7 +68,7 @@ public class AppLockScreenOverlay extends Overlay {
                             .addCategory(Intent.CATEGORY_HOME)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    getContext().startActivity(intent);
                     remove();
                 }
             });
@@ -76,14 +76,14 @@ public class AppLockScreenOverlay extends Overlay {
             continueButton = (Button) rLayout.findViewById(R.id.button_confirm);
         }
 
-        messageView.setText(context.getString(R.string.app_locked_message));
+        messageView.setText(getContext().getString(R.string.app_locked_message));
 
-        Drawable wallpaper = context.getResources().getDrawable(R.drawable.background);
+        Drawable wallpaper = getContext().getResources().getDrawable(R.drawable.background);
         wallpaper.setColorFilter(Color.argb(100, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
         wallpaperView.setImageDrawable(wallpaper);
 
 
-        final Passphrase masterPassphrase = Passphrase.getMasterPassword(context);
+        final Passphrase masterPassphrase = Passphrase.getMasterPassword(getContext());
         masterPasswordEditText.setText("");
         masterPasswordEditText.setTransformationMethod(new PasswordTransformationMethod());
         if(masterPassphrase.getPassphraseType().equals(Passphrase.TYPE_PIN)){

@@ -14,11 +14,11 @@ import android.view.WindowManager;
 public abstract class Overlay {
     private static final String LOG_TAG = Overlay.class.getSimpleName();
 
-    protected LayoutInflater inflater;
-    protected WindowManager windowManager;
-    protected Context context;
-    protected View layout;
-    protected WindowManager.LayoutParams params;
+    private LayoutInflater inflater;
+    private WindowManager windowManager;
+    private Context context;
+    private View layout;
+    private WindowManager.LayoutParams params;
 
     private boolean isAdded = false;
 
@@ -28,24 +28,24 @@ public abstract class Overlay {
         this.windowManager = windowManager;
     }
 
-    protected abstract WindowManager.LayoutParams getLayoutParams();
+    protected abstract WindowManager.LayoutParams buildLayoutParams();
 
     /**
      * Gets the layout to be shown by the window manager.
      * Recycling of already inflated view must be taken care of by the implementation. Else memory leaks can occur!
      * @return layout to be shown by the window manager.
      */
-    protected abstract View getLayout();
+    protected abstract View buildLayout();
 
     /**
-     * Adds the view specified by getLayout() to the windowManager passed during initialization
+     * Adds the view specified by buildLayout() to the windowManager passed during initialization
      */
     public void execute(){
-        layout = getLayout();
+        layout = buildLayout();
         if(isAdded) return;
         layout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         if(params == null){
-            params = getLayoutParams();
+            params = buildLayoutParams();
         }
         try {
             windowManager.addView(layout, params);
@@ -57,7 +57,7 @@ public abstract class Overlay {
     }
 
     /**
-     * Removes the view specified by getLayout() from the windowManager passed during initialization
+     * Removes the view specified by buildLayout() from the windowManager passed during initialization
      */
     public void remove(){
         if(!isAdded) return;
@@ -89,5 +89,13 @@ public abstract class Overlay {
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         }
         return systemUiVisibility;
+    }
+
+    public LayoutInflater getInflater() {
+        return inflater;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

@@ -42,6 +42,8 @@ import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.Blueto
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
+import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.baseclasses.EnvironmentVariable;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.cards.EnableDisableCardHeader;
@@ -94,6 +96,9 @@ public class EditEnvironment extends ActionBarActivity {
 
     private static int currentPassphraseTypeIndex;
 
+    private static String[] patternTypes;
+    private static String currentPatternType;
+
     PlaceholderFragment placeholderFragment;
 
     @Override
@@ -113,6 +118,9 @@ public class EditEnvironment extends ActionBarActivity {
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(getResources().getColor(R.color.action_bar_edit_environment));
         }
+
+        patternTypes = this.getResources().getStringArray(R.array.pref_values_pattern_type);
+        currentPatternType = SharedPreferencesHelper.getPatternType(this);
     }
 
     @Override
@@ -163,6 +171,7 @@ public class EditEnvironment extends ActionBarActivity {
     }
 
     public static class PlaceholderFragment extends Fragment {
+        private static final String TMP_ENVIRONMENT_GESTURE_FILE_NAME = "tmp_environment";
 
         Environment environment;
         String environmentName;
@@ -762,8 +771,19 @@ public class EditEnvironment extends ActionBarActivity {
             passphraseEnterPatternTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent patternIntent = new Intent(getActivity(), StorePattern.class);
-                    startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
+                    if (currentPatternType.equals(patternTypes[0])) {
+                        if(!SharedPreferencesHelper.isLockscreenNotificationsShown(getActivity())){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle(R.string.alert_title_error).setMessage(R.string.alert_incompat_pattern);
+                            builder.setPositiveButton(R.string.ok,null);
+                            builder.create().show();
+                            return;
+                        }
+                        Intent patternIntent = new Intent(getActivity(), StorePattern.class);
+                        startActivityForResult(patternIntent, REQUEST_CREATE_PATTERN);
+                    } else if (currentPatternType.equals(patternTypes[1])) {
+                        RootHelper.getPattern(getActivity(), TMP_ENVIRONMENT_GESTURE_FILE_NAME);
+                    }
                 }
             });
 
@@ -1047,6 +1067,12 @@ public class EditEnvironment extends ActionBarActivity {
             newEnvironment.updateInDatabase(getActivity(),this.environmentName);
 
             /* Updating passphrase */
+            if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_PATTERN &&
+                    currentPatternType.equals(patternTypes[1]) && RootHelper.isHasCapturedPattern()) {
+                RootHelper.renameGestureKeyFile(getActivity(), TMP_ENVIRONMENT_GESTURE_FILE_NAME, environmentName);
+                pattern = new ArrayList<>();
+                pattern.add(0);
+            }
             if(selectedPassphrasetype == Passphrase.INDEX_PASSPHRASE_TYPE_NONE || (!passphraseEditText.getText().toString().equals("") &&
                     passphraseConfirmationEditText.getText().toString().equals(passphraseEditText.getText().toString())) ||
                     pattern != null){

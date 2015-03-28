@@ -4,11 +4,15 @@
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General</string>
     <string name="pref_header_lockscreen">Lock Screen</string>
+    <string name="pref_header_pattern">Pattern Lock</string>
 
     <string name="pref_key_enable_notification">enable_notification</string>
     <string name="pref_title_enable_notification">Enable notification</string>
     <string name="pref_description_notification">Status bar notification indicating your
         current environment</string>
+
+    <string name="pref_key_show_lockscreen_notifications">show_lockscreen_notifications</string>
+    <string name="pref_title_show_lockscreen_notifications">Show notifications in lockscreen</string>
 
     <string name="pref_key_hide_persistent_notifications">hide_persistent_notifications</string>
     <string name="pref_title_hide_persistent_notifications">Hide persistent notifications</string>
@@ -29,4 +33,19 @@
         <item>custom</item>
     </string-array>
 
+    <string name="pref_key_pattern_type">pattern_type</string>
+    <string name="pref_title_pattern_type">Pattern lock type</string>
+    <string-array name="pref_entries_pattern_type">
+        <item>Inbuilt pattern lock (May not work on all devices)</item>
+        <item>System pattern lock (Requires root)</item>
+        <!--<item>Disabled</item>-->
+    </string-array>
+    <string-array name="pref_values_pattern_type">
+        <item>inbuilt</item>
+        <item>system</item>
+        <!--<item>disabled</item>-->
+    </string-array>
+
+    <string name="pref_key_is_visible_pattern">visible_pattern</string>
+    <string name="pref_title_is_visible_pattern">Make pattern visible</string>
 </resources>

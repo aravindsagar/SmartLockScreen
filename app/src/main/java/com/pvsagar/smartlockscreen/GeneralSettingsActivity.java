@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.camera.CropImageIntentBuilder;
+import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.frontend_helpers.MediaStoreUtils;
 import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
@@ -54,9 +55,12 @@ public class GeneralSettingsActivity extends PreferenceActivity {
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
     public static String PREF_KEY_ENABLE_NOTIFICATION;
+    public static String PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS;
     public static String PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS;
     public static String PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS;
     public static String PREF_KEY_SET_WALLPAPER;
+    public static String PREF_KEY_PATTERN_TYPE;
+    public static String PREF_KEY_VISIBLE_PATTERN;
 
     private static int REQUEST_PICTURE = 1;
     private static int REQUEST_CROP_PICTURE = 2;
@@ -67,10 +71,14 @@ public class GeneralSettingsActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         PREF_KEY_ENABLE_NOTIFICATION = getResources().getString(R.string.pref_key_enable_notification);
+        PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS = getResources().getString(R.string.pref_key_show_lockscreen_notifications);
         PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS = getResources().getString(R.string.pref_key_hide_persistent_notifications);
         PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS = getResources().getString(R.string.pref_key_hide_low_priority_notifications);
         PREF_KEY_SET_WALLPAPER = getResources().getString(R.string.pref_key_lockscreen_wallpaper);
+        PREF_KEY_PATTERN_TYPE = getResources().getString(R.string.pref_key_pattern_type);
+        PREF_KEY_VISIBLE_PATTERN = getResources().getString(R.string.pref_key_is_visible_pattern);
         setupActionBar();
+        RootHelper.hasRootAccess();
     }
 
     /**
@@ -141,6 +149,11 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         getPreferenceScreen().addPreference(lockscreenHeader);
         addPreferencesFromResource(R.xml.pref_lockscreen);
 
+        PreferenceCategory patternHeader = new PreferenceCategory(this);
+        patternHeader.setTitle(R.string.pref_header_pattern);
+        getPreferenceScreen().addPreference(patternHeader);
+        addPreferencesFromResource(R.xml.pref_pattern);
+
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
@@ -151,6 +164,7 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         SLSPreferenceChangeListener preferenceChangeListener =
                 new SLSPreferenceChangeListener(GeneralSettingsActivity.this);
         setAndCallListener(findPreference(PREF_KEY_ENABLE_NOTIFICATION),preferenceChangeListener);
+        setAndCallListener(findPreference(PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS),preferenceChangeListener);
         setAndCallListener(findPreference(PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS),preferenceChangeListener);
         setAndCallListener(findPreference(PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS),preferenceChangeListener);
         wallpaperPreference = findPreference(PREF_KEY_SET_WALLPAPER);
@@ -185,6 +199,14 @@ public class GeneralSettingsActivity extends PreferenceActivity {
                     mContext.startService(BaseService.getServiceIntent(mContext, null,
                             BaseService.ACTION_REMOVE_PERSISTENT_NOTIFICATION));
                 }
+            } else if (preference.getKey().equals(PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS)){
+                Intent lockscreenTypeIntent = BaseService.getServiceIntent(mContext, null, BaseService.ACTION_SET_LOCKSCREEN_TYPE);
+                if((boolean) newValue) {
+                    lockscreenTypeIntent.putExtra(BaseService.EXTRA_LOCKSCREEN_TYPE, BaseService.LOCKSCREEN_TYPE_NOTIFICATIONS);
+                } else {
+                    lockscreenTypeIntent.putExtra(BaseService.EXTRA_LOCKSCREEN_TYPE, BaseService.LOCKSCREEN_TYPE_MINIMAL);
+                }
+                mContext.startService(lockscreenTypeIntent);
             } else if(preference.getKey().equals(PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS)){
 
             } else if(preference.getKey().equals(PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS)){
@@ -327,6 +349,14 @@ public class GeneralSettingsActivity extends PreferenceActivity {
             } else {
                 wallpaperPreference.setSummary(R.string.pref_description_lockscreen_wallpaper_system);
             }
+        }
+    }
+
+    public static class PatternSettingsFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
         }
     }
 }

@@ -33,8 +33,11 @@ public class SharedPreferencesHelper {
     private static final String KEY_DOWNLOAD_LINK = PACKAGE_NAME + ".DOWNLOAD_LINK";
     private static final String KEY_CHANGE_LOG_LINK = PACKAGE_NAME + ".CHANGE_LOG_LINK";
     private static String KEY_ENABLE_NOTIFICATION;
+    private static String KEY_SHOW_LOCKSCREEN_NOTIFICATIONS;
     private static String KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS;
     private static String KEY_HIDE_PERSISTENT_NOTIFICATIONS;
+    private static String KEY_PATTERN_TYPE;
+    private static String KEY_PATTERN_VISIBLE;
     private static SharedPreferences preferences;
 
     private static void initPreferences(Context context){
@@ -44,11 +47,20 @@ public class SharedPreferencesHelper {
         if(KEY_ENABLE_NOTIFICATION == null || KEY_ENABLE_NOTIFICATION.isEmpty()){
             KEY_ENABLE_NOTIFICATION = context.getResources().getString(R.string.pref_key_enable_notification);
         }
+        if(KEY_SHOW_LOCKSCREEN_NOTIFICATIONS == null || KEY_SHOW_LOCKSCREEN_NOTIFICATIONS.isEmpty()){
+            KEY_SHOW_LOCKSCREEN_NOTIFICATIONS = context.getResources().getString(R.string.pref_key_show_lockscreen_notifications);
+        }
         if(KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS== null || KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS.isEmpty()){
             KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS = context.getResources().getString(R.string.pref_key_hide_low_priority_notifications);
         }
         if(KEY_HIDE_PERSISTENT_NOTIFICATIONS == null || KEY_HIDE_PERSISTENT_NOTIFICATIONS.isEmpty()){
             KEY_HIDE_PERSISTENT_NOTIFICATIONS = context.getResources().getString(R.string.pref_key_hide_persistent_notifications);
+        }
+        if(KEY_PATTERN_TYPE == null || KEY_PATTERN_TYPE.isEmpty()){
+            KEY_PATTERN_TYPE = context.getResources().getString(R.string.pref_key_pattern_type);
+        }
+        if(KEY_PATTERN_VISIBLE == null || KEY_PATTERN_VISIBLE.isEmpty()){
+            KEY_PATTERN_VISIBLE = context.getResources().getString(R.string.pref_key_is_visible_pattern);
         }
     }
 
@@ -228,5 +240,20 @@ public class SharedPreferencesHelper {
     public static boolean shouldHideLowPriorityNotifications(Context context){
         initPreferences(context);
         return preferences.getBoolean(GeneralSettingsActivity.PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS, false);
+    }
+
+    public static boolean isLockscreenNotificationsShown(Context context){
+        initPreferences(context);
+        return preferences.getBoolean(KEY_SHOW_LOCKSCREEN_NOTIFICATIONS, true);
+    }
+
+    public static String getPatternType(Context context) {
+        initPreferences(context);
+        return preferences.getString(KEY_PATTERN_TYPE, "inbuilt");
+    }
+
+    public static boolean isPatternVisible(Context context){
+        initPreferences(context);
+        return preferences.getBoolean(KEY_PATTERN_VISIBLE, true);
     }
 }

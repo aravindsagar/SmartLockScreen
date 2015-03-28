@@ -27,17 +27,22 @@ public class BluetoothReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String mAction = intent.getAction();
         BluetoothDevice device;
-        if(mAction.equals(BluetoothDevice.ACTION_ACL_CONNECTED)){
-            device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            addBluetoothDeviceToConnectedDevices(/*BluetoothEnvironmentVariable.
+        switch (mAction) {
+            case BluetoothDevice.ACTION_ACL_CONNECTED:
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                addBluetoothDeviceToConnectedDevices(/*BluetoothEnvironmentVariable.
                     getBluetoothEnvironmentVariableFromDatabase(context,*/ new BluetoothEnvironmentVariable(device.getName(),
-                            device.getAddress()));
-        } else if(mAction.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)){
-            device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            removeBluetoothDeviceFromConnectedDevices(/*BluetoothEnvironmentVariable.
+                        device.getAddress()));
+                break;
+            case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                removeBluetoothDeviceFromConnectedDevices(/*BluetoothEnvironmentVariable.
                     getBluetoothEnvironmentVariableFromDatabase(context,*/ new BluetoothEnvironmentVariable(device.getName(),
-                            device.getAddress()));
-        } else return;
+                        device.getAddress()));
+                break;
+            default:
+                return;
+        }
         context.startService(BaseService.getServiceIntent(context, null,
                 BaseService.ACTION_DETECT_ENVIRONMENT));
     }
@@ -51,6 +56,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
             if(newVariable.equals(variable))
                 return;
         }
+        Log.d(LOG_TAG, "Device connected: " + newVariable.getDeviceName());
         currentlyConnectedBluetoothDevices.add(newVariable);
     }
 
@@ -61,8 +67,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
         }
         for(int i=0; i<currentlyConnectedBluetoothDevices.size(); i++){
             BluetoothEnvironmentVariable v = currentlyConnectedBluetoothDevices.get(i);
-            if(variable.equals(v))
+            if(variable.equals(v)) {
+                Log.d(LOG_TAG, "Device disconnected: " + variable.getDeviceName());
                 currentlyConnectedBluetoothDevices.remove(i);
+            }
         }
     }
 

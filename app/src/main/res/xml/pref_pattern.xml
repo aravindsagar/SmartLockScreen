@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="@string/pref_key_pattern_type"
+        android:title="@string/pref_title_pattern_type"
+        android:entryValues="@array/pref_values_pattern_type"
+        android:entries="@array/pref_entries_pattern_type"
+        android:defaultValue="inbuilt" />
+    <!--<CheckBoxPreference
+        android:key="@string/pref_key_is_visible_pattern"
+        android:title="@string/pref_title_is_visible_pattern"
+        android:defaultValue="true" />-->
+
+</PreferenceScreen>

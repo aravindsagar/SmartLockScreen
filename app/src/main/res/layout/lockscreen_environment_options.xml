@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingRight="@dimen/activity_vertical_margin"
+    android:paddingEnd="@dimen/activity_vertical_margin"
+    android:background="@android:color/white">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall">
+        <ImageView
+            android:layout_width="@dimen/lock_screen_user_picture_size"
+            android:layout_height="@dimen/lock_screen_user_picture_size"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:id="@+id/image_view_environment_picture"
+            android:layout_gravity="center_vertical"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/text_view_current_environment"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:id="@+id/button_master_passphrase_unlock">
+        <ImageView
+            android:layout_width="@dimen/lock_screen_user_picture_size"
+            android:layout_height="@dimen/lock_screen_user_picture_size"
+            android:id="@+id/image_view_master_passphrase_icon"
+            android:src="@drawable/ic_master_password"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/activity_vertical_margin"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/use_master_password"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</LinearLayout>

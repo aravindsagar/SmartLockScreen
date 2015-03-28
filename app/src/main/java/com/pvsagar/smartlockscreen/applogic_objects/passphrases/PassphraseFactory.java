@@ -40,17 +40,22 @@ public class PassphraseFactory {
 
     public static Passphrase getPassphraseInstance(final String type){
         Passphrase returnPassphrase;
-        if(type.equals(Passphrase.TYPE_PASSWORD)){
-            returnPassphrase = new Password();
-        } else if(type.equals(Passphrase.TYPE_PIN)){
-            returnPassphrase = new Pin();
-        } else if(type.equals(Passphrase.TYPE_NONE)){
-            returnPassphrase = new NoSecurity();
-        } else if(type.equals(Passphrase.TYPE_PATTERN)){
-            returnPassphrase = new Pattern();
-        } else {
-            throw new TypeNotPresentException("The type read from database is not a valid type."
-                    , new Exception());
+        switch (type) {
+            case Passphrase.TYPE_PASSWORD:
+                returnPassphrase = new Password();
+                break;
+            case Passphrase.TYPE_PIN:
+                returnPassphrase = new Pin();
+                break;
+            case Passphrase.TYPE_NONE:
+                returnPassphrase = new NoSecurity();
+                break;
+            case Passphrase.TYPE_PATTERN:
+                returnPassphrase = new Pattern();
+                break;
+            default:
+                throw new TypeNotPresentException("The type read from database is not a valid type."
+                        , new Exception());
         }
         return returnPassphrase;
     }

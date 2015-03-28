@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.view.WindowManager;
 
 import com.pvsagar.smartlockscreen.applogic.AppLocker;
+import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
 import com.pvsagar.smartlockscreen.baseclasses.OnForegroundAppChangedListener;
 import com.pvsagar.smartlockscreen.services.window_helpers.AppLockScreenOverlay;
 
@@ -21,16 +22,20 @@ public class AppLockService extends Service {
     public static final String ACTION_STOP_SERVICE = PACKAGE_NAME + ".STOP_SERVICE";
     public static final String ACTION_START_APP_LOCK_OVERLAY = PACKAGE_NAME + ".START_APP_LOCK_OVERLAY";
     public static final String ACTION_CLEAR_APP_LOCK_OVERLAY = PACKAGE_NAME + ".CLEAR_APP_LOCK_OVERLAY";
+    public static final String ACTION_REGISTER_LISTENER_ROOT_HELPER = PACKAGE_NAME + ".REGISTER_LISTENER_ROOT_HELPER";
+    public static final String ACTION_UNREGISTER_LISTENER_ROOT_HELPER = PACKAGE_NAME + ".UNREGISTER_LISTENER_ROOT_HELPER";
 
     private String previousPackageName = "";
 
-    private OnForegroundAppChangedListener mOnForegroundAppChangedListener;
+    private OnForegroundAppChangedListener mOnForegroundAppChangedListener, rootHelperListener;
 
     private AppLockThread mAppLockThread;
 
     private AppLockScreenOverlay mAppLockScreenOverlay;
 
     ActivityManager mActivityManager;
+
+    private int timeSinceRegistered;
 
     public AppLockService() {
     }
@@ -74,6 +79,12 @@ public class AppLockService extends Service {
                     mAppLockScreenOverlay.execute();
                 } else if (action.equals(ACTION_CLEAR_APP_LOCK_OVERLAY)) {
                     mAppLockScreenOverlay.remove();
+                } else if (action.equals(ACTION_REGISTER_LISTENER_ROOT_HELPER)) {
+                    rootHelperListener = RootHelper.getListener(this);
+                    timeSinceRegistered = 0;
+                } else if (action.equals(ACTION_UNREGISTER_LISTENER_ROOT_HELPER)) {
+                    rootHelperListener = null;
+                    timeSinceRegistered = 0;
                 }
             }
         }
@@ -117,7 +128,13 @@ public class AppLockService extends Service {
                 }
                 if(mOnForegroundAppChangedListener != null){
                     mOnForegroundAppChangedListener.onForegroundAppChanged(
-                            foregroundTaskPackageName, foregroundTaskActivityName);
+                            foregroundTaskPackageName, foregroundTaskActivityName, 0);
+                }
+
+                if(rootHelperListener != null){
+                    timeSinceRegistered += 100;
+                    rootHelperListener.onForegroundAppChanged(
+                            foregroundTaskPackageName, foregroundTaskActivityName, timeSinceRegistered);
                 }
             }
         }

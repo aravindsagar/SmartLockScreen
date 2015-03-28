@@ -8,7 +8,11 @@
 
     <header
         android:fragment="com.pvsagar.smartlockscreen.GeneralSettingsActivity$LockScreenSettingsFragment"
-        android:title="@string/pref_header_general" />
+        android:title="@string/pref_header_lockscreen" />
+
+    <header
+        android:fragment="com.pvsagar.smartlockscreen.GeneralSettingsActivity$PatternSettingsFragment"
+        android:title="@string/pref_header_pattern" />
 
     <!--<header
         android:fragment="com.pvsagar.smartlockscreen.GeneralSettingsActivity$NotificationPreferenceFragment"

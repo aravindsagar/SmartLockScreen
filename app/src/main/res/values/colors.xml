@@ -42,4 +42,7 @@
     <color name="notification_subtext">#ff5f5f5f</color>
 
     <color name="card_header_background_dark">#ff455A64</color>
+
+    <color name="pager_title_background">#512DA8</color>
+    <color name="pager_title_text">#FFECB3</color>
 </resources>
