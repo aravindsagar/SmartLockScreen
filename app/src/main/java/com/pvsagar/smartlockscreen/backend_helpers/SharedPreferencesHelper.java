@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen.backend_helpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.pvsagar.smartlockscreen.GeneralSettingsActivity;
@@ -32,6 +33,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_VERSION_CODE = PACKAGE_NAME + ".VERSION_CODE";
     private static final String KEY_DOWNLOAD_LINK = PACKAGE_NAME + ".DOWNLOAD_LINK";
     private static final String KEY_CHANGE_LOG_LINK = PACKAGE_NAME + ".CHANGE_LOG_LINK";
+    private static final String KEY_FIRST_TIME_ROOT_CHECKED = PACKAGE_NAME + ".FIRST_TIME_ROOT_CHECKED";
     private static String KEY_ENABLE_NOTIFICATION;
     private static String KEY_SHOW_LOCKSCREEN_NOTIFICATIONS;
     private static String KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS;
@@ -242,9 +244,10 @@ public class SharedPreferencesHelper {
         return preferences.getBoolean(GeneralSettingsActivity.PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS, false);
     }
 
-    public static boolean isLockscreenNotificationsShown(Context context){
+    public static boolean isLockscreenNotificationsShown(Context context) {
         initPreferences(context);
-        return preferences.getBoolean(KEY_SHOW_LOCKSCREEN_NOTIFICATIONS, true);
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP &&
+                preferences.getBoolean(KEY_SHOW_LOCKSCREEN_NOTIFICATIONS, true);
     }
 
     public static String getPatternType(Context context) {
@@ -255,5 +258,34 @@ public class SharedPreferencesHelper {
     public static boolean isPatternVisible(Context context){
         initPreferences(context);
         return preferences.getBoolean(KEY_PATTERN_VISIBLE, true);
+    }
+
+    private static String[] patternTypes;
+    public static boolean isRootPattern(Context context){
+        if(patternTypes == null || patternTypes.length == 0) {
+            patternTypes = context.getResources().getStringArray(R.array.pref_values_pattern_type);
+        }
+        return getPatternType(context).equals(patternTypes[1]);
+    }
+
+    public static void setRootPattern(Context context){
+        initPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(KEY_PATTERN_TYPE, "system");
+        editor.apply();
+        preferences = null;
+    }
+
+    public static boolean firstTimeRootChecked(Context context) {
+        initPreferences(context);
+        return preferences.getBoolean(KEY_FIRST_TIME_ROOT_CHECKED, false);
+    }
+
+    public static void setFirstTimeRootChecked(Context context, boolean value) {
+        initPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(KEY_FIRST_TIME_ROOT_CHECKED, value);
+        editor.apply();
+        preferences = null;
     }
 }

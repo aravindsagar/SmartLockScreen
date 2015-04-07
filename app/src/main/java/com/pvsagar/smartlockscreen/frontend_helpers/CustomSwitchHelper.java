@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
@@ -31,10 +32,13 @@ public class CustomSwitchHelper {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             Switch mSwitch = (Switch) buttonView;
-            if(isChecked){
-                mSwitch.setThumbDrawable(switchOn);
-            } else {
-                mSwitch.setThumbDrawable(switchOff);
+
+            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                if (isChecked) {
+                    mSwitch.setThumbDrawable(switchOn);
+                } else {
+                    mSwitch.setThumbDrawable(switchOff);
+                }
             }
 
             onCustomCheckedChanged(buttonView, isChecked);

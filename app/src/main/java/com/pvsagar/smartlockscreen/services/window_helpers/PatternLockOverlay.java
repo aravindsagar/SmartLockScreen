@@ -3,14 +3,18 @@ package com.pvsagar.smartlockscreen.services.window_helpers;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
+import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Overlay;
+import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 import com.pvsagar.smartlockscreen.services.BaseService;
 import com.sagar.lockpattern_gridview.PatternGridView;
@@ -32,6 +36,7 @@ public class PatternLockOverlay extends Overlay {
     RelativeLayout enterPatternLayout;
     TextView statusView;
     PatternGridView patternGridView;
+    private ImageView wallpaperView;
 
     public PatternLockOverlay(Context context, WindowManager windowManager) {
         super(context, windowManager);
@@ -63,6 +68,7 @@ public class PatternLockOverlay extends Overlay {
             enterPatternLayout = (RelativeLayout) getInflater().inflate(R.layout.enter_pattern, null);
             statusView = (TextView) enterPatternLayout.findViewById(R.id.enter_pattern_status_textview);
             patternGridView = (PatternGridView) enterPatternLayout.findViewById(R.id.enter_pattern_grid);
+            wallpaperView = (ImageView) enterPatternLayout.findViewById(R.id.wallpaper_image_view);
             setSystemUiVisibility(enterPatternLayout);
 
             enterPatternLayout.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +80,11 @@ public class PatternLockOverlay extends Overlay {
                     }
                 }
             });
+        }
+
+        if(!SharedPreferencesHelper.isLockscreenNotificationsShown(getContext())) {
+            Drawable wallpaper = WallpaperHelper.getWallpaperDrawable(getContext());
+            wallpaperView.setImageDrawable(wallpaper);
         }
 
         patternGridView.setPatternListener(new PatternInterface.PatternListener() {

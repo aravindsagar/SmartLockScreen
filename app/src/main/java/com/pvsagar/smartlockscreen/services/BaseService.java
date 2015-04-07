@@ -34,6 +34,7 @@ import com.pvsagar.smartlockscreen.applogic_objects.User;
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.BluetoothEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.LocationEnvironmentVariable;
 import com.pvsagar.smartlockscreen.applogic_objects.environment_variables.WiFiEnvironmentVariable;
+import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.backend_helpers.WakeLockHelper;
@@ -64,7 +65,8 @@ public class BaseService extends Service implements
         GooglePlayServicesClient.OnConnectionFailedListener,
         OnAddGeofencesResultListener,
         OnRemoveGeofencesResultListener,
-        EnvironmentDetector.EnvironmentDetectedCallback{
+        EnvironmentDetector.EnvironmentDetectedCallback,
+        RootHelper.RootAccessCheckedListener{
     private static final String LOG_TAG = BaseService.class.getSimpleName();
 
     public static final int ONGOING_NOTIFICATION_ID = 1;
@@ -147,7 +149,6 @@ public class BaseService extends Service implements
         requestAddGeofences();
         new DetermineConnectedWifiNetwork().execute();
         new BluetoothDeviceSearch().execute();
-        new RootAccessTest().execute();
         ScreenReceiver.registerScreenReceiver(this);
         WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mNotificationsLockScreenOverlay = new NotificationsLockScreenOverlay(this, windowManager);
@@ -158,6 +159,10 @@ public class BaseService extends Service implements
             mCurrentLockScreenOverlay = mNotificationsLockScreenOverlay;
         } else {
             mCurrentLockScreenOverlay = mMinimalLockScreenOverlay;
+        }
+
+        if(!SharedPreferencesHelper.firstTimeRootChecked(this)) {
+            RootHelper.hasRootAccessAsync(this);
         }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
@@ -219,6 +224,9 @@ public class BaseService extends Service implements
                         mIsInCall = false;
                     }
                     if(!mIsInCall){
+                        if(!SharedPreferencesHelper.isLockscreenNotificationsShown(this) && AdminActions.getCurrentPassphraseType().equals(Passphrase.TYPE_PATTERN)){
+                            mPatternLockOverlay.execute();
+                        }
                         mCurrentLockScreenOverlay.execute();
                     }
                     WakeLockHelper.releaseWakeLock(ScreenReceiver.WAKE_LOCK_TAG);
@@ -242,8 +250,10 @@ public class BaseService extends Service implements
                         mIsInCall = true;
                     }
                 } else if(action.equals(ACTION_DISMISS_PATTERN_OVERLAY_ONLY)) {
-                    mPatternLockOverlay.remove();
-                    mCurrentLockScreenOverlay.execute();
+                    if(SharedPreferencesHelper.isLockscreenNotificationsShown(this)){
+                        mPatternLockOverlay.remove();
+                        mCurrentLockScreenOverlay.execute();
+                    }
                 } else if (action.equals(ACTION_NOTIFICATION_CHANGED)) {
                     // Add to the list view
                     //Bundle extras = intent.getExtras();
@@ -406,7 +416,7 @@ public class BaseService extends Service implements
         @Override
         protected List<BluetoothEnvironmentVariable> doInBackground(Void... params) {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if(mBluetoothAdapter.isEnabled()){
+            if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
                 Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
                 List<BluetoothEnvironmentVariable> connectedDevices = new ArrayList<BluetoothEnvironmentVariable>();
                 for(BluetoothDevice device: bondedDevices){
@@ -483,13 +493,7 @@ public class BaseService extends Service implements
             if(unknownPassphrase == null) {
                 unknownPassphrase = Passphrase.getMasterPassword(this);
             }
-            if(!unknownPassphrase.setAsCurrentPassword(this)){
-                AdminActions.initializeAdminObjects(this);
-                if(!unknownPassphrase.setAsCurrentPassword(this)){
-                    startService(BaseService.getServiceIntent(this,
-                            "Please enable administrator for the app.", null));
-                }
-            }
+            new SetPassphraseAsyncTask().execute(unknownPassphrase);
         } else {
             Environment current = currentList.get(0);
             User user = User.getCurrentUser(this);
@@ -499,13 +503,7 @@ public class BaseService extends Service implements
                     passphrase = user.getPassphraseForUnknownEnvironment(this);
                 }
                 if(passphrase != null){
-                    if(!passphrase.setAsCurrentPassword(this)){
-                        AdminActions.initializeAdminObjects(this);
-                        if(!passphrase.setAsCurrentPassword(this)){
-                            startService(BaseService.getServiceIntent(this,
-                                    "Please enable administrator for the app.", null));
-                        }
-                    }
+                    new SetPassphraseAsyncTask().execute(passphrase);
                 } else {
                     Log.w(LOG_TAG, "Passphrase null for current user in current environment.");
                 }
@@ -529,23 +527,27 @@ public class BaseService extends Service implements
         }
     }
 
-    private class RootAccessTest extends AsyncTask<Void, Void, Boolean>{
+    public class SetPassphraseAsyncTask extends AsyncTask<Passphrase, Void, Void>{
         @Override
-        protected Boolean doInBackground(Void... params) {
-            //return RootHelper.testRootAccess(BaseService.this);
+        protected Void doInBackground(Passphrase... params) {
+            Passphrase passphrase = params[0];
+
+            if(!passphrase.setAsCurrentPassword(BaseService.this)){
+                AdminActions.initializeAdminObjects(BaseService.this);
+                if(!passphrase.setAsCurrentPassword(BaseService.this)){
+                    startService(BaseService.getServiceIntent(BaseService.this,
+                            "Please enable administrator for the app.", null));
+                }
+            }
             return null;
         }
+    }
 
-        /*@Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            String toastText;
-            if(aBoolean){
-                toastText = "Copied apk to sdcard";
-            } else {
-                toastText = "No root access";
-            }
-            Toast.makeText(BaseService.this, toastText, Toast.LENGTH_SHORT).show();
-        }*/
+    @Override
+    public void onRootAccessChecked(boolean hasRootAccess) {
+        if(hasRootAccess){
+            SharedPreferencesHelper.setRootPattern(this);
+            SharedPreferencesHelper.setFirstTimeRootChecked(this, true);
+        }
     }
 }

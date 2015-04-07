@@ -5,6 +5,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -89,7 +90,11 @@ public class AdminActions extends DeviceAdminReceiver {
         }
         if(isAdminEnabled()) {
             mDPM.setPasswordMinimumLength(mDeviceAdmin, 0);
-            mDPM.resetPassword(password, 0);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && (password == null || password.isEmpty())){
+                mDPM.resetPassword(null, 0);
+            } else {
+                mDPM.resetPassword(password, 0);
+            }
             return true;
         }
         else {
@@ -128,4 +133,8 @@ public class AdminActions extends DeviceAdminReceiver {
             return false;
         }
     }
+
+    /*public static void setPatternAsMinimumSecurity(){
+        mDPM.setPasswordQuality(mDeviceAdmin, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+    }*/
 }

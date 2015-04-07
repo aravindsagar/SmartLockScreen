@@ -45,7 +45,7 @@ import java.util.List;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class GeneralSettingsActivity extends PreferenceActivity {
+public class GeneralSettingsActivity extends PreferenceActivity implements RootHelper.RootAccessCheckedListener {
     private static final String LOG_TAG = GeneralSettingsActivity.class.getSimpleName();
     /**
      * Determines whether to always show the simplified settings UI, where
@@ -53,7 +53,7 @@ public class GeneralSettingsActivity extends PreferenceActivity {
      * as a master/detail two-pane view on tablets. When true, a single pane is
      * shown on tablets.
      */
-    private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    private static final boolean ALWAYS_SIMPLE_PREFS = true;
     public static String PREF_KEY_ENABLE_NOTIFICATION;
     public static String PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS;
     public static String PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS;
@@ -65,8 +65,8 @@ public class GeneralSettingsActivity extends PreferenceActivity {
     private static int REQUEST_PICTURE = 1;
     private static int REQUEST_CROP_PICTURE = 2;
 
-    private static Preference wallpaperPreference;
-    private boolean hasRootAccess;
+    private static Preference wallpaperPreference, hideLowPriorityNotificationPreference, hidePersistentNotificationPreference;
+    private SLSPreferenceChangeListener preferenceChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,7 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         PREF_KEY_PATTERN_TYPE = getResources().getString(R.string.pref_key_pattern_type);
         PREF_KEY_VISIBLE_PATTERN = getResources().getString(R.string.pref_key_is_visible_pattern);
         setupActionBar();
-        hasRootAccess = RootHelper.hasRootAccess();
+        RootHelper.hasRootAccessAsync(this);
     }
 
     /**
@@ -139,37 +139,28 @@ public class GeneralSettingsActivity extends PreferenceActivity {
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.
 
-        // Add 'general' preferences.
-        /*PreferenceCategory generalHeader = new PreferenceCategory(this);
-        generalHeader.setTitle(R.string.pref_header_general);
-        getPreferenceScreen().addPreference(generalHeader);*/
-        addPreferencesFromResource(R.xml.pref_general);
+        preferenceChangeListener = new SLSPreferenceChangeListener(GeneralSettingsActivity.this);
 
+        //General Preferences
+        addPreferencesFromResource(R.xml.pref_general);
+        setAndCallListener(findPreference(PREF_KEY_ENABLE_NOTIFICATION),preferenceChangeListener);
+
+        //Lockscreen Preferences
         PreferenceCategory lockscreenHeader = new PreferenceCategory(this);
         lockscreenHeader.setTitle(R.string.pref_header_lockscreen);
         getPreferenceScreen().addPreference(lockscreenHeader);
         addPreferencesFromResource(R.xml.pref_lockscreen);
-
-        if(hasRootAccess) {
-            PreferenceCategory patternHeader = new PreferenceCategory(this);
-            patternHeader.setTitle(R.string.pref_header_pattern);
-            getPreferenceScreen().addPreference(patternHeader);
-            addPreferencesFromResource(R.xml.pref_pattern);
+        hideLowPriorityNotificationPreference = findPreference(PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS);
+        hidePersistentNotificationPreference = findPreference(PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            getPreferenceScreen().removePreference(findPreference(PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS));
+            getPreferenceScreen().removePreference(hidePersistentNotificationPreference);
+            getPreferenceScreen().removePreference(hideLowPriorityNotificationPreference);
+        } else {
+            setAndCallListener(findPreference(PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS),preferenceChangeListener);
+            setAndCallListener(findPreference(PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS),preferenceChangeListener);
+            setAndCallListener(findPreference(PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS),preferenceChangeListener);
         }
-
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
-        // their values. When their values change, their summaries are updated
-        // to reflect the new value, per the Android Design guidelines.
-        /*bindPreferenceSummaryToValue(findPreference("example_text"));
-        bindPreferenceSummaryToValue(findPreference("example_list"));
-        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-        bindPreferenceSummaryToValue(findPreference("sync_frequency"));*/
-        SLSPreferenceChangeListener preferenceChangeListener =
-                new SLSPreferenceChangeListener(GeneralSettingsActivity.this);
-        setAndCallListener(findPreference(PREF_KEY_ENABLE_NOTIFICATION),preferenceChangeListener);
-        setAndCallListener(findPreference(PREF_KEY_SHOW_LOCKSCREEN_NOTIFICATIONS),preferenceChangeListener);
-        setAndCallListener(findPreference(PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS),preferenceChangeListener);
-        setAndCallListener(findPreference(PREF_KEY_HIDE_LOW_PRIORITY_NOTIFICATIONS),preferenceChangeListener);
         wallpaperPreference = findPreference(PREF_KEY_SET_WALLPAPER);
         wallpaperPreference.setOnPreferenceChangeListener(preferenceChangeListener);
         String[] wallpaperValues = getResources().getStringArray(R.array.pref_values_lockscreen_wallpaper);
@@ -177,6 +168,19 @@ public class GeneralSettingsActivity extends PreferenceActivity {
             wallpaperPreference.setSummary(R.string.pref_description_lockscreen_wallpaper_custom);
         } else {
             wallpaperPreference.setSummary(R.string.pref_description_lockscreen_wallpaper_system);
+        }
+
+    }
+
+    @Override
+    public void onRootAccessChecked(boolean hasRootAccess) {
+        //Pattern preferences
+        if(hasRootAccess) {
+            PreferenceCategory patternHeader = new PreferenceCategory(this);
+            patternHeader.setTitle(R.string.pref_header_pattern);
+            getPreferenceScreen().addPreference(patternHeader);
+            addPreferencesFromResource(R.xml.pref_pattern);
+            setAndCallListener(findPreference(PREF_KEY_PATTERN_TYPE), preferenceChangeListener);
         }
     }
 
@@ -206,8 +210,12 @@ public class GeneralSettingsActivity extends PreferenceActivity {
                 Intent lockscreenTypeIntent = BaseService.getServiceIntent(mContext, null, BaseService.ACTION_SET_LOCKSCREEN_TYPE);
                 if((boolean) newValue) {
                     lockscreenTypeIntent.putExtra(BaseService.EXTRA_LOCKSCREEN_TYPE, BaseService.LOCKSCREEN_TYPE_NOTIFICATIONS);
+                    hideLowPriorityNotificationPreference.setEnabled(true);
+                    hidePersistentNotificationPreference.setEnabled(true);
                 } else {
                     lockscreenTypeIntent.putExtra(BaseService.EXTRA_LOCKSCREEN_TYPE, BaseService.LOCKSCREEN_TYPE_MINIMAL);
+                    hideLowPriorityNotificationPreference.setEnabled(false);
+                    hidePersistentNotificationPreference.setEnabled(false);
                 }
                 mContext.startService(lockscreenTypeIntent);
             } else if(preference.getKey().equals(PREF_KEY_HIDE_PERSISTENT_NOTIFICATIONS)){
@@ -223,6 +231,13 @@ public class GeneralSettingsActivity extends PreferenceActivity {
                     preference.setSummary(R.string.pref_description_lockscreen_wallpaper_system);
                     WallpaperHelper.onWallpaperChanged(mContext, wallpaperTypes[0]);
                 }
+            } else if(preference.getKey().equals(PREF_KEY_PATTERN_TYPE)){
+                if(newValue.equals("inbuilt")){
+                    preference.setSummary(mContext.getString(R.string.pref_summary_inbuilt_pattern));
+                } else if(newValue.equals("system")){
+                    preference.setSummary(mContext.getString(R.string.pref_summary_system_pattern));
+                }
+                mContext.startService(BaseService.getServiceIntent(mContext, null, BaseService.ACTION_DETECT_ENVIRONMENT));
             }
             return true;
         }

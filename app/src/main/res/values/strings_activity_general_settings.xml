@@ -48,4 +48,5 @@
 
     <string name="pref_key_is_visible_pattern">visible_pattern</string>
     <string name="pref_title_is_visible_pattern">Make pattern visible</string>
+    <string name="pref_summary_system_pattern">System pattern</string>
 </resources>

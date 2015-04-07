@@ -17,6 +17,7 @@ import com.pvsagar.smartlockscreen.SmartLockScreenSettings;
 public class NotificationHelper {
 
     private static final String NOTIFICATION_TITLE = "Smart Lockscreen";
+    public static final int ENTER_PATTERN_NOTIFICATION_ID = 2;
 
     public static Notification getAppNotification(Context context, String text){
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);

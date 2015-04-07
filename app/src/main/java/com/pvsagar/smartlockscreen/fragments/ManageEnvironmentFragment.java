@@ -73,6 +73,8 @@ public class ManageEnvironmentFragment extends Fragment {
             mPaddingTop = tintManager.getConfig().getPixelInsetTop(true);
             if(Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT){
                 mPaddingTop += 24;
+            } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                mPaddingTop += 12;
             }
         }
         setUnknownEnvironmentLayout(rootView);

@@ -124,7 +124,7 @@
     <string name="view_change_log">View change log</string>
     <string name="update_available_dialog">"A new version of SmartLockScreen is available, version "</string>
     <string name="alert_title_error">Error</string>
-    <string name="alert_incompat_pattern">Please enable \'Show notifications in Lockscreen\' option in General Settings to use pattern lock.
-        Alternatively, if you have root access, change pattern type to \'System Pattern\' in General Settings</string>
+    <string name="enter_pattern_again">Please re-enter pattern lock in SmartLockScreen settings screen, for current environment.</string>
+    <string name="pref_summary_inbuilt_pattern">Inbuilt pattern</string>
 
 </resources>

@@ -5,7 +5,6 @@ import android.app.KeyguardManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.pvsagar.smartlockscreen.applogic.EnvironmentDetector;
@@ -21,18 +20,18 @@ public class DismissKeyguardActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dismiss_keyguard);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
-        int systemUiVisibilityFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+        /*int systemUiVisibilityFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             systemUiVisibilityFlags = systemUiVisibilityFlags | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
-        getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);
+        getWindow().getDecorView().setSystemUiVisibility(systemUiVisibilityFlags);*/
         new WaitBeforeDismiss().execute();
     }
 

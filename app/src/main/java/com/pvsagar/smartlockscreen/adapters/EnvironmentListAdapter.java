@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -134,10 +135,12 @@ public class EnvironmentListAdapter extends ArrayAdapter<Environment> {
         }
 
         mSwitch.setChecked(environment.isEnabled());
-        if(!mSwitch.isChecked()){
-            mSwitch.setThumbDrawable(switchOff);
-        } else {
-            mSwitch.setThumbDrawable(switchOn);
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            if (!mSwitch.isChecked()) {
+                mSwitch.setThumbDrawable(switchOff);
+            } else {
+                mSwitch.setThumbDrawable(switchOn);
+            }
         }
         mSwitch.setOnCheckedChangeListener(new CustomSwitchHelper.CustomSwitchCheckedChangeListener(getContext()) {
             @Override

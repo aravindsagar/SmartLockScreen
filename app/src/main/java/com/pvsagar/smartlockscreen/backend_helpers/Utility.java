@@ -53,10 +53,7 @@ public class Utility {
     }
 
     public static boolean isEqual(double a, double b, double doubleErrorTolerance){
-        if(Math.abs(a-b) <= doubleErrorTolerance){
-            return true;
-        }
-        return false;
+        return Math.abs(a - b) <= doubleErrorTolerance;
     }
 
     public static boolean isEqual(double a, double b){

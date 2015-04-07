@@ -32,7 +32,7 @@ dependencies {
     compile project(':Lock Pattern Grid View Library')
     compile project(':libsuperuser')
     compile 'me.villani.lorenzo.android:android-cropimage:1.0.1'
-    compile 'com.github.gabrielemariotti.cards:library:1.9.0'
+    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.0.1'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
     compile 'com.android.support:support-v4:21.0.0'
     compile 'com.android.support:appcompat-v7:21.0.0'

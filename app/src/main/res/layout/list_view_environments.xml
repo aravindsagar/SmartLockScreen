@@ -55,7 +55,6 @@
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:paddingLeft="0dp"
-            android:thumb="@color/switch_color"
             />
 
     </LinearLayout>

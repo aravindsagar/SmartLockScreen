@@ -2,6 +2,7 @@ package com.pvsagar.smartlockscreen.adapters;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,10 +56,12 @@ public class AllowedAppsListAdapter extends ArrayAdapter<App> {
         viewHolder.appName.setText(app.getAppName());
         viewHolder.packageName.setText(app.getPackageName());
 
-        if(viewHolder.aSwitch.isChecked()){
-            viewHolder.aSwitch.setThumbDrawable(CustomSwitchHelper.getSwitchOnDrawable(getContext()));
-        } else {
-            viewHolder.aSwitch.setThumbDrawable(CustomSwitchHelper.getSwitchOffDrawable());
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            if (viewHolder.aSwitch.isChecked()) {
+                viewHolder.aSwitch.setThumbDrawable(CustomSwitchHelper.getSwitchOnDrawable(getContext()));
+            } else {
+                viewHolder.aSwitch.setThumbDrawable(CustomSwitchHelper.getSwitchOffDrawable());
+            }
         }
         viewHolder.aSwitch.setOnCheckedChangeListener(new CustomSwitchHelper.CustomSwitchCheckedChangeListener(getContext()) {
             @Override

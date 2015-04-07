@@ -43,6 +43,7 @@ public class MinimalLockScreenOverlay extends LockScreenOverlay {
         params.x = 0;
         params.y = 0;
         params.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
+        params.systemUiVisibility = getFullScreenSystemUiVisibility();
         return params;
     }
 

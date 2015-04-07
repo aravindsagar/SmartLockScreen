@@ -394,6 +394,7 @@ ADDED from AndroidManifest.xml:215:9
 uses-sdk
 INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
 MERGED from SmartLockScreen:Lock Pattern Grid View Library:unspecified:7:5
+MERGED from SmartLockScreen:libsuperuser:unspecified:7:5
 MERGED from me.villani.lorenzo.android:android-cropimage:1.0.1:7:5
 MERGED from com.github.gabrielemariotti.cards:library:1.9.0:24:5
 MERGED from com.android.support:support-v4:21.0.0:15:5

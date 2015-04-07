@@ -5,6 +5,12 @@
     android:layout_height="match_parent"
     android:id="@+id/enter_pattern_layout">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/wallpaper_image_view"
+        android:scaleType="centerCrop"/>
+
     <com.sagar.lockpattern_gridview.PatternGridView
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/enter_pattern_grid"
