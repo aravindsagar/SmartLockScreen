@@ -1,3 +1,8 @@
+alpha v3.0
+----------
+[*] Lollipop support! :)
+[*] A different approach adopted for root pattern. Should work fine on AOSP Roms. Some instabilities are there though
+
 alpha v2.0
 ----------
 [*] Native pattern lock support (only if device has root access)
