@@ -1,13 +1,6 @@
 package com.pvsagar.smartlockscreen.applogic_objects.passphrases;
 
-import android.app.NotificationManager;
-import android.content.Context;
-
-import com.pvsagar.smartlockscreen.R;
-import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
-import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
-import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,7 +31,7 @@ public class Pattern extends Passphrase<List<Integer>> {
 
     @Override
     protected List<Integer> getPassphraseRepresentationFromPassphraseString(String passphrase) {
-        List<Integer> pattern  = new ArrayList<Integer>();
+        List<Integer> pattern  = new ArrayList<>();
         String[] patternNumbers = passphrase.split(":");
         for (String patternNumber : patternNumbers) {
             pattern.add(Integer.parseInt(patternNumber));
@@ -49,21 +42,6 @@ public class Pattern extends Passphrase<List<Integer>> {
     @Override
     protected boolean isPassphraseRepresentationValid(List<Integer> passphrase) {
         return passphrase!=null && passphrase.size() > 0;
-    }
-
-    @Override
-    public boolean setAsCurrentPassword(Context context) {
-        if(SharedPreferencesHelper.isRootPattern(context)){
-            Passphrase.getMasterPassword(context).setAsCurrentPassword(context);
-            if(getPassphraseRepresentation().size() <= 2) {
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.notify(NotificationHelper.ENTER_PATTERN_NOTIFICATION_ID,
-                        NotificationHelper.getAppNotification(context, context.getString(R.string.enter_pattern_again)));
-                return true;
-            }
-            if(RootHelper.setCurrentPattern(context, this)) return true;
-        }
-        return super.setAsCurrentPassword(context);
     }
 
     private byte[] getPatternBytes(){

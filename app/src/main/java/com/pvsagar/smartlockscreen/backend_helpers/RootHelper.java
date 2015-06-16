@@ -45,6 +45,7 @@ public class RootHelper {
 
     public static boolean setCurrentPattern(Context context, Pattern pattern){
         if(!hasRootAccess()) return false;
+
         ServiceHelper serviceHelper = new ServiceHelper();
 
         List<String> outputs = Shell.SU.run(new String[]{
@@ -59,7 +60,8 @@ public class RootHelper {
             Log.d(LOG_TAG, output);
         }
 
-        if(!hasSetPattern(context)){
+        boolean result = hasSetPattern(context);
+        if(!result){
             //Trying a different approach
             writePattenFile(context, pattern);
             outputs = Shell.SU.run(new String[]{
@@ -76,9 +78,9 @@ public class RootHelper {
             }
             Shell.SU.run(new String[]{getSqlite3BinaryFile(context) + " " + LOCKSETTINGS_DB_FILE +
                     " \"update locksettings set value = 1 where name='lock_pattern_autolock'\""});
+            result = hasSetPattern(context);
         }
 
-        boolean result = hasSetPattern(context);
         if(result){
             Log.d(LOG_TAG, "Set pattern");
         } else {
@@ -448,7 +450,7 @@ public class RootHelper {
 
         private Constants getConstants(){
             switch (Build.VERSION.SDK_INT) {
-                case 22: //TODO change 22 to constant after changing compile and target sdk version
+                case 22: //TODO change 22 to declared constant after changing compile and target sdk version
                     return new Lollipop_5_1();
                 case Build.VERSION_CODES.LOLLIPOP:
                     return new Lollipop_5_0();

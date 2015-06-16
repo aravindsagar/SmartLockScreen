@@ -1,14 +1,20 @@
 package com.pvsagar.smartlockscreen.baseclasses;
 
+import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
+import com.pvsagar.smartlockscreen.R;
 import com.pvsagar.smartlockscreen.applogic_objects.passphrases.PassphraseFactory;
+import com.pvsagar.smartlockscreen.applogic_objects.passphrases.Pattern;
 import com.pvsagar.smartlockscreen.backend_helpers.EncryptorDecryptor;
+import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.Utility;
 import com.pvsagar.smartlockscreen.environmentdb.EnvironmentDatabaseContract.PasswordEntry;
+import com.pvsagar.smartlockscreen.frontend_helpers.NotificationHelper;
 import com.pvsagar.smartlockscreen.receivers.AdminActions;
 
 /**
@@ -40,6 +46,8 @@ public abstract class Passphrase<PassphraseRepresentation> {
     public static final String TYPE_PIN = PACKAGE_PREFIX + ".TYPE_PIN";
     public static final String TYPE_NONE = PACKAGE_PREFIX + ".TYPE_NONE";
     public static final String TYPE_PATTERN = PACKAGE_PREFIX + ".TYPE_PATTERN";
+
+    protected static Passphrase currentPassphrase, previousPassphrase;
 
     public Passphrase(String type){
         Utility.checkForNullAndThrowException(type);
@@ -143,8 +151,43 @@ public abstract class Passphrase<PassphraseRepresentation> {
      * Sets this passphrase as current device password
      * @return
      */
-    public boolean setAsCurrentPassword(Context context){
-        return AdminActions.changePassword(passwordString, this.passphraseType, getMasterPassword(context));
+    public final boolean setAsCurrentPassword(Context context){
+        if(currentPassphrase != null && this.equals(currentPassphrase) && previousPassphrase != null && currentPassphrase.equals(previousPassphrase)) {
+            Log.d(LOG_TAG, "Previous passphrase matches current passphrase");
+            if(!passphraseType.equals(TYPE_PATTERN) || SharedPreferencesHelper.isRootPattern(context))
+                return true;
+        }
+        boolean result = setPatternAsCurrentPassword(context);
+        if(!result) {
+            result = AdminActions.changePassword(passwordString, this.passphraseType, getMasterPassword(context));
+        }
+
+        if(result){
+            previousPassphrase = currentPassphrase;
+            currentPassphrase = this;
+        }
+        return result;
+    }
+
+    public static void clearCurrentPassphraseCache(){
+        currentPassphrase = null;
+        previousPassphrase = null;
+    }
+
+    public boolean setPatternAsCurrentPassword(Context context) {
+        if(!(this instanceof Pattern)) return false;
+        Pattern p = (Pattern) this;
+        if(SharedPreferencesHelper.isRootPattern(context)){
+            Passphrase.getMasterPassword(context).setAsCurrentPassword(context);
+            if(p.getPassphraseRepresentation().size() <= 2) {
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(NotificationHelper.ENTER_PATTERN_NOTIFICATION_ID,
+                        NotificationHelper.getAppNotification(context, context.getString(R.string.enter_pattern_again)));
+                return true;
+            }
+            if(RootHelper.setCurrentPattern(context, p)) return true;
+        }
+        return false;
     }
 
     /**
@@ -182,5 +225,13 @@ public abstract class Passphrase<PassphraseRepresentation> {
 
     public boolean compareString(String passphrase){
         return passwordString != null && passphrase != null && passwordString.equals(passphrase);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Passphrase)) return false;
+        Passphrase p = (Passphrase) o;
+        return p.getPassphraseType().equals(getPassphraseType())
+                && p.passwordString.equals(passwordString);
     }
 }

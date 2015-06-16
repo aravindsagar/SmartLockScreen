@@ -84,14 +84,18 @@ public class AdminActions extends DeviceAdminReceiver {
 
     public static boolean changePassword(String password, String passphraseType, Passphrase masterPassphrase){
         currentPassphraseType = passphraseType;
+        currentPassphraseString = password;
         if(passphraseType.equals(Passphrase.TYPE_PATTERN)){
-            currentPassphraseString = password;
             password = (String) masterPassphrase.getPassphraseRepresentation();
         }
         if(isAdminEnabled()) {
             mDPM.setPasswordMinimumLength(mDeviceAdmin, 0);
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && (password == null || password.isEmpty())){
-                mDPM.resetPassword(null, 0);
+                try {
+                    mDPM.resetPassword(null, 0);
+                } catch (NullPointerException e) {
+                    mDPM.resetPassword(password, 0);
+                }
             } else {
                 mDPM.resetPassword(password, 0);
             }

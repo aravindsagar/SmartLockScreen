@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.android.camera.CropImageIntentBuilder;
 import com.pvsagar.smartlockscreen.backend_helpers.RootHelper;
 import com.pvsagar.smartlockscreen.backend_helpers.SharedPreferencesHelper;
+import com.pvsagar.smartlockscreen.baseclasses.Passphrase;
 import com.pvsagar.smartlockscreen.frontend_helpers.MediaStoreUtils;
 import com.pvsagar.smartlockscreen.frontend_helpers.WallpaperHelper;
 import com.pvsagar.smartlockscreen.services.BaseService;
@@ -237,6 +238,7 @@ public class GeneralSettingsActivity extends PreferenceActivity implements RootH
                 } else if(newValue.equals("system")){
                     preference.setSummary(mContext.getString(R.string.pref_summary_system_pattern));
                 }
+                Passphrase.clearCurrentPassphraseCache();
                 mContext.startService(BaseService.getServiceIntent(mContext, null, BaseService.ACTION_DETECT_ENVIRONMENT));
             }
             return true;
