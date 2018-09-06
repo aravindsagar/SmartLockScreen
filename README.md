@@ -1,8 +1,8 @@
-#SmartLockScreen
+# SmartLockScreen
 
 An android app, for balancing security and convinience, with **Environment sensitive passwords, Notifications in lockscreen, and Restricted User profiles**
 
-##Features
+## Features
 - Define environments - Each environment can be a combination of any of Bluetooth devices, Wi-Fi network and Location.
 - Set passphrase for each environment. The app detects environment changes and changes the passphrase automatically in the background.
 How is this useful? Consider this: Say you define environment home, which says Home is when the phone is connected to Home Wi-Fi (you can use location also, or both together). For environment home, set password as none. And for unknown environment, you can set, say, a pattern lock. So whenever you are at home, you can unlock the phone easily, but when outside, it'll set a lock and prevent unauthorized usage by others.
@@ -14,11 +14,11 @@ These are just indicative. Possibilities are endless!
 - Material Design, and smooth animations.
 - More features are coming soon!
 
-##Learn more
+## Learn more
 Visit XDA thread http://forum.xda-developers.com/android/apps-games/app-smartlockscreen-android-enjoy-t2919989
 Signed apk, screenshots and more can be found there.
 
-##License
+## License
 
 Copyright 2014 Aravind Sagar, and Priyan Vaithilingam
 
